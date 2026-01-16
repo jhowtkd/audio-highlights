@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { v4 as uuidv4 } from 'uuid';
 import type { TranscriptionSegment, HighlightConfig, GeneratedHighlight } from '@/types';
 import { formatTime } from '@/lib/format-utils';
@@ -89,6 +88,14 @@ interface GPTHighlight {
   reasoning: string;
 }
 
+interface PicaChatResponse {
+  choices: {
+    message: {
+      content: string;
+    };
+  }[];
+}
+
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
@@ -111,37 +118,53 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    // Verifica as variáveis de ambiente da Pica
+    if (!process.env.PICA_SECRET_KEY || !process.env.PICA_OPENAI_CONNECTION_KEY) {
       return NextResponse.json(
-        { error: 'OpenAI API key não configurada' },
+        { error: 'Credenciais da Pica API não configuradas' },
         { status: 500 }
       );
     }
 
-    // Inicializa o cliente OpenAI dentro da função
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
-    });
-
     const prompt = buildPrompt(segments, config);
 
-    const response = await openai.chat.completions.create({
-      model: 'gpt-4o',
-      messages: [
-        {
-          role: 'system',
-          content: 'Você é um assistente especializado em identificar os melhores momentos de podcasts para criar clips virais. Sempre responda apenas com JSON válido.',
-        },
-        {
-          role: 'user',
-          content: prompt,
-        },
-      ],
-      temperature: 0.7,
-      max_tokens: 4000,
+    // Chama a API do GPT-4 via Pica passthrough
+    const response = await fetch('https://api.picaos.com/v1/passthrough/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-pica-secret': process.env.PICA_SECRET_KEY,
+        'x-pica-connection-key': process.env.PICA_OPENAI_CONNECTION_KEY,
+        'x-pica-action-id': 'conn_mod_def::GDzgH4tQCbA::xO5s3EVCSZ-ljoJDpnhkTA',
+      },
+      body: JSON.stringify({
+        model: 'gpt-4o',
+        messages: [
+          {
+            role: 'system',
+            content: 'Você é um assistente especializado em identificar os melhores momentos de podcasts para criar clips virais. Sempre responda apenas com JSON válido.',
+          },
+          {
+            role: 'user',
+            content: prompt,
+          },
+        ],
+        temperature: 0.7,
+        max_tokens: 4000,
+      }),
     });
 
-    const content = response.choices[0]?.message?.content;
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Erro na API Pica:', errorText);
+      return NextResponse.json(
+        { error: `Erro na API do GPT: ${errorText}` },
+        { status: response.status }
+      );
+    }
+
+    const data: PicaChatResponse = await response.json();
+    const content = data.choices[0]?.message?.content;
 
     if (!content) {
       return NextResponse.json(
@@ -217,15 +240,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erro na geração de highlights:', error);
 
-    if (error instanceof OpenAI.APIError) {
-      return NextResponse.json(
-        { error: `Erro na API do GPT: ${error.message}` },
-        { status: error.status || 500 }
-      );
-    }
-
     return NextResponse.json(
-      { error: 'Erro ao gerar highlights' },
+      { error: error instanceof Error ? error.message : 'Erro ao gerar highlights' },
       { status: 500 }
     );
   }
