@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback } from 'react';
-import { Mic, Sparkles, FileText } from 'lucide-react';
+import { useState, useCallback, useEffect } from 'react';
+import { Mic, Sparkles, FileText, AlertCircle } from 'lucide-react';
 import { Toaster, toast } from 'sonner';
 import { Dropzone } from '@/components/upload/dropzone';
 import { AudioPlayer } from '@/components/audio/player';
@@ -10,9 +10,10 @@ import { ConfigPanel } from '@/components/highlights/config-panel';
 import { HighlightList } from '@/components/highlights/highlight-list';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Progress } from '@/components/ui/progress';
-import type { Transcription, GeneratedHighlight, HighlightConfig, TranscriptionSegment } from '@/types';
+import { Button } from '@/components/ui/button';
+import type { Transcription, GeneratedHighlight, HighlightConfig } from '@/types';
 
-type AppStep = 'upload' | 'transcribing' | 'transcribed' | 'generating' | 'completed';
+type AppStep = 'upload' | 'transcribing' | 'transcribed' | 'generating' | 'completed' | 'error';
 
 interface HighlightStats {
   totalDuration: number;
@@ -31,6 +32,15 @@ export default function Home() {
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [seekTo, setSeekTo] = useState<number | undefined>(undefined);
   const [transcriptionProgress, setTranscriptionProgress] = useState<number>(0);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<string>('transcription');
+
+  // Muda para a tab de highlights quando são gerados
+  useEffect(() => {
+    if (highlights.length > 0) {
+      setActiveTab('highlights');
+    }
+  }, [highlights]);
 
   const handleFileAccepted = useCallback(async (file: File, duration: number) => {
     setAudioFile(file);
@@ -65,9 +75,17 @@ export default function Home() {
       toast.success('Transcrição concluída!');
     } catch (error) {
       console.error('Erro:', error);
-      toast.error(error instanceof Error ? error.message : 'Erro ao transcrever o áudio');
-      setStep('upload');
+      const message = error instanceof Error ? error.message : 'Erro ao transcrever o áudio';
+      setErrorMessage(message);
+      toast.error(message);
+      setStep('error');
     }
+  }, []);
+
+  const handleRetry = useCallback(() => {
+    setErrorMessage(null);
+    setStep('upload');
+    setTranscriptionProgress(0);
   }, []);
 
   const handleGenerateHighlights = useCallback(async (config: HighlightConfig) => {
@@ -131,6 +149,8 @@ export default function Home() {
     setCurrentTime(0);
     setSeekTo(undefined);
     setTranscriptionProgress(0);
+    setErrorMessage(null);
+    setActiveTab('transcription');
   }, [audioUrl]);
 
   return (
@@ -238,6 +258,31 @@ export default function Home() {
           </div>
         )}
 
+        {/* Error Step */}
+        {step === 'error' && (
+          <div className="max-w-md mx-auto text-center py-16">
+            <div className="mb-6">
+              <div className="mx-auto w-16 h-16 bg-red-100 dark:bg-red-900 rounded-full flex items-center justify-center">
+                <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
+              </div>
+            </div>
+            <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-3">
+              Ops! Algo deu errado
+            </h2>
+            <p className="text-slate-600 dark:text-slate-400 mb-6">
+              {errorMessage || 'Ocorreu um erro inesperado'}
+            </p>
+            <div className="flex gap-3 justify-center">
+              <Button onClick={handleRetry} variant="default">
+                Tentar novamente
+              </Button>
+              <Button onClick={handleReset} variant="outline">
+                Voltar ao início
+              </Button>
+            </div>
+          </div>
+        )}
+
         {/* Transcribed / Generating / Completed Steps */}
         {(step === 'transcribed' || step === 'generating' || step === 'completed') && (
           <div className="space-y-6">
@@ -255,7 +300,7 @@ export default function Home() {
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
               {/* Left Column - Transcription */}
               <div className="lg:col-span-2">
-                <Tabs defaultValue="transcription" className="w-full">
+                <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                   <TabsList className="mb-4">
                     <TabsTrigger value="transcription">
                       <FileText className="h-4 w-4 mr-2" />

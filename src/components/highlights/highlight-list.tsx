@@ -1,6 +1,7 @@
 'use client';
 
-import { Download, Clock, Percent } from 'lucide-react';
+import { Download, Clock, Percent, Check } from 'lucide-react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { HighlightCard } from './highlight-card';
 import { formatDuration } from '@/lib/format-utils';
@@ -22,8 +23,13 @@ export function HighlightList({ highlights, segments, stats, onPlay }: Highlight
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
+      toast.success('Texto copiado!', {
+        icon: <Check className="h-4 w-4" />,
+        duration: 2000,
+      });
     } catch (error) {
       console.error('Erro ao copiar:', error);
+      toast.error('Erro ao copiar texto');
     }
   };
 
@@ -51,6 +57,8 @@ export function HighlightList({ highlights, segments, stats, onPlay }: Highlight
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    toast.success(`Arquivo ${filename} baixado!`, { duration: 2000 });
   };
 
   const handleExportAll = (format: 'srt' | 'txt') => {
@@ -75,6 +83,8 @@ export function HighlightList({ highlights, segments, stats, onPlay }: Highlight
     a.click();
     document.body.removeChild(a);
     URL.revokeObjectURL(url);
+
+    toast.success(`${highlights.length} highlights exportados!`, { duration: 2000 });
   };
 
   if (highlights.length === 0) {
