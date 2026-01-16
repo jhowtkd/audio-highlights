@@ -1,0 +1,145 @@
+'use client';
+
+import { Download, Clock, Percent } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { HighlightCard } from './highlight-card';
+import { formatDuration } from '@/lib/format-utils';
+import type { GeneratedHighlight, TranscriptionSegment } from '@/types';
+import { generateSRT, generateMarkdown } from '@/lib/export';
+
+interface HighlightListProps {
+  highlights: GeneratedHighlight[];
+  segments: TranscriptionSegment[];
+  stats?: {
+    totalDuration: number;
+    averageDuration: number;
+    coveragePercent: number;
+  };
+  onPlay: (startTime: number) => void;
+}
+
+export function HighlightList({ highlights, segments, stats, onPlay }: HighlightListProps) {
+  const handleCopy = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+    } catch (error) {
+      console.error('Erro ao copiar:', error);
+    }
+  };
+
+  const handleExport = (highlight: GeneratedHighlight, format: 'srt' | 'txt') => {
+    let content: string;
+    let filename: string;
+    let mimeType: string;
+
+    if (format === 'srt') {
+      content = generateSRT(highlight, segments);
+      filename = `${highlight.title.replace(/[^a-z0-9]/gi, '_')}.srt`;
+      mimeType = 'text/plain';
+    } else {
+      content = generateMarkdown(highlight);
+      filename = `${highlight.title.replace(/[^a-z0-9]/gi, '_')}.txt`;
+      mimeType = 'text/plain';
+    }
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  const handleExportAll = (format: 'srt' | 'txt') => {
+    const contents = highlights.map((h, i) => {
+      if (format === 'srt') {
+        return `# Highlight ${i + 1}: ${h.title}\n\n${generateSRT(h, segments)}`;
+      } else {
+        return generateMarkdown(h);
+      }
+    });
+
+    const content = contents.join('\n\n---\n\n');
+    const filename = `all_highlights.${format === 'srt' ? 'srt' : 'md'}`;
+    const mimeType = 'text/plain';
+
+    const blob = new Blob([content], { type: mimeType });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = filename;
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  };
+
+  if (highlights.length === 0) {
+    return (
+      <div className="flex flex-col items-center justify-center py-12 text-slate-500">
+        <p>Nenhum highlight gerado ainda</p>
+        <p className="text-sm mt-1">Configure os parâmetros e clique em &quot;Gerar Highlights&quot;</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Stats Header */}
+      {stats && (
+        <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-slate-50 dark:bg-slate-900 rounded-xl">
+          <div className="flex flex-wrap items-center gap-6 text-sm">
+            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+              <span className="font-bold text-2xl text-slate-900 dark:text-slate-100">
+                {highlights.length}
+              </span>
+              <span>highlights</span>
+            </div>
+
+            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+              <Clock className="h-4 w-4" />
+              <span>
+                Total: <span className="font-medium">{formatDuration(stats.totalDuration)}</span>
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400">
+              <Percent className="h-4 w-4" />
+              <span>
+                Cobertura: <span className="font-medium">{stats.coveragePercent}%</span>
+              </span>
+            </div>
+          </div>
+
+          <div className="flex gap-2">
+            <Button size="sm" variant="outline" onClick={() => handleExportAll('srt')}>
+              <Download className="h-4 w-4 mr-1.5" />
+              Exportar Todos (SRT)
+            </Button>
+            <Button size="sm" variant="outline" onClick={() => handleExportAll('txt')}>
+              <Download className="h-4 w-4 mr-1.5" />
+              Exportar Todos (MD)
+            </Button>
+          </div>
+        </div>
+      )}
+
+      {/* Highlight Cards */}
+      <div className="space-y-4">
+        {highlights.map((highlight, index) => (
+          <HighlightCard
+            key={highlight.id}
+            highlight={highlight}
+            index={index}
+            onPlay={onPlay}
+            onExport={handleExport}
+            onCopy={handleCopy}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}

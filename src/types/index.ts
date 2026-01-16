@@ -1,0 +1,114 @@
+// Tipos principais da aplicação AudioHighlights
+
+export interface TranscriptionSegment {
+  id: string;
+  start: number;      // segundos
+  end: number;        // segundos
+  text: string;
+  confidence?: number; // 0-1
+  words?: WordTimestamp[];
+}
+
+export interface WordTimestamp {
+  word: string;
+  start: number;
+  end: number;
+  confidence?: number;
+}
+
+export interface Transcription {
+  id: string;
+  projectId: string;
+  fullText: string;
+  segments: TranscriptionSegment[];
+  language?: string;
+  duration: number;
+  createdAt: Date;
+}
+
+export interface HighlightConfig {
+  minDuration: number;      // segundos (30-300)
+  maxDuration: number;      // segundos (60-600)
+  targetDuration: number;   // duração média desejada
+  quantity: number;         // 1-20
+  focusTopics?: string[];   // tópicos prioritários
+  excludeTopics?: string[]; // tópicos a ignorar
+}
+
+export interface GeneratedHighlight {
+  id: string;
+  title: string;
+  summary: string;
+  startTime: number;
+  endTime: number;
+  duration: number;
+  transcript: string;
+  relevanceScore: number;
+  tags: string[];
+  reasoning: string;
+}
+
+export type ProjectStatus =
+  | 'UPLOADED'
+  | 'TRANSCRIBING'
+  | 'TRANSCRIBED'
+  | 'GENERATING_HIGHLIGHTS'
+  | 'COMPLETED'
+  | 'ERROR';
+
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  audioUrl: string;
+  audioFileName: string;
+  audioDuration: number;
+  status: ProjectStatus;
+  transcription?: Transcription;
+  highlights?: GeneratedHighlight[];
+  highlightConfig?: HighlightConfig;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+// Tipos para exportação
+export type ExportFormat = 'srt' | 'vtt' | 'txt' | 'markdown' | 'json';
+
+export interface ExportOptions {
+  format: ExportFormat;
+  highlightId?: string;
+  includeTimestamps: boolean;
+  maxLineLength?: number;
+}
+
+// Tipos para API responses
+export interface UploadResponse {
+  success: boolean;
+  project?: Project;
+  error?: string;
+}
+
+export interface TranscribeResponse {
+  event: 'progress' | 'segment' | 'complete' | 'error';
+  data: {
+    progress?: number;
+    segment?: TranscriptionSegment;
+    transcription?: Transcription;
+    error?: string;
+  };
+}
+
+export interface HighlightsResponse {
+  event: 'analyzing' | 'highlight' | 'complete' | 'error';
+  data: {
+    progress?: number;
+    highlight?: GeneratedHighlight;
+    highlights?: GeneratedHighlight[];
+    stats?: {
+      totalDuration: number;
+      averageDuration: number;
+      coveragePercent: number;
+    };
+    error?: string;
+  };
+}
