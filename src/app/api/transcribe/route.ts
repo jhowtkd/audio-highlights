@@ -1,81 +1,55 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
+import OpenAI from 'openai';
 import type { TranscriptionSegment, Transcription } from '@/types';
-
-// Interface para resposta do Whisper verbose_json
-interface WhisperSegment {
-  start: number;
-  end: number;
-  text: string;
-  avg_logprob?: number;
-}
-
-interface WhisperWord {
-  word: string;
-  start: number;
-  end: number;
-}
-
-interface WhisperResponse {
-  text: string;
-  language?: string;
-  segments?: WhisperSegment[];
-  words?: WhisperWord[];
-}
+import type { WhisperResponse } from '@/types/api';
+import { WHISPER_MODEL, ERROR_MESSAGES } from '@/lib/constants';
+import { createErrorResponse, requireEnvVar, AppError } from '@/lib/errors';
 
 export async function POST(request: NextRequest) {
   try {
+    // Validate environment variables
+    const apiKey = requireEnvVar('OPENAI_API_KEY');
+
+    // Parse form data
     const formData = await request.formData();
-    const file = formData.get('file') as File;
-    const projectId = formData.get('projectId') as string;
+    const file = formData.get('file') as File | null;
+    const projectId = formData.get('projectId') as string | null;
 
     if (!file) {
-      return NextResponse.json(
-        { error: 'Nenhum arquivo enviado' },
-        { status: 400 }
+      throw new AppError(
+        'No file provided',
+        400,
+        ERROR_MESSAGES.NO_FILE_PROVIDED
       );
     }
 
-    // Verifica as variáveis de ambiente da Pica
-    if (!process.env.PICA_SECRET_KEY || !process.env.PICA_OPENAI_CONNECTION_KEY) {
-      return NextResponse.json(
-        { error: 'Credenciais da Pica API não configuradas' },
-        { status: 500 }
+    // Validate file type
+    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/x-m4a', 'audio/mp4', 'audio/ogg', 'audio/webm'];
+    if (!validTypes.includes(file.type)) {
+      throw new AppError(
+        `Invalid file type: ${file.type}`,
+        400,
+        ERROR_MESSAGES.INVALID_AUDIO_FILE
       );
     }
 
-    // Prepara o FormData para a API da Pica
-    const picaFormData = new FormData();
-    picaFormData.append('file', file);
-    picaFormData.append('model', 'whisper-1');
-    picaFormData.append('language', 'pt');
-    picaFormData.append('response_format', 'verbose_json');
-    picaFormData.append('timestamp_granularities[]', 'segment');
-    picaFormData.append('timestamp_granularities[]', 'word');
-
-    // Chama a API do Whisper via Pica passthrough
-    const response = await fetch('https://api.picaos.com/v1/passthrough/v1/audio/transcriptions', {
-      method: 'POST',
-      headers: {
-        'x-pica-secret': process.env.PICA_SECRET_KEY,
-        'x-pica-connection-key': process.env.PICA_OPENAI_CONNECTION_KEY,
-        'x-pica-action-id': 'conn_mod_def::GDzgH4tQCbA::kJ8mPI-0SmO6UV04cpjyZw',
-      },
-      body: picaFormData,
+    // Initialize OpenAI client
+    const openai = new OpenAI({
+      apiKey,
+      organization: process.env.OPENAI_ORG_ID,
     });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.error('Erro na API Pica:', errorText);
-      return NextResponse.json(
-        { error: `Erro na API do Whisper: ${errorText}` },
-        { status: response.status }
-      );
-    }
+    // Call OpenAI Whisper API
+    const transcriptionResponse = await openai.audio.transcriptions.create({
+      file: file,
+      model: WHISPER_MODEL,
+      language: 'pt',
+      response_format: 'verbose_json',
+      timestamp_granularities: ['segment', 'word'],
+    }) as unknown as WhisperResponse;
 
-    const transcriptionResponse: WhisperResponse = await response.json();
-
-    // Processa os segmentos
+    // Process segments
     const segments: TranscriptionSegment[] = (transcriptionResponse.segments || []).map(
       (segment) => ({
         id: uuidv4(),
@@ -97,12 +71,12 @@ export async function POST(request: NextRequest) {
       })
     );
 
-    // Calcula a duração total
+    // Calculate total duration
     const duration = segments.length > 0
       ? segments[segments.length - 1].end
       : 0;
 
-    // Monta o objeto de transcrição
+    // Build transcription object
     const transcription: Transcription = {
       id: uuidv4(),
       projectId: projectId || uuidv4(),
@@ -119,11 +93,6 @@ export async function POST(request: NextRequest) {
     });
 
   } catch (error) {
-    console.error('Erro na transcrição:', error);
-
-    return NextResponse.json(
-      { error: error instanceof Error ? error.message : 'Erro ao processar a transcrição' },
-      { status: 500 }
-    );
+    return createErrorResponse(error, 'Transcription API');
   }
 }

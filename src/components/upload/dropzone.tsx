@@ -7,17 +7,12 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { cn } from '@/lib/utils';
-
-const ACCEPTED_AUDIO_TYPES = {
-  'audio/mpeg': ['.mp3'],
-  'audio/wav': ['.wav'],
-  'audio/x-m4a': ['.m4a'],
-  'audio/mp4': ['.m4a'],
-  'audio/ogg': ['.ogg'],
-  'audio/webm': ['.webm'],
-};
-
-const MAX_FILE_SIZE = 500 * 1024 * 1024; // 500MB
+import {
+  ACCEPTED_AUDIO_TYPES,
+  MAX_FILE_SIZE,
+  MAX_AUDIO_DURATION,
+  ERROR_MESSAGES,
+} from '@/lib/constants';
 
 interface AudioFile {
   file: File;
@@ -64,22 +59,22 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
     const file = acceptedFiles[0];
 
     if (file.size > MAX_FILE_SIZE) {
-      setError(`Arquivo muito grande. Máximo permitido: ${formatFileSize(MAX_FILE_SIZE)}`);
+      setError(ERROR_MESSAGES.FILE_TOO_LARGE);
       return;
     }
 
     try {
       const duration = await getAudioDuration(file);
 
-      if (duration > 4 * 60 * 60) {
-        setError('Áudio muito longo. Máximo permitido: 4 horas');
+      if (duration > MAX_AUDIO_DURATION) {
+        setError(ERROR_MESSAGES.AUDIO_TOO_LONG);
         return;
       }
 
       const url = URL.createObjectURL(file);
       setAudioFile({ file, duration, url });
     } catch {
-      setError('Não foi possível processar o arquivo de áudio');
+      setError(ERROR_MESSAGES.INVALID_AUDIO_FILE);
     }
   }, []);
 

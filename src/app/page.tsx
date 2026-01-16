@@ -42,6 +42,15 @@ export default function Home() {
     }
   }, [highlights]);
 
+  // Cleanup Object URL on unmount or when audioUrl changes
+  useEffect(() => {
+    return () => {
+      if (audioUrl) {
+        URL.revokeObjectURL(audioUrl);
+      }
+    };
+  }, [audioUrl]);
+
   const handleFileAccepted = useCallback(async (file: File, duration: number) => {
     setAudioFile(file);
     setAudioDuration(duration);
@@ -136,6 +145,16 @@ export default function Home() {
   }, []);
 
   const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      const confirmed = window.confirm(
+        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
+      );
+      if (!confirmed) {
+        return;
+      }
+    }
+
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -151,7 +170,7 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl]);
+  }, [audioUrl, transcription, highlights]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
