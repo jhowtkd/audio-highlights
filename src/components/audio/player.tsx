@@ -64,16 +64,22 @@ export function AudioPlayer({
     }
   }, [seekTo]);
 
-  const togglePlay = useCallback(() => {
+  const togglePlay = useCallback(async () => {
     const audio = audioRef.current;
     if (!audio) return;
 
     if (isPlaying) {
       audio.pause();
+      setIsPlaying(false);
     } else {
-      audio.play();
+      try {
+        await audio.play();
+        setIsPlaying(true);
+      } catch (error) {
+        console.error('Error playing audio:', error);
+        setIsPlaying(false);
+      }
     }
-    setIsPlaying(!isPlaying);
   }, [isPlaying]);
 
   const handleSeek = useCallback((value: number[]) => {
@@ -141,6 +147,7 @@ export function AudioPlayer({
             size="icon"
             onClick={() => skip(-10)}
             className="h-8 w-8"
+            aria-label="Voltar 10 segundos"
           >
             <SkipBack className="h-4 w-4" />
           </Button>
@@ -150,6 +157,7 @@ export function AudioPlayer({
             size="icon"
             onClick={togglePlay}
             className="h-10 w-10"
+            aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
           >
             {isPlaying ? (
               <Pause className="h-5 w-5" />
@@ -163,6 +171,7 @@ export function AudioPlayer({
             size="icon"
             onClick={() => skip(10)}
             className="h-8 w-8"
+            aria-label="Avançar 10 segundos"
           >
             <SkipForward className="h-4 w-4" />
           </Button>
@@ -175,6 +184,7 @@ export function AudioPlayer({
             size="icon"
             onClick={toggleMute}
             className="h-8 w-8"
+            aria-label={isMuted ? 'Ativar som' : 'Silenciar'}
           >
             {isMuted ? (
               <VolumeX className="h-4 w-4" />
@@ -188,6 +198,7 @@ export function AudioPlayer({
             step={0.1}
             onValueChange={handleVolumeChange}
             className="w-24"
+            aria-label="Controle de volume"
           />
         </div>
       </div>

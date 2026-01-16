@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { HighlightCard } from './highlight-card';
 import { formatDuration } from '@/lib/format-utils';
 import type { GeneratedHighlight, TranscriptionSegment } from '@/types';
-import { generateSRT, generateMarkdown } from '@/lib/export';
+import { generateSRT, generateMarkdown, downloadFile } from '@/lib/export';
 
 interface HighlightListProps {
   highlights: GeneratedHighlight[];
@@ -34,56 +34,27 @@ export function HighlightList({ highlights, segments, stats, onPlay }: Highlight
   };
 
   const handleExport = (highlight: GeneratedHighlight, format: 'srt' | 'txt') => {
-    let content: string;
-    let filename: string;
-    let mimeType: string;
+    const content = format === 'srt'
+      ? generateSRT(highlight, segments)
+      : generateMarkdown(highlight);
 
-    if (format === 'srt') {
-      content = generateSRT(highlight, segments);
-      filename = `${highlight.title.replace(/[^a-z0-9]/gi, '_')}.srt`;
-      mimeType = 'text/plain';
-    } else {
-      content = generateMarkdown(highlight);
-      filename = `${highlight.title.replace(/[^a-z0-9]/gi, '_')}.txt`;
-      mimeType = 'text/plain';
-    }
+    const filename = `${highlight.title.replace(/[^a-z0-9]/gi, '_')}.${format === 'srt' ? 'srt' : 'txt'}`;
 
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
+    downloadFile(content, filename);
     toast.success(`Arquivo ${filename} baixado!`, { duration: 2000 });
   };
 
   const handleExportAll = (format: 'srt' | 'txt') => {
     const contents = highlights.map((h, i) => {
-      if (format === 'srt') {
-        return `# Highlight ${i + 1}: ${h.title}\n\n${generateSRT(h, segments)}`;
-      } else {
-        return generateMarkdown(h);
-      }
+      return format === 'srt'
+        ? `# Highlight ${i + 1}: ${h.title}\n\n${generateSRT(h, segments)}`
+        : generateMarkdown(h);
     });
 
     const content = contents.join('\n\n---\n\n');
     const filename = `all_highlights.${format === 'srt' ? 'srt' : 'md'}`;
-    const mimeType = 'text/plain';
 
-    const blob = new Blob([content], { type: mimeType });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(url);
-
+    downloadFile(content, filename);
     toast.success(`${highlights.length} highlights exportados!`, { duration: 2000 });
   };
 
