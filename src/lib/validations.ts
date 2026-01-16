@@ -82,7 +82,7 @@ export function validateEnv() {
     });
   } catch (error) {
     if (error instanceof z.ZodError) {
-      const missingVars = error.errors.map((e) => e.path.join('.')).join(', ');
+      const missingVars = error.issues.map((issue) => issue.path.join('.')).join(', ');
       throw new Error(`Missing or invalid environment variables: ${missingVars}`);
     }
     throw error;

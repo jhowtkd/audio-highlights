@@ -42,7 +42,7 @@ export function createErrorResponse(error: unknown, context?: string): NextRespo
 
   // Handle Zod validation errors
   if (error instanceof ZodError) {
-    const issues = error.errors.map((e) => `${e.path.join('.')}: ${e.message}`).join(', ');
+    const issues = error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join(', ');
     return NextResponse.json(
       {
         error: 'Dados inválidos',
