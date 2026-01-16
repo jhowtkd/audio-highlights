@@ -40,11 +40,10 @@ export async function POST(request: NextRequest) {
       organization: process.env.OPENAI_ORG_ID,
     });
 
-    // Call OpenAI Whisper API
+    // Call OpenAI Whisper API - auto-detects language
     const transcriptionResponse = await openai.audio.transcriptions.create({
       file: file,
       model: WHISPER_MODEL,
-      language: 'pt',
       response_format: 'verbose_json',
       timestamp_granularities: ['segment', 'word'],
     }) as unknown as WhisperResponse;
