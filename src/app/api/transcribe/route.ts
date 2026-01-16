@@ -1,7 +1,27 @@
 import { NextRequest, NextResponse } from 'next/server';
-import OpenAI from 'openai';
 import { v4 as uuidv4 } from 'uuid';
 import type { TranscriptionSegment, Transcription } from '@/types';
+
+// Interface para resposta do Whisper verbose_json
+interface WhisperSegment {
+  start: number;
+  end: number;
+  text: string;
+  avg_logprob?: number;
+}
+
+interface WhisperWord {
+  word: string;
+  start: number;
+  end: number;
+}
+
+interface WhisperResponse {
+  text: string;
+  language?: string;
+  segments?: WhisperSegment[];
+  words?: WhisperWord[];
+}
 
 export async function POST(request: NextRequest) {
   try {
@@ -16,30 +36,48 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!process.env.OPENAI_API_KEY) {
+    // Verifica as variáveis de ambiente da Pica
+    if (!process.env.PICA_SECRET_KEY || !process.env.PICA_OPENAI_CONNECTION_KEY) {
       return NextResponse.json(
-        { error: 'OpenAI API key não configurada' },
+        { error: 'Credenciais da Pica API não configuradas' },
         { status: 500 }
       );
     }
 
-    // Inicializa o cliente OpenAI dentro da função
-    const openai = new OpenAI({
-      apiKey: process.env.OPENAI_API_KEY,
+    // Prepara o FormData para a API da Pica
+    const picaFormData = new FormData();
+    picaFormData.append('file', file);
+    picaFormData.append('model', 'whisper-1');
+    picaFormData.append('language', 'pt');
+    picaFormData.append('response_format', 'verbose_json');
+    picaFormData.append('timestamp_granularities[]', 'segment');
+    picaFormData.append('timestamp_granularities[]', 'word');
+
+    // Chama a API do Whisper via Pica passthrough
+    const response = await fetch('https://api.picaos.com/v1/passthrough/v1/audio/transcriptions', {
+      method: 'POST',
+      headers: {
+        'x-pica-secret': process.env.PICA_SECRET_KEY,
+        'x-pica-connection-key': process.env.PICA_OPENAI_CONNECTION_KEY,
+        'x-pica-action-id': 'conn_mod_def::GDzgH4tQCbA::kJ8mPI-0SmO6UV04cpjyZw',
+      },
+      body: picaFormData,
     });
 
-    // Chama a API do Whisper com timestamps detalhados
-    const transcriptionResponse = await openai.audio.transcriptions.create({
-      file: file,
-      model: 'whisper-1',
-      response_format: 'verbose_json',
-      timestamp_granularities: ['segment', 'word'],
-      language: 'pt', // Português brasileiro
-    });
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error('Erro na API Pica:', errorText);
+      return NextResponse.json(
+        { error: `Erro na API do Whisper: ${errorText}` },
+        { status: response.status }
+      );
+    }
+
+    const transcriptionResponse: WhisperResponse = await response.json();
 
     // Processa os segmentos
     const segments: TranscriptionSegment[] = (transcriptionResponse.segments || []).map(
-      (segment, index) => ({
+      (segment) => ({
         id: uuidv4(),
         start: segment.start,
         end: segment.end,
@@ -83,15 +121,8 @@ export async function POST(request: NextRequest) {
   } catch (error) {
     console.error('Erro na transcrição:', error);
 
-    if (error instanceof OpenAI.APIError) {
-      return NextResponse.json(
-        { error: `Erro na API do Whisper: ${error.message}` },
-        { status: error.status || 500 }
-      );
-    }
-
     return NextResponse.json(
-      { error: 'Erro ao processar a transcrição' },
+      { error: error instanceof Error ? error.message : 'Erro ao processar a transcrição' },
       { status: 500 }
     );
   }
