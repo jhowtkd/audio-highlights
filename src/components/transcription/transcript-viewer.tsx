@@ -1,11 +1,19 @@
 'use client';
 
 import { useRef, useEffect, useState, useCallback } from 'react';
-import { Search, X, Loader2, Sparkles } from 'lucide-react';
+import { Search, X, Loader2, Sparkles, Download, FileText, FileCode } from 'lucide-react';
+import { toast } from 'sonner';
 import { formatTime } from '@/lib/format-utils';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import {
+  downloadFile,
+  generateFullTranscriptText,
+  generateFullTranscriptWithTimestamps,
+  generateFullTranscriptSRT,
+  generateFullTranscriptMarkdown
+} from '@/lib/export';
 import type { TranscriptionSegment } from '@/types';
 
 interface SearchResult {
@@ -120,6 +128,37 @@ export function TranscriptViewer({
     }
   }, [handleSearch, clearSearch]);
 
+  // Export handlers
+  const [showExportMenu, setShowExportMenu] = useState(false);
+
+  const handleExportTranscript = useCallback((format: 'txt' | 'txt-timestamps' | 'srt' | 'md') => {
+    let content: string;
+    let filename: string;
+
+    switch (format) {
+      case 'txt':
+        content = generateFullTranscriptText(segments);
+        filename = 'transcricao.txt';
+        break;
+      case 'txt-timestamps':
+        content = generateFullTranscriptWithTimestamps(segments);
+        filename = 'transcricao_com_timestamps.txt';
+        break;
+      case 'srt':
+        content = generateFullTranscriptSRT(segments);
+        filename = 'transcricao.srt';
+        break;
+      case 'md':
+        content = generateFullTranscriptMarkdown(segments);
+        filename = 'transcricao.md';
+        break;
+    }
+
+    downloadFile(content, filename);
+    toast.success(`Transcrição baixada: ${filename}`);
+    setShowExportMenu(false);
+  }, [segments]);
+
   if (segments.length === 0) {
     return (
       <div className={cn('flex items-center justify-center h-64 text-slate-500', className)}>
@@ -167,6 +206,65 @@ export function TranscriptViewer({
             </>
           )}
         </Button>
+
+        {/* Download Button with Dropdown */}
+        <div className="relative">
+          <Button
+            onClick={() => setShowExportMenu(!showExportMenu)}
+            variant="outline"
+            size="sm"
+            className="shrink-0"
+          >
+            <Download className="h-4 w-4 mr-1" />
+            Baixar
+          </Button>
+
+          {showExportMenu && (
+            <>
+              {/* Backdrop to close menu */}
+              <div
+                className="fixed inset-0 z-10"
+                onClick={() => setShowExportMenu(false)}
+              />
+
+              {/* Dropdown Menu */}
+              <div className="absolute right-0 top-full mt-1 z-20 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 min-w-[180px]">
+                <button
+                  type="button"
+                  onClick={() => handleExportTranscript('txt')}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                >
+                  <FileText className="h-4 w-4" />
+                  Texto simples (.txt)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleExportTranscript('txt-timestamps')}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                >
+                  <FileText className="h-4 w-4" />
+                  Com timestamps (.txt)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleExportTranscript('srt')}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                >
+                  <FileCode className="h-4 w-4" />
+                  Legendas (.srt)
+                </button>
+                <button
+                  type="button"
+                  onClick={() => handleExportTranscript('md')}
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                >
+                  <FileCode className="h-4 w-4" />
+                  Markdown (.md)
+                </button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
 
       {/* Search Results Banner */}

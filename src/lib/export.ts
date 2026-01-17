@@ -167,3 +167,50 @@ export function downloadFile(content: string | Blob, filename: string, mimeType:
   document.body.removeChild(a);
   URL.revokeObjectURL(url);
 }
+
+/**
+ * Gera transcrição completa em texto simples
+ */
+export function generateFullTranscriptText(segments: TranscriptionSegment[]): string {
+  return segments.map((s) => s.text.trim()).join(' ');
+}
+
+/**
+ * Gera transcrição completa com timestamps
+ */
+export function generateFullTranscriptWithTimestamps(segments: TranscriptionSegment[]): string {
+  return segments
+    .map((s) => `[${formatTime(s.start)}] ${s.text.trim()}`)
+    .join('\n\n');
+}
+
+/**
+ * Gera transcrição completa em SRT
+ */
+export function generateFullTranscriptSRT(segments: TranscriptionSegment[]): string {
+  return segments
+    .map((seg, i) => {
+      return `${i + 1}
+${formatSRTTime(seg.start)} --> ${formatSRTTime(seg.end)}
+${seg.text.trim()}`;
+    })
+    .join('\n\n');
+}
+
+/**
+ * Gera transcrição completa em Markdown
+ */
+export function generateFullTranscriptMarkdown(segments: TranscriptionSegment[]): string {
+  const totalDuration = segments.length > 0 ? segments[segments.length - 1].end : 0;
+
+  return `# Transcrição Completa
+
+**Duração total:** ${formatDuration(totalDuration)}
+**Segmentos:** ${segments.length}
+
+---
+
+${segments.map((s) => `**[${formatTime(s.start)}]** ${s.text.trim()}`).join('\n\n')}
+`;
+}
+
