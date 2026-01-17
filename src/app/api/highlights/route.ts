@@ -96,22 +96,6 @@ IMPORTANTE:
 - Retorne APENAS o JSON, sem nenhum texto adicional`;
 }
 
-function extractTranscriptForHighlight(
-  segments: TranscriptionSegment[],
-  startTime: number,
-  endTime: number
-): string {
-  // Fixed: Include segments that overlap with the highlight range
-  return segments
-    .filter((s) =>
-      (s.start >= startTime && s.start < endTime) ||
-      (s.end > startTime && s.end <= endTime) ||
-      (s.start <= startTime && s.end >= endTime)
-    )
-    .map((s) => s.text)
-    .join(' ');
-}
-
 export async function POST(request: NextRequest) {
   try {
     // Validate environment variables
@@ -198,33 +182,47 @@ export async function POST(request: NextRequest) {
     }
 
     // Process and validate highlights
-    const highlights: GeneratedHighlight[] = parsedResponse.highlights
-      .map((h: GPTHighlight) => {
-        const duration = h.endTime - h.startTime;
-        const transcript = extractTranscriptForHighlight(
-          segments,
-          h.startTime,
-          h.endTime
-        );
+    // Assumes segments are sorted by start time, which is a standard output from transcription services.
+    const sortedHighlights = parsedResponse.highlights.sort((a, b) => a.startTime - b.startTime);
 
-        return {
-          id: uuidv4(),
-          title: h.title,
-          summary: h.summary,
-          startTime: h.startTime,
-          endTime: h.endTime,
-          duration,
-          transcript,
-          relevanceScore: h.relevanceScore,
-          tags: h.tags,
-          reasoning: h.reasoning,
-          // Novos campos inteligentes
-          emotionTone: h.emotionTone,
-          viralFactors: h.viralFactors,
-          suggestedTitles: h.suggestedTitles,
-          quotableLines: h.quotableLines,
-        };
-      })
+    let segmentIndex = 0;
+    const highlights: GeneratedHighlight[] = sortedHighlights.map((h: GPTHighlight) => {
+      const duration = h.endTime - h.startTime;
+      const transcriptParts: string[] = [];
+
+      // Advance segmentIndex to the first potentially relevant segment
+      while (segmentIndex < segments.length && segments[segmentIndex].end < h.startTime) {
+        segmentIndex++;
+      }
+
+      // Iterate through segments that could overlap
+      let tempIndex = segmentIndex;
+      while (tempIndex < segments.length && segments[tempIndex].start < h.endTime) {
+        const segment = segments[tempIndex];
+        // Check for actual overlap: max(start1, start2) < min(end1, end2)
+        if (Math.max(segment.start, h.startTime) < Math.min(segment.end, h.endTime)) {
+          transcriptParts.push(segment.text);
+        }
+        tempIndex++;
+      }
+
+      return {
+        id: uuidv4(),
+        title: h.title,
+        summary: h.summary,
+        startTime: h.startTime,
+        endTime: h.endTime,
+        duration,
+        transcript: transcriptParts.join(' '),
+        relevanceScore: h.relevanceScore,
+        tags: h.tags,
+        reasoning: h.reasoning,
+        emotionTone: h.emotionTone,
+        viralFactors: h.viralFactors,
+        suggestedTitles: h.suggestedTitles,
+        quotableLines: h.quotableLines,
+      };
+    })
       .filter((h: GeneratedHighlight) => {
         // Validate duration
         return h.duration >= config.minDuration && h.duration <= config.maxDuration;
