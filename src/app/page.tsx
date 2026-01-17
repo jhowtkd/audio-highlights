@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useCallback, useEffect } from 'react';
-import { Mic, Sparkles, FileText, AlertCircle } from 'lucide-react';
+import { useState, useCallback, useEffect, useRef } from 'react';
+import { Mic, Sparkles, FileText, AlertCircle, Timer, Film, X } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster, toast } from 'sonner';
 import { Dropzone } from '@/components/upload/dropzone';
@@ -9,10 +9,16 @@ import { AudioPlayer } from '@/components/audio/player';
 import { TranscriptViewer } from '@/components/transcription/transcript-viewer';
 import { ConfigPanel } from '@/components/highlights/config-panel';
 import { HighlightList } from '@/components/highlights/highlight-list';
+import { EpisodeSummary } from '@/components/highlights/episode-summary';
+import { Waveform } from '@/components/audio/waveform';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Progress } from '@/components/ui/progress';
 import { Button } from '@/components/ui/button';
-import type { Transcription, GeneratedHighlight, HighlightConfig } from '@/types';
+import { Progress } from '@/components/ui/progress';
+import { formatDuration } from '@/lib/format-utils';
+import { useFFmpeg } from '@/hooks/use-ffmpeg';
+import { processLargeAudioWithFFmpeg } from '@/lib/audio-chunking';
+import { downloadFile } from '@/lib/export';
+import type { Transcription, GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
 
 type AppStep = 'upload' | 'transcribing' | 'transcribed' | 'generating' | 'completed' | 'error';
 
@@ -30,11 +36,24 @@ export default function Home() {
   const [transcription, setTranscription] = useState<Transcription | null>(null);
   const [highlights, setHighlights] = useState<GeneratedHighlight[]>([]);
   const [highlightStats, setHighlightStats] = useState<HighlightStats | null>(null);
+  const [episodeAnalysis, setEpisodeAnalysis] = useState<EpisodeAnalysis | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [seekTo, setSeekTo] = useState<number | undefined>(undefined);
   const [transcriptionProgress, setTranscriptionProgress] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('transcription');
+  const [statusMessage, setStatusMessage] = useState<string>('');
+
+  // Timer states
+  const [elapsedTime, setElapsedTime] = useState<number>(0);
+  const [estimatedTime, setEstimatedTime] = useState<string>('');
+  const timerRef = useRef<NodeJS.Timeout | null>(null);
+
+  // FFmpeg hook
+  const { cutVideo, splitAudio, isProcessing: isFFmpegProcessing, progress: ffmpegProgress, message: ffmpegMessage } = useFFmpeg();
+
+  // Video state
+  const [videoFile, setVideoFile] = useState<File | null>(null);
 
   // Muda para a tab de highlights quando são gerados
   useEffect(() => {
@@ -49,38 +68,92 @@ export default function Home() {
       if (audioUrl) {
         URL.revokeObjectURL(audioUrl);
       }
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+      }
     };
   }, [audioUrl]);
 
+  // Timer logic for transcription
+  useEffect(() => {
+    if (step === 'transcribing') {
+      const startTime = Date.now();
+      timerRef.current = setInterval(() => {
+        const seconds = Math.floor((Date.now() - startTime) / 1000);
+        setElapsedTime(seconds);
+      }, 1000);
+    } else {
+      if (timerRef.current) {
+        clearInterval(timerRef.current);
+        timerRef.current = null;
+      }
+      if (step === 'upload') {
+        setElapsedTime(0);
+      }
+    }
+  }, [step]);
+
   const handleFileAccepted = useCallback(async (file: File, duration: number) => {
+    // Reset states
+    setAudioFile(null);
+    setErrorMessage(null);
+
     setAudioFile(file);
     setAudioDuration(duration);
     setAudioUrl(URL.createObjectURL(file));
+
     setStep('transcribing');
-    setTranscriptionProgress(10);
+
+    // Estimate Time logic based on audio file size
+    const sizeMB = file.size / (1024 * 1024);
+    const estimatedSeconds = Math.max(30, Math.ceil(sizeMB * 10));
+    setEstimatedTime(formatDuration(estimatedSeconds));
+    setTranscriptionProgress(0);
+
+    setStatusMessage('Processando áudio...');
 
     try {
-      const formData = new FormData();
-      formData.append('file', file);
-      formData.append('projectId', crypto.randomUUID());
+      let transcriptionResult: Transcription;
 
-      setTranscriptionProgress(30);
+      // Use FFmpeg chunking for long audio (>20 minutes)
+      const CHUNK_THRESHOLD_SECONDS = 20 * 60; // 20 minutes
 
-      const response = await fetch('/api/transcribe', {
-        method: 'POST',
-        body: formData,
-      });
+      if (duration > CHUNK_THRESHOLD_SECONDS) {
+        // Long audio: use FFmpeg to split and process in chunks
+        transcriptionResult = await processLargeAudioWithFFmpeg(
+          file,
+          crypto.randomUUID(),
+          duration,
+          splitAudio,
+          (progress, message) => {
+            setTranscriptionProgress(progress);
+            setStatusMessage(message);
+          }
+        );
+      } else {
+        // Short audio: direct API call
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('projectId', crypto.randomUUID());
 
-      setTranscriptionProgress(80);
+        setStatusMessage('Transcrevendo áudio...');
 
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Erro na transcrição');
+        const response = await fetch('/api/transcribe', {
+          method: 'POST',
+          body: formData,
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error || 'Erro na transcrição');
+        }
+
+        const data = await response.json();
+        transcriptionResult = data.transcription;
       }
 
-      const data = await response.json();
       setTranscriptionProgress(100);
-      setTranscription(data.transcription);
+      setTranscription(transcriptionResult);
       setStep('transcribed');
       toast.success('Transcrição concluída!');
     } catch (error) {
@@ -92,6 +165,42 @@ export default function Home() {
     }
   }, []);
 
+  const handleDownloadVideo = useCallback(async (highlight: GeneratedHighlight) => {
+    if (!videoFile) return;
+
+    // Use highlight title for filename
+    const safeTitle = highlight.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+    const filename = `${safeTitle}.mp4`;
+
+    // Show toast for feedback
+    toast.promise(
+      cutVideo(videoFile, highlight.startTime, highlight.endTime),
+      {
+        loading: 'Cortando vídeo...',
+        success: (blob) => {
+          downloadFile(blob, filename);
+          return 'Vídeo baixado com sucesso!';
+        },
+        error: 'Erro ao cortar vídeo'
+      }
+    );
+  }, [videoFile, cutVideo]);
+
+  const handleVideoSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file && file.type.startsWith('video/')) {
+      setVideoFile(file);
+      toast.success(`Vídeo "${file.name}" anexado!`);
+    } else if (file) {
+      toast.error('Por favor, selecione um arquivo de vídeo (MP4, MOV)');
+    }
+  }, []);
+
+  const handleRemoveVideo = useCallback(() => {
+    setVideoFile(null);
+    toast.info('Vídeo removido');
+  }, []);
+
   const handleRetry = useCallback(() => {
     setErrorMessage(null);
     setStep('upload');
@@ -99,9 +208,16 @@ export default function Home() {
   }, []);
 
   const handleGenerateHighlights = useCallback(async (config: HighlightConfig) => {
-    if (!transcription) return;
+    console.log('🖱️ handleGenerateHighlights acionado', { config, hasTranscription: !!transcription });
+
+    if (!transcription) {
+      console.error('❌ Transcrição ausente ao tentar gerar highlights');
+      toast.error('Erro: Transcrição não encontrada. Tente recarregar.');
+      return;
+    }
 
     setStep('generating');
+    toast.info('Iniciando geração de highlights...');
 
     try {
       const response = await fetch('/api/highlights', {
@@ -123,6 +239,7 @@ export default function Home() {
       const data = await response.json();
       setHighlights(data.highlights);
       setHighlightStats(data.stats);
+      setEpisodeAnalysis(data.episodeAnalysis || null);
       setStep('completed');
       toast.success(`${data.highlights.length} highlights gerados!`);
     } catch (error) {
@@ -274,10 +391,31 @@ export default function Home() {
             <p className="text-slate-600 dark:text-slate-400 mb-6">
               {audioFile?.name}
             </p>
-            <Progress value={transcriptionProgress} className="max-w-xs mx-auto" />
-            <p className="text-sm text-slate-500 mt-3">
-              Isso pode levar alguns minutos dependendo do tamanho do arquivo
-            </p>
+            {isFFmpegProcessing ? (
+              // Show FFmpeg progress if active
+              <div className="flex flex-col items-center gap-1 text-sm text-slate-500 mb-4">
+                <p className="font-medium text-purple-600 animate-pulse">{ffmpegMessage} ({ffmpegProgress}%)</p>
+                <Progress value={ffmpegProgress} className="max-w-xs mx-auto" />
+              </div>
+            ) : (
+              <>
+                <Progress value={transcriptionProgress} className="max-w-xs mx-auto mb-4" />
+
+                <div className="flex flex-col items-center gap-1 text-sm text-slate-500 dark:text-slate-400">
+                  {statusMessage && (
+                    <p className="font-medium text-blue-600 dark:text-blue-400 mb-2 animate-pulse">{statusMessage}</p>
+                  )}
+                  <div className="flex items-center gap-2 font-mono bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full">
+                    <Timer className="h-4 w-4" />
+                    <span>{formatDuration(elapsedTime)}</span>
+                  </div>
+                  <p className="mt-2 text-xs">
+                    Isso pode levar alguns minutos (Estimado: ~{estimatedTime})
+                  </p>
+                  <p className="text-xs opacity-70">Não feche esta página</p>
+                </div>
+              </>
+            )}
           </div>
         )}
 
@@ -311,12 +449,22 @@ export default function Home() {
           <div className="space-y-6">
             {/* Audio Player */}
             {audioUrl && (
-              <AudioPlayer
-                src={audioUrl}
-                onTimeUpdate={handleTimeUpdate}
-                seekTo={seekTo}
-                className="max-w-4xl mx-auto"
-              />
+              <div className="max-w-4xl mx-auto space-y-4">
+                <AudioPlayer
+                  src={audioUrl}
+                  onTimeUpdate={handleTimeUpdate}
+                  seekTo={seekTo}
+                />
+
+                {/* Waveform Visualizer */}
+                <Waveform
+                  audioUrl={audioUrl}
+                  duration={audioDuration}
+                  currentTime={currentTime}
+                  highlights={highlights}
+                  onSeek={(time) => setSeekTo(time)}
+                />
+              </div>
             )}
 
             {/* Content Grid */}
@@ -349,12 +497,62 @@ export default function Home() {
                   </TabsContent>
 
                   <TabsContent value="highlights">
+                    {/* Video Attach Section */}
+                    <div className="bg-gradient-to-r from-purple-50 to-indigo-50 dark:from-purple-950/30 dark:to-indigo-950/30 rounded-xl border border-purple-200 dark:border-purple-800 p-4 mb-4">
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <Film className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                          <div>
+                            <p className="font-medium text-slate-900 dark:text-slate-100">
+                              {videoFile ? videoFile.name : 'Quer gerar clipes de vídeo?'}
+                            </p>
+                            <p className="text-xs text-slate-500">
+                              {videoFile
+                                ? `${(videoFile.size / (1024 * 1024)).toFixed(1)} MB`
+                                : 'Anexe o vídeo correspondente a este áudio para baixar os cortes'}
+                            </p>
+                          </div>
+                        </div>
+                        {videoFile ? (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={handleRemoveVideo}
+                            className="text-red-500 hover:text-red-600"
+                          >
+                            <X className="h-4 w-4" />
+                          </Button>
+                        ) : (
+                          <label>
+                            <input
+                              type="file"
+                              accept="video/mp4,video/quicktime"
+                              onChange={handleVideoSelect}
+                              className="hidden"
+                            />
+                            <Button asChild variant="outline" size="sm" className="cursor-pointer">
+                              <span>
+                                <Film className="h-4 w-4 mr-1.5" />
+                                Anexar Vídeo
+                              </span>
+                            </Button>
+                          </label>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Episode Summary */}
+                    {episodeAnalysis && (
+                      <EpisodeSummary analysis={episodeAnalysis} className="mb-4" />
+                    )}
+
                     <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4">
                       <HighlightList
                         highlights={highlights}
                         segments={transcription?.segments || []}
                         stats={highlightStats || undefined}
                         onPlay={handlePlayHighlight}
+                        onDownloadVideo={videoFile ? handleDownloadVideo : undefined}
                       />
                     </div>
                   </TabsContent>

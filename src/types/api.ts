@@ -59,8 +59,21 @@ export interface GPTHighlight {
   relevanceScore: number;
   tags: string[];
   reasoning: string;
+  // Novos campos inteligentes
+  emotionTone?: 'excited' | 'humorous' | 'dramatic' | 'informative' | 'controversial' | 'inspirational';
+  viralFactors?: {
+    hasHook: boolean;
+    hasStorytelling: boolean;
+    hasSurprise: boolean;
+    emotionalIntensity: number;
+  };
+  suggestedTitles?: string[];
+  quotableLines?: string[];
 }
 
 export interface GPTHighlightsResponse {
+  episodeSummary?: string;
+  keyTopics?: string[];
   highlights: GPTHighlight[];
 }
+
