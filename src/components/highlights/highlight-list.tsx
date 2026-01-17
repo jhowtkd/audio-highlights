@@ -17,9 +17,10 @@ interface HighlightListProps {
     coveragePercent: number;
   };
   onPlay: (startTime: number) => void;
+  onDownloadVideo?: (highlight: GeneratedHighlight) => void;
 }
 
-export function HighlightList({ highlights, segments, stats, onPlay }: HighlightListProps) {
+export function HighlightList({ highlights, segments, stats, onPlay, onDownloadVideo }: HighlightListProps) {
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -118,6 +119,7 @@ export function HighlightList({ highlights, segments, stats, onPlay }: Highlight
             onPlay={onPlay}
             onExport={handleExport}
             onCopy={handleCopy}
+            onDownloadVideo={onDownloadVideo}
           />
         ))}
       </div>

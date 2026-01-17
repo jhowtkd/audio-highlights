@@ -26,6 +26,24 @@ export interface Transcription {
   createdAt: Date;
 }
 
+// Tipos para funcionalidades inteligentes
+export type EmotionTone = 'excited' | 'humorous' | 'dramatic' | 'informative' | 'controversial' | 'inspirational';
+
+export type PlatformTemplate = 'tiktok' | 'youtube_shorts' | 'instagram_reels' | 'podcast_trailer' | 'custom';
+
+export interface ViralFactors {
+  hasHook: boolean;
+  hasStorytelling: boolean;
+  hasSurprise: boolean;
+  emotionalIntensity: number; // 1-10
+}
+
+export interface EpisodeAnalysis {
+  summary: string;
+  keyTopics: string[];
+  totalHighlightsGenerated: number;
+}
+
 export interface HighlightConfig {
   minDuration: number;      // segundos (30-300)
   maxDuration: number;      // segundos (60-600)
@@ -33,6 +51,7 @@ export interface HighlightConfig {
   quantity: number;         // 1-20
   focusTopics?: string[];   // tópicos prioritários
   excludeTopics?: string[]; // tópicos a ignorar
+  platform?: PlatformTemplate; // template de plataforma selecionado
 }
 
 export interface GeneratedHighlight {
@@ -46,6 +65,11 @@ export interface GeneratedHighlight {
   relevanceScore: number;
   tags: string[];
   reasoning: string;
+  // Novos campos inteligentes
+  emotionTone?: EmotionTone;
+  viralFactors?: ViralFactors;
+  suggestedTitles?: string[];
+  quotableLines?: string[];
 }
 
 export type ProjectStatus =

@@ -156,8 +156,8 @@ export function generateAllHighlights(
 /**
  * Faz download de um arquivo
  */
-export function downloadFile(content: string, filename: string, mimeType: string = 'text/plain'): void {
-  const blob = new Blob([content], { type: mimeType });
+export function downloadFile(content: string | Blob, filename: string, mimeType: string = 'text/plain'): void {
+  const blob = content instanceof Blob ? content : new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;

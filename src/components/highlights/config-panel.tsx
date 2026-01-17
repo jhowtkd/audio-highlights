@@ -8,7 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { formatDuration } from '@/lib/format-utils';
-import type { HighlightConfig } from '@/types';
+import { PLATFORM_TEMPLATES } from '@/lib/constants';
+import type { HighlightConfig, PlatformTemplate } from '@/types';
 
 interface ConfigPanelProps {
   onGenerate: (config: HighlightConfig) => void;
@@ -21,15 +22,31 @@ const DEFAULT_CONFIG: HighlightConfig = {
   maxDuration: 120,
   targetDuration: 60,
   quantity: 5,
+  platform: 'custom',
 };
 
 export function ConfigPanel({ onGenerate, isGenerating, audioDuration }: ConfigPanelProps) {
   const [config, setConfig] = useState<HighlightConfig>(DEFAULT_CONFIG);
+  const [selectedPlatform, setSelectedPlatform] = useState<PlatformTemplate>('custom');
+
+  const handlePlatformSelect = (platform: PlatformTemplate) => {
+    setSelectedPlatform(platform);
+    const template = PLATFORM_TEMPLATES[platform];
+    setConfig((prev) => ({
+      ...prev,
+      platform,
+      minDuration: template.minDuration,
+      maxDuration: template.maxDuration,
+      targetDuration: template.targetDuration,
+    }));
+  };
 
   const handleMinDurationChange = (value: number[]) => {
     const newMin = value[0];
+    setSelectedPlatform('custom');
     setConfig((prev) => ({
       ...prev,
+      platform: 'custom',
       minDuration: newMin,
       // Garante que max e target são maiores que min
       maxDuration: Math.max(prev.maxDuration, newMin),
@@ -39,8 +56,10 @@ export function ConfigPanel({ onGenerate, isGenerating, audioDuration }: ConfigP
 
   const handleMaxDurationChange = (value: number[]) => {
     const newMax = value[0];
+    setSelectedPlatform('custom');
     setConfig((prev) => ({
       ...prev,
+      platform: 'custom',
       maxDuration: newMax,
       // Garante que min e target são menores que max
       minDuration: Math.min(prev.minDuration, newMax),
@@ -50,8 +69,10 @@ export function ConfigPanel({ onGenerate, isGenerating, audioDuration }: ConfigP
 
   const handleTargetDurationChange = (value: number[]) => {
     const newTarget = value[0];
+    setSelectedPlatform('custom');
     setConfig((prev) => ({
       ...prev,
+      platform: 'custom',
       targetDuration: Math.max(prev.minDuration, Math.min(newTarget, prev.maxDuration)),
     }));
   };
@@ -65,6 +86,7 @@ export function ConfigPanel({ onGenerate, isGenerating, audioDuration }: ConfigP
   };
 
   const handleSubmit = () => {
+    console.log('🔘 Botão clicado no ConfigPanel');
     onGenerate(config);
   };
 
@@ -81,11 +103,38 @@ export function ConfigPanel({ onGenerate, isGenerating, audioDuration }: ConfigP
           Configurar Highlights
         </CardTitle>
         <CardDescription>
-          Defina os parâmetros para gerar os melhores momentos
+          Escolha uma plataforma ou configure manualmente
         </CardDescription>
       </CardHeader>
 
       <CardContent className="space-y-6">
+        {/* Platform Selector */}
+        <div className="space-y-3">
+          <Label className="flex items-center gap-2">
+            🎯 Plataforma
+          </Label>
+          <div className="grid grid-cols-2 gap-2">
+            {(Object.entries(PLATFORM_TEMPLATES) as [PlatformTemplate, typeof PLATFORM_TEMPLATES[PlatformTemplate]][]).map(([key, template]) => (
+              <button
+                key={key}
+                type="button"
+                onClick={() => handlePlatformSelect(key)}
+                className={`flex flex-col items-start p-3 rounded-lg border text-left transition-all ${selectedPlatform === key
+                    ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 ring-1 ring-blue-500'
+                    : 'border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600'
+                  }`}
+              >
+                <span className="text-lg">{template.icon}</span>
+                <span className="font-medium text-sm text-slate-900 dark:text-slate-100">
+                  {template.name}
+                </span>
+                <span className="text-xs text-slate-500 dark:text-slate-400">
+                  {template.description}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
         {/* Duração Mínima */}
         <div className="space-y-3">
           <div className="flex items-center justify-between">

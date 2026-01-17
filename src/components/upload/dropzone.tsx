@@ -145,8 +145,21 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
           </Button>
         </div>
 
+        {audioFile.duration < 60 && (
+          <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg flex items-start gap-2">
+            <span className="text-amber-600 dark:text-amber-400 mt-0.5">⚠️</span>
+            <div className="text-sm text-amber-800 dark:text-amber-200">
+              <p className="font-medium">Áudio curto detectado ({formatDuration(audioFile.duration)})</p>
+              <p className="mt-0.5 text-amber-700 dark:text-amber-300">
+                Para melhores resultados na geração de highlights, recomendamos áudios com mais de 1 minuto.
+                Áudios muito curtos podem não gerar cortes relevantes.
+              </p>
+            </div>
+          </div>
+        )}
+
         <div className="mt-6 flex justify-end">
-          <Button onClick={handleSubmit} size="lg">
+          <Button onClick={handleSubmit} size="lg" className="w-full sm:w-auto">
             <Upload className="mr-2 h-4 w-4" />
             Iniciar Transcrição
           </Button>
@@ -164,8 +177,8 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
           isDragActive && !isDragReject
             ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
             : isDragReject
-            ? 'border-red-500 bg-red-50 dark:bg-red-950'
-            : 'border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 bg-slate-50 dark:bg-slate-900'
+              ? 'border-red-500 bg-red-50 dark:bg-red-950'
+              : 'border-slate-300 dark:border-slate-700 hover:border-slate-400 dark:hover:border-slate-600 bg-slate-50 dark:bg-slate-900'
         )}
       >
         <input {...getInputProps()} />
@@ -177,8 +190,8 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
               isDragActive && !isDragReject
                 ? 'bg-blue-100 dark:bg-blue-900'
                 : isDragReject
-                ? 'bg-red-100 dark:bg-red-900'
-                : 'bg-slate-200 dark:bg-slate-800'
+                  ? 'bg-red-100 dark:bg-red-900'
+                  : 'bg-slate-200 dark:bg-slate-800'
             )}
           >
             <Upload
@@ -187,8 +200,8 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
                 isDragActive && !isDragReject
                   ? 'text-blue-600 dark:text-blue-400'
                   : isDragReject
-                  ? 'text-red-600 dark:text-red-400'
-                  : 'text-slate-500'
+                    ? 'text-red-600 dark:text-red-400'
+                    : 'text-slate-500'
               )}
             />
           </div>
@@ -204,7 +217,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
           <p className="text-sm text-slate-500 mb-4">ou clique para selecionar</p>
 
           <p className="text-xs text-slate-400">
-            MP3, WAV, M4A, OGG, WebM • Até 500MB • Máximo 4 horas
+            MP3, WAV, M4A, OGG, OPUS, FLAC, WebM • Até 500MB • Máx 4h
           </p>
         </div>
       </div>

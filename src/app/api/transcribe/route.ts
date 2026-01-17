@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Validate file type
-    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/x-m4a', 'audio/mp4', 'audio/ogg', 'audio/webm'];
+    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/x-m4a', 'audio/mp4', 'audio/ogg', 'audio/opus', 'audio/webm', 'audio/flac'];
     if (!validTypes.includes(file.type)) {
       throw new AppError(
         `Invalid file type: ${file.type}`,
@@ -40,9 +40,16 @@ export async function POST(request: NextRequest) {
       organization: process.env.OPENAI_ORG_ID,
     });
 
+    // OpenAI API fix: .opus files are supported but must be sent with .ogg extension/MIME
+    let fileToSend = file;
+    if (file.type === 'audio/opus' || file.name.toLowerCase().endsWith('.opus')) {
+      const newName = file.name.replace(/\.opus$/i, '.ogg');
+      fileToSend = new File([file], newName, { type: 'audio/ogg' });
+    }
+
     // Call OpenAI Whisper API - auto-detects language
     const transcriptionResponse = await openai.audio.transcriptions.create({
-      file: file,
+      file: fileToSend,
       model: WHISPER_MODEL,
       response_format: 'verbose_json',
       timestamp_granularities: ['segment', 'word'],
