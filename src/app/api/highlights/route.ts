@@ -16,24 +16,83 @@ function buildPrompt(
     .map((s) => `[${formatTime(s.start)}] ${s.text}`)
     .join('\n');
 
-  return `Você é um especialista em análise de conteúdo de podcasts e criação de clips virais. Sua tarefa é fazer uma análise COMPLETA do episódio e identificar os ${config.quantity} momentos mais impactantes.
+  const platformInstructions = getPlatformInstructions(config.platform);
 
-## REGRAS DE DURAÇÃO (CRÍTICO - RESPEITE RIGOROSAMENTE)
-- Duração MÍNIMA de cada highlight: ${config.minDuration} segundos
-- Duração MÁXIMA de cada highlight: ${config.maxDuration} segundos
-- Duração MÉDIA alvo: ${config.targetDuration} segundos
-- NUNCA selecione trechos menores que ${config.minDuration}s ou maiores que ${config.maxDuration}s
-${config.platform && config.platform !== 'custom' ? `- Otimizado para: ${config.platform.replace('_', ' ').toUpperCase()}` : ''}
+  return `Você é um ENGENHEIRO DE ATENÇÃO especializado em transformar conteúdo de áudio longo em micro-clips virais. Sua análise é baseada em neurociência da atenção e métricas algorítmicas do Instagram Reels 2025.
 
-## CRITÉRIOS DE SELEÇÃO PARA CLIPS VIRAIS
-Priorize momentos que tenham POTENCIAL VIRAL:
-1. 🎣 HOOK FORTE - Início impactante que prende atenção nos primeiros 3 segundos
-2. 📖 STORYTELLING - Histórias pessoais com arco narrativo
-3. 😮 SURPRESA - Revelações, dados surpreendentes, plot twists
-4. 💡 INSIGHTS - Aprendizados únicos e acionáveis
-5. 😂 HUMOR - Momentos genuinamente engraçados
-6. 🔥 CONTROVÉRSIA - Opiniões fortes e provocativas
-7. ❤️ EMOÇÃO - Momentos de vulnerabilidade ou intensidade emocional
+## SEU PAPEL
+Você não é um editor comum. Você entende que:
+- O usuário de redes sociais está em "transe de scroll" buscando dopamina com mínimo esforço
+- Os primeiros 3 SEGUNDOS determinam 90% do sucesso de um clip
+- Salvamentos (Saves) indicam UTILIDADE, Compartilhamentos (Shares) indicam RESSONÂNCIA EMOCIONAL
+- Taxa de Conclusão (Watch Through Rate) é mais valiosa que Likes
+
+## REGRAS DE DURAÇÃO (CRÍTICO)
+- Duração MÍNIMA: ${config.minDuration} segundos
+- Duração MÁXIMA: ${config.maxDuration} segundos  
+- Duração ALVO: ${config.targetDuration} segundos
+- Quantidade de clips: ${config.quantity}
+${platformInstructions}
+
+## 🎣 ANÁLISE DE GANCHO (HOOK) - O MAIS IMPORTANTE
+
+### Tipos de Gancho que você DEVE identificar:
+
+1. **PROMESSA OUSADA (promise)**
+   - Estabelece valor imediato: "Como eu [resultado] em [tempo]"
+   - Elimina ambiguidade, apela ao desejo de ganho
+   - Ex: "A única estratégia de SEO que funciona em 2025"
+
+2. **MEDO/NEGATIVIDADE (fear)**  
+   - Aversão à perda é mais forte que desejo de ganho
+   - Ex: "Pare de cometer este erro", "Por que seu marketing está falhando"
+   - Gera retenção para alívio da tensão
+
+3. **CURIOSIDADE (curiosity)**
+   - Começo IN MEDIA RES (no meio da ação)
+   - Estímulo visual/sonoro forte sem contexto
+   - Cria lacuna que o cérebro PRECISA preencher
+
+4. **CONTRARIANO (contrarian)**
+   - Desafia sabedoria convencional do nicho
+   - Ex: "Por que você NÃO deve postar todo dia"
+   - Gera fricção cognitiva = maior retenção inicial
+
+5. **IN MEDIA RES (in_media_res)**
+   - Começa no clímax ou momento de tensão
+   - Sem introdução, sem contexto inicial
+
+## 🎬 ARQUÉTIPOS DE CONTEÚDO VIRAL
+
+1. **STORY (story)** - História com arco narrativo
+   - Situação → Complicação → Resolução
+   - Anedotas pessoais, estudos de caso
+   - Funciona excepcionalmente para prender atenção
+
+2. **HOT TAKE (hot_take)** - Opinião polarizante
+   - Opinião forte, controversa ou contrária ao senso comum
+   - GERA COMENTÁRIOS = alimenta algoritmo
+   
+3. **TUTORIAL (tutorial)** - "Como fazer X"
+   - Alta SALVABILIDADE (saveability)
+   - Impulsiona alcance a longo prazo
+   
+4. **MOMENTO HUMANO (human_moment)** - Vulnerabilidade
+   - Erros, emoção genuína, risadas, falhas
+   - Quebra barreira da "perfeição corporativa"
+   - Alta COMPARTILHABILIDADE (shareability)
+
+5. **REVELAÇÃO (revelation)** - "Aha! Moment"
+   - Momento de clareza súbita
+   - Dados surpreendentes, plot twists
+
+## 📊 CRITÉRIOS DE SELEÇÃO (ORDENADOS POR IMPORTÂNCIA)
+
+1. **Qualidade do Hook** - Os primeiros 3s são um PATTERN INTERRUPT?
+2. **Densidade de Valor** - Cada segundo entrega algo? (sem "gordura narrativa")
+3. **"Aha! Moment"** - Tem clímax claro e satisfatório?
+4. **Loop Potential** - O final conecta gramaticalmente/logicamente ao início?
+5. **Completion Potential** - Há motivo para assistir até o final?
 
 ${config.focusTopics?.length ? `
 ## TÓPICOS PRIORITÁRIOS
@@ -48,20 +107,19 @@ Não selecione trechos focados em: ${config.excludeTopics.join(', ')}
 ## TRANSCRIÇÃO COM TIMESTAMPS
 ${transcriptWithTimestamps}
 
-## FORMATO DE RESPOSTA
-Retorne APENAS um JSON válido (sem markdown, sem código, apenas o JSON puro):
+## FORMATO DE RESPOSTA (JSON PURO, SEM MARKDOWN)
 {
-  "episodeSummary": "Resumo executivo do episódio em 3-4 frases, destacando os principais pontos discutidos",
+  "episodeSummary": "Resumo executivo do episódio em 3-4 frases",
   "keyTopics": ["tópico1", "tópico2", "tópico3"],
   "highlights": [
     {
-      "title": "Título curto e atraente (máximo 60 caracteres)",
+      "title": "Título curto e magnético (máx 60 chars)",
       "suggestedTitles": [
-        "Alternativa otimizada para TikTok/Reels",
-        "Alternativa mais descritiva para YouTube",
-        "Alternativa com pergunta para engajamento"
+        "Versão TikTok/Reels - mais provocativa",
+        "Versão YouTube - mais descritiva", 
+        "Versão com pergunta para engajamento"
       ],
-      "summary": "Resumo em 2-3 frases do que é discutido",
+      "summary": "Resumo em 2-3 frases",
       "startTime": 123.5,
       "endTime": 234.8,
       "relevanceScore": 95,
@@ -70,30 +128,78 @@ Retorne APENAS um JSON válido (sem markdown, sem código, apenas o JSON puro):
         "hasHook": true,
         "hasStorytelling": true,
         "hasSurprise": false,
-        "emotionalIntensity": 8
+        "emotionalIntensity": 8,
+        "hookType": "promise",
+        "contentArchetype": "story",
+        "loopPotential": false,
+        "saveability": 7,
+        "shareability": 9,
+        "completionPotential": 8
       },
+      "hookAnalysis": "Análise específica de por que os primeiros 3 segundos funcionam como pattern interrupt",
+      "openingLine": "Primeira frase exata do corte",
       "quotableLines": [
-        "Frase mais marcante e compartilhável deste trecho",
+        "Frase mais marcante e compartilhável",
         "Segunda frase impactante (se houver)"
       ],
-      "tags": ["tag1", "tag2", "tag3"],
-      "reasoning": "Explicação de por que este trecho tem potencial viral"
+      "tags": ["tag1", "tag2"],
+      "reasoning": "Por que este trecho tem potencial viral (mencione o tipo de hook e arquétipo)"
     }
   ]
 }
 
 ## CAMPOS OBRIGATÓRIOS
 - emotionTone: "excited" | "humorous" | "dramatic" | "informative" | "controversial" | "inspirational"
-- viralFactors.emotionalIntensity: número de 1-10
-- quotableLines: 1-3 frases que funcionariam bem isoladas em posts de texto
-- suggestedTitles: 3 variações de título otimizadas para diferentes contextos
+- viralFactors.hookType: "promise" | "fear" | "curiosity" | "contrarian" | "in_media_res"
+- viralFactors.contentArchetype: "story" | "hot_take" | "tutorial" | "human_moment" | "revelation"
+- viralFactors.saveability: 1-10 (quão útil/educacional é - gera SAVES)
+- viralFactors.shareability: 1-10 (quão emocional/engraçado é - gera SHARES)
+- viralFactors.completionPotential: 1-10 (probabilidade de assistir até o final)
+- viralFactors.loopPotential: boolean (final conecta ao início?)
+- hookAnalysis: análise dos primeiros 3 segundos
+- openingLine: primeira frase exata do corte
 
-IMPORTANTE:
-- Os timestamps devem corresponder EXATAMENTE aos da transcrição
-- Garanta que (endTime - startTime) esteja entre ${config.minDuration} e ${config.maxDuration} segundos
+## REGRAS FINAIS
+- Timestamps EXATOS da transcrição
+- (endTime - startTime) entre ${config.minDuration} e ${config.maxDuration} segundos
 - Ordene por relevanceScore (maior primeiro)
 - Evite sobreposição entre highlights
-- Retorne APENAS o JSON, sem nenhum texto adicional`;
+- Retorne APENAS JSON válido, sem texto adicional`;
+}
+
+function getPlatformInstructions(platform?: string): string {
+  switch (platform) {
+    case 'instagram_reels':
+      return `
+## 📸 OTIMIZADO PARA: INSTAGRAM REELS
+- Algoritmo prioriza: Watch Time > Completion Rate > Saves > Shares
+- Foque em clips que gerem SAVES (educacionais) ou SHARES (emocionais)
+- Zonas de segurança: deixe espaço para UI do app (250px topo, 350px base)
+- Loop perfeito é MUITO valorizado (taxa de replay)`;
+    case 'tiktok':
+      return `
+## 🎵 OTIMIZADO PARA: TIKTOK  
+- Velocidade e dynamismo são essenciais
+- Hooks ainda mais curtos (1-2 segundos)
+- Conteúdo controverso/polarizante performa muito bem
+- Loops curtos (7-15s) com replay alto`;
+    case 'youtube_shorts':
+      return `
+## 📺 OTIMIZADO PARA: YOUTUBE SHORTS
+- Máximo 59 segundos (CRÍTICO)
+- Setup rápido + Payoff claro
+- Pode ser mais informativo que outras plataformas
+- CTAs funcionam bem no final`;
+    case 'podcast_trailer':
+      return `
+## 🎙️ OTIMIZADO PARA: TRAILER DE PODCAST
+- Pode ser mais longo (1-3 min)
+- Foque em highlights que representem o MELHOR do episódio
+- Misture diferentes tons/momentos para variedade
+- Inclua "teaser" que deixe curiosidade para ouvir completo`;
+    default:
+      return '';
+  }
 }
 
 function extractTranscriptForHighlight(
@@ -218,11 +324,14 @@ export async function POST(request: NextRequest) {
           relevanceScore: h.relevanceScore,
           tags: h.tags,
           reasoning: h.reasoning,
-          // Novos campos inteligentes
+          // Campos inteligentes de viralidade
           emotionTone: h.emotionTone,
           viralFactors: h.viralFactors,
           suggestedTitles: h.suggestedTitles,
           quotableLines: h.quotableLines,
+          // Novos campos de análise de gancho
+          hookAnalysis: h.hookAnalysis,
+          openingLine: h.openingLine,
         };
       })
       .filter((h: GeneratedHighlight) => {

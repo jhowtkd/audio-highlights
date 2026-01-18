@@ -31,11 +31,24 @@ export type EmotionTone = 'excited' | 'humorous' | 'dramatic' | 'informative' | 
 
 export type PlatformTemplate = 'tiktok' | 'youtube_shorts' | 'instagram_reels' | 'podcast_trailer' | 'custom';
 
+// Tipos de gancho baseados em neurociência da atenção (pesquisa 2025)
+export type HookType = 'promise' | 'fear' | 'curiosity' | 'contrarian' | 'in_media_res';
+
+// Arquétipos de conteúdo viral
+export type ContentArchetype = 'story' | 'hot_take' | 'tutorial' | 'human_moment' | 'revelation';
+
 export interface ViralFactors {
   hasHook: boolean;
   hasStorytelling: boolean;
   hasSurprise: boolean;
   emotionalIntensity: number; // 1-10
+  // Novos campos baseados na pesquisa de viralidade
+  hookType: HookType;
+  contentArchetype: ContentArchetype;
+  loopPotential: boolean;
+  saveability: number; // 1-10
+  shareability: number; // 1-10
+  completionPotential: number; // 1-10
 }
 
 export interface EpisodeAnalysis {
@@ -65,11 +78,14 @@ export interface GeneratedHighlight {
   relevanceScore: number;
   tags: string[];
   reasoning: string;
-  // Novos campos inteligentes
+  // Campos inteligentes de viralidade
   emotionTone?: EmotionTone;
   viralFactors?: ViralFactors;
   suggestedTitles?: string[];
   quotableLines?: string[];
+  // Novos campos de análise de gancho
+  hookAnalysis?: string;
+  openingLine?: string;
 }
 
 export type ProjectStatus =
