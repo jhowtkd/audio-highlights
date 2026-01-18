@@ -9,13 +9,20 @@ export const MAX_AUDIO_DURATION = 4 * 60 * 60; // 4 hours in seconds
 // Accepted audio file types
 export const ACCEPTED_AUDIO_TYPES = {
   'audio/mpeg': ['.mp3'],
+  'audio/mp3': ['.mp3'],
   'audio/wav': ['.wav'],
+  'audio/wave': ['.wav'],
+  'audio/x-wav': ['.wav'],
   'audio/x-m4a': ['.m4a'],
   'audio/mp4': ['.m4a'],
+  'audio/m4a': ['.m4a'],
+  'audio/aac': ['.m4a', '.aac'],
+  'audio/x-aac': ['.m4a', '.aac'],
   'audio/ogg': ['.ogg', '.opus'],
   'audio/opus': ['.opus'],
   'audio/webm': ['.webm'],
   'audio/flac': ['.flac'],
+  'audio/x-flac': ['.flac'],
 } as const;
 
 // API configuration

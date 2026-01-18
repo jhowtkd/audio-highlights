@@ -31,18 +31,32 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
   const [error, setError] = useState<string | null>(null);
 
   const getAudioDuration = (file: File): Promise<number> => {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const audio = new Audio();
       audio.preload = 'metadata';
 
+      // Timeout para arquivos que o navegador não consegue ler
+      const timeout = setTimeout(() => {
+        URL.revokeObjectURL(audio.src);
+        // Estimar duração baseado no tamanho (~128kbps para áudio comprimido)
+        const estimatedDuration = (file.size * 8) / (128 * 1000);
+        console.warn(`Não foi possível ler metadados de ${file.name}, estimando duração: ${estimatedDuration}s`);
+        resolve(Math.min(estimatedDuration, MAX_AUDIO_DURATION));
+      }, 5000);
+
       audio.onloadedmetadata = () => {
+        clearTimeout(timeout);
         URL.revokeObjectURL(audio.src);
         resolve(audio.duration);
       };
 
       audio.onerror = () => {
+        clearTimeout(timeout);
         URL.revokeObjectURL(audio.src);
-        reject(new Error('Não foi possível ler o arquivo de áudio'));
+        // Fallback: estimar duração baseado no tamanho do arquivo
+        const estimatedDuration = (file.size * 8) / (128 * 1000);
+        console.warn(`Erro ao ler ${file.name}, estimando duração: ${estimatedDuration}s`);
+        resolve(Math.min(estimatedDuration, MAX_AUDIO_DURATION));
       };
 
       audio.src = URL.createObjectURL(file);

@@ -82,6 +82,60 @@ export function useFFmpeg() {
     }, [load]);
 
     /**
+     * Convert any audio file to MP3 format
+     * Useful for M4A/AAC files that OpenAI Whisper may not support directly
+     */
+    const convertToMp3 = useCallback(async (audioFile: File): Promise<File> => {
+        // If already MP3, return as-is
+        if (audioFile.type === 'audio/mpeg' || audioFile.name.toLowerCase().endsWith('.mp3')) {
+            return audioFile;
+        }
+
+        await load();
+        const ffmpeg = ffmpegRef.current;
+        if (!ffmpeg) throw new Error('FFmpeg não inicializado');
+
+        setIsProcessing(true);
+        setProgress(0);
+        setMessage('Convertendo áudio para MP3...');
+
+        try {
+            const ext = audioFile.name.split('.').pop() || 'audio';
+            const inputName = `input.${ext}`;
+
+            await ffmpeg.writeFile(inputName, await fetchFile(audioFile));
+            await ffmpeg.exec([
+                '-i', inputName,
+                '-acodec', 'libmp3lame',
+                '-q:a', '2', // Higher quality for conversion
+                '-ar', '44100', // Standard sample rate
+                'output.mp3'
+            ]);
+            const data = await ffmpeg.readFile('output.mp3');
+
+            await ffmpeg.deleteFile(inputName);
+            await ffmpeg.deleteFile('output.mp3');
+
+            const blob = new Blob([data as unknown as BlobPart], { type: 'audio/mpeg' });
+            const mp3File = new File(
+                [blob],
+                `${audioFile.name.replace(/\.[^/.]+$/, "")}.mp3`,
+                { type: 'audio/mpeg' }
+            );
+
+            console.log(`Convertido ${audioFile.name} (${audioFile.type}) -> ${mp3File.name}`);
+            return mp3File;
+        } catch (err) {
+            console.error('Erro na conversão para MP3:', err);
+            throw new Error('Falha na conversão de áudio para MP3');
+        } finally {
+            setIsProcessing(false);
+            setProgress(0);
+            setMessage('');
+        }
+    }, [load]);
+
+    /**
      * Cut video clip
      */
     const cutVideo = useCallback(async (videoFile: File, start: number, end: number): Promise<Blob> => {
@@ -144,9 +198,22 @@ export function useFFmpeg() {
         setMessage(`Dividindo parte ${index + 1}...`);
 
         try {
-            // Determine input/output extensions
-            const ext = audioFile.name.split('.').pop() || 'mp3';
-            const inputName = `input.${ext}`;
+            // Determine input extension based on MIME type, not filename
+            // This is important when a file was converted (e.g., M4A->MP3) but keeps original name
+            let ext = 'mp3';
+            if (audioFile.type === 'audio/mpeg' || audioFile.type === 'audio/mp3') {
+                ext = 'mp3';
+            } else if (audioFile.type.includes('m4a') || audioFile.type === 'audio/mp4' || audioFile.type === 'audio/aac') {
+                ext = 'm4a';
+            } else if (audioFile.type.includes('wav')) {
+                ext = 'wav';
+            } else if (audioFile.type.includes('ogg')) {
+                ext = 'ogg';
+            } else if (audioFile.type.includes('flac')) {
+                ext = 'flac';
+            }
+
+            const inputName = `input_${index}.${ext}`;
             const outputName = `output_${index}.mp3`; // Always output as MP3 for consistency
 
             await ffmpeg.writeFile(inputName, await fetchFile(audioFile));
@@ -166,7 +233,7 @@ export function useFFmpeg() {
             await ffmpeg.deleteFile(outputName);
 
             const blob = new Blob([data as unknown as BlobPart], { type: 'audio/mpeg' });
-            return new File([blob], `${audioFile.name}_part${index}.mp3`, { type: 'audio/mpeg' });
+            return new File([blob], `chunk_${index}.mp3`, { type: 'audio/mpeg' });
         } catch (err) {
             console.error(err);
             throw new Error(`Falha ao dividir áudio (parte ${index + 1})`);
@@ -176,5 +243,5 @@ export function useFFmpeg() {
         }
     }, [load]);
 
-    return { isLoaded, isProcessing, progress, message, load, extractAudio, cutVideo, splitAudio };
+    return { isLoaded, isProcessing, progress, message, load, extractAudio, convertToMp3, cutVideo, splitAudio };
 }
