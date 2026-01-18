@@ -5,6 +5,7 @@ import type { TranscriptionSegment, Transcription } from '@/types';
 import type { WhisperResponse } from '@/types/api';
 import { WHISPER_MODEL, ERROR_MESSAGES } from '@/lib/constants';
 import { createErrorResponse, requireEnvVar, AppError } from '@/lib/errors';
+import { needsConversion, convertToMp3 } from '@/lib/audio-converter';
 
 export async function POST(request: NextRequest) {
   try {
@@ -29,13 +30,13 @@ export async function POST(request: NextRequest) {
       'audio/mpeg', 'audio/mp3',
       'audio/wav', 'audio/wave', 'audio/x-wav',
       'audio/x-m4a', 'audio/mp4', 'audio/m4a', 'audio/aac', 'audio/x-aac',
-      'audio/ogg', 'audio/opus', 
-      'audio/webm', 
+      'audio/ogg', 'audio/opus',
+      'audio/webm',
       'audio/flac', 'audio/x-flac'
     ];
     const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.opus', '.webm', '.flac', '.aac'];
     const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
-    
+
     const isValidType = validTypes.includes(file.type) || validExtensions.includes(fileExtension);
     if (!isValidType) {
       throw new AppError(
@@ -51,12 +52,31 @@ export async function POST(request: NextRequest) {
       organization: process.env.OPENAI_ORG_ID,
     });
 
-    // OpenAI API fix: .opus files are supported but must be sent with .ogg extension/MIME
+    // Convert file if needed (M4A, AAC, etc.)
     let fileToSend = file;
-    if (file.type === 'audio/opus' || file.name.toLowerCase().endsWith('.opus')) {
-      const newName = file.name.replace(/\.opus$/i, '.ogg');
-      fileToSend = new File([file], newName, { type: 'audio/ogg' });
+
+    if (needsConversion(file.name)) {
+      console.log(`[Transcription API] Converting ${file.name} to MP3...`);
+      try {
+        fileToSend = await convertToMp3(file);
+        console.log(`[Transcription API] Conversion successful: ${fileToSend.name}`);
+      } catch (conversionError) {
+        console.error('[Transcription API] Conversion failed:', conversionError);
+        throw new AppError(
+          'Failed to convert audio file',
+          500,
+          'Não foi possível converter o arquivo de áudio. Tente enviar em formato MP3.'
+        );
+      }
     }
+
+    // OpenAI API fix: .opus files are supported but must be sent with .ogg extension/MIME
+    if (fileToSend.type === 'audio/opus' || fileToSend.name.toLowerCase().endsWith('.opus')) {
+      const newName = fileToSend.name.replace(/\.opus$/i, '.ogg');
+      fileToSend = new File([fileToSend], newName, { type: 'audio/ogg' });
+    }
+
+    console.log(`[Transcription API] Sending to Whisper: ${fileToSend.name} (${fileToSend.type})`);
 
     // Call OpenAI Whisper API - auto-detects language
     const transcriptionResponse = await openai.audio.transcriptions.create({

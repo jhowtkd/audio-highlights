@@ -50,6 +50,12 @@ export interface ChatCompletionResponse {
   };
 }
 
+// Tipos de gancho baseados em neurociência da atenção (pesquisa 2025)
+export type HookType = 'promise' | 'fear' | 'curiosity' | 'contrarian' | 'in_media_res';
+
+// Arquétipos de conteúdo viral
+export type ContentArchetype = 'story' | 'hot_take' | 'tutorial' | 'human_moment' | 'revelation';
+
 // GPT-generated highlight format
 export interface GPTHighlight {
   title: string;
@@ -59,16 +65,26 @@ export interface GPTHighlight {
   relevanceScore: number;
   tags: string[];
   reasoning: string;
-  // Novos campos inteligentes
+  // Campos inteligentes de viralidade
   emotionTone?: 'excited' | 'humorous' | 'dramatic' | 'informative' | 'controversial' | 'inspirational';
   viralFactors?: {
     hasHook: boolean;
     hasStorytelling: boolean;
     hasSurprise: boolean;
     emotionalIntensity: number;
+    // Novos campos baseados na pesquisa
+    hookType: HookType;
+    contentArchetype: ContentArchetype;
+    loopPotential: boolean;
+    saveability: number; // 1-10: quão "salvável" é o conteúdo (educacional, tático)
+    shareability: number; // 1-10: quão "compartilhável" é (emocional, engraçado)
+    completionPotential: number; // 1-10: probabilidade de assistir até o final
   };
   suggestedTitles?: string[];
   quotableLines?: string[];
+  // Novos campos de análise de gancho
+  hookAnalysis?: string; // Análise específica dos primeiros 3 segundos
+  openingLine?: string; // Primeira frase do corte (para avaliar pattern interrupt)
 }
 
 export interface GPTHighlightsResponse {

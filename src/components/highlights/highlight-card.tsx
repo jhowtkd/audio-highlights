@@ -7,7 +7,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatTime, formatDuration } from '@/lib/format-utils';
 import { cn } from '@/lib/utils';
-import type { GeneratedHighlight, EmotionTone } from '@/types';
+import type { GeneratedHighlight, EmotionTone, HookType, ContentArchetype } from '@/types';
 
 interface HighlightCardProps {
   highlight: GeneratedHighlight;
@@ -27,6 +27,24 @@ const EMOTION_CONFIG: Record<EmotionTone, { icon: string; label: string; color: 
   informative: { icon: '💡', label: 'Informativo', color: 'bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400' },
   controversial: { icon: '⚡', label: 'Polêmico', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
   inspirational: { icon: '✨', label: 'Inspirador', color: 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400' },
+};
+
+// Configuração de tipos de Hook (pesquisa viralidade 2025)
+const HOOK_TYPE_CONFIG: Record<HookType, { icon: string; label: string; color: string }> = {
+  promise: { icon: '🎯', label: 'Promessa', color: 'bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400' },
+  fear: { icon: '😰', label: 'Medo/Alerta', color: 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400' },
+  curiosity: { icon: '🤔', label: 'Curiosidade', color: 'bg-cyan-100 text-cyan-700 dark:bg-cyan-900/30 dark:text-cyan-400' },
+  contrarian: { icon: '🔄', label: 'Contrariano', color: 'bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-400' },
+  in_media_res: { icon: '🎬', label: 'In Media Res', color: 'bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400' },
+};
+
+// Configuração de arquétipos de conteúdo
+const ARCHETYPE_CONFIG: Record<ContentArchetype, { icon: string; label: string }> = {
+  story: { icon: '📖', label: 'História' },
+  hot_take: { icon: '🔥', label: 'Hot Take' },
+  tutorial: { icon: '📚', label: 'Tutorial' },
+  human_moment: { icon: '💫', label: 'Momento Humano' },
+  revelation: { icon: '💡', label: 'Revelação' },
 };
 
 export function HighlightCard({
@@ -91,33 +109,63 @@ export function HighlightCard({
             </div>
           </div>
 
-          {/* Viral Factors */}
+          {/* Viral Factors - Expandido */}
           {highlight.viralFactors && (
-            <div className="flex items-center gap-2 mt-3 flex-wrap">
-              {highlight.viralFactors.hasHook && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400">
-                  🎣 Hook
-                </span>
-              )}
-              {highlight.viralFactors.hasStorytelling && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400">
-                  📖 Story
-                </span>
-              )}
-              {highlight.viralFactors.hasSurprise && (
-                <span className="text-xs px-2 py-0.5 rounded-full bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-400">
-                  😮 Surprise
-                </span>
-              )}
-              <span className="text-xs text-slate-500">
-                Intensidade: {highlight.viralFactors.emotionalIntensity}/10
-              </span>
+            <div className="mt-3 space-y-2">
+              {/* Linha 1: Hook Type + Archetype */}
+              <div className="flex items-center gap-2 flex-wrap">
+                {highlight.viralFactors.hookType && HOOK_TYPE_CONFIG[highlight.viralFactors.hookType] && (
+                  <Badge className={cn('text-xs font-medium', HOOK_TYPE_CONFIG[highlight.viralFactors.hookType].color)}>
+                    {HOOK_TYPE_CONFIG[highlight.viralFactors.hookType].icon} {HOOK_TYPE_CONFIG[highlight.viralFactors.hookType].label}
+                  </Badge>
+                )}
+                {highlight.viralFactors.contentArchetype && ARCHETYPE_CONFIG[highlight.viralFactors.contentArchetype] && (
+                  <Badge variant="outline" className="text-xs font-medium">
+                    {ARCHETYPE_CONFIG[highlight.viralFactors.contentArchetype].icon} {ARCHETYPE_CONFIG[highlight.viralFactors.contentArchetype].label}
+                  </Badge>
+                )}
+                {highlight.viralFactors.loopPotential && (
+                  <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-400">
+                    🔄 Loop
+                  </span>
+                )}
+              </div>
+
+              {/* Linha 2: Métricas visuais */}
+              <div className="flex items-center gap-4 text-xs text-slate-500">
+                <div className="flex items-center gap-1" title="Salvabilidade: quão útil/educacional">
+                  💾 <span className="font-medium">{highlight.viralFactors.saveability || 0}/10</span>
+                </div>
+                <div className="flex items-center gap-1" title="Compartilhabilidade: quão emocional">
+                  🔗 <span className="font-medium">{highlight.viralFactors.shareability || 0}/10</span>
+                </div>
+                <div className="flex items-center gap-1" title="Chance de assistir até o final">
+                  ▶️ <span className="font-medium">{highlight.viralFactors.completionPotential || highlight.viralFactors.emotionalIntensity}/10</span>
+                </div>
+              </div>
             </div>
           )}
         </div>
 
         {/* Content */}
         <div className="p-4 space-y-4">
+          {/* Hook Analysis */}
+          {highlight.hookAnalysis && (
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 dark:from-green-950/20 dark:to-emerald-950/20 rounded-lg p-3 border border-green-200/50 dark:border-green-800/50">
+              <div className="flex items-center gap-1 mb-1 text-xs font-medium text-green-700 dark:text-green-400">
+                🎣 Análise do Hook (primeiros 3 segundos)
+              </div>
+              <p className="text-sm text-slate-700 dark:text-slate-300">
+                {highlight.hookAnalysis}
+              </p>
+              {highlight.openingLine && (
+                <p className="mt-2 text-sm italic text-slate-600 dark:text-slate-400">
+                  &ldquo;{highlight.openingLine}&rdquo;
+                </p>
+              )}
+            </div>
+          )}
+
           {/* Summary */}
           <p className="text-sm text-slate-600 dark:text-slate-400">
             {highlight.summary}
