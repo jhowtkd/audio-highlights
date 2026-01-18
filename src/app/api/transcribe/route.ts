@@ -24,11 +24,22 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Validate file type
-    const validTypes = ['audio/mpeg', 'audio/wav', 'audio/x-m4a', 'audio/mp4', 'audio/ogg', 'audio/opus', 'audio/webm', 'audio/flac'];
-    if (!validTypes.includes(file.type)) {
+    // Validate file type - support multiple MIME types and fallback to extension check
+    const validTypes = [
+      'audio/mpeg', 'audio/mp3',
+      'audio/wav', 'audio/wave', 'audio/x-wav',
+      'audio/x-m4a', 'audio/mp4', 'audio/m4a', 'audio/aac', 'audio/x-aac',
+      'audio/ogg', 'audio/opus', 
+      'audio/webm', 
+      'audio/flac', 'audio/x-flac'
+    ];
+    const validExtensions = ['.mp3', '.wav', '.m4a', '.ogg', '.opus', '.webm', '.flac', '.aac'];
+    const fileExtension = file.name.toLowerCase().substring(file.name.lastIndexOf('.'));
+    
+    const isValidType = validTypes.includes(file.type) || validExtensions.includes(fileExtension);
+    if (!isValidType) {
       throw new AppError(
-        `Invalid file type: ${file.type}`,
+        `Invalid file type: ${file.type} (extension: ${fileExtension})`,
         400,
         ERROR_MESSAGES.INVALID_AUDIO_FILE
       );

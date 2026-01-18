@@ -48,33 +48,39 @@ export async function processLargeAudioWithFFmpeg(
         const splitProgress = Math.round((i / totalChunks) * 30);
         onProgress(splitProgress, `Preparando parte ${i + 1} de ${totalChunks}...`);
 
-        // Use FFmpeg to extract this chunk
-        const chunkFile = await ffmpegSplitFn(file, startTime, chunkDuration, i);
+        try {
+            // Use FFmpeg to extract this chunk
+            const chunkFile = await ffmpegSplitFn(file, startTime, chunkDuration, i);
 
-        // Transcribe progress: 30-90%
-        const transcribeBaseProgress = 30 + Math.round((i / totalChunks) * 60);
-        onProgress(transcribeBaseProgress, `Transcrevendo parte ${i + 1} de ${totalChunks}...`);
+            // Transcribe progress: 30-90%
+            const transcribeBaseProgress = 30 + Math.round((i / totalChunks) * 60);
+            onProgress(transcribeBaseProgress, `Transcrevendo parte ${i + 1} de ${totalChunks}...`);
 
-        // Transcribe this chunk
-        const result = await transcribeChunk(chunkFile, projectId);
+            // Transcribe this chunk
+            const result = await transcribeChunk(chunkFile, projectId);
 
-        // Adjust timestamps and merge
-        const adjustedSegments = result.segments.map(s => ({
-            ...s,
-            start: s.start + startTime,
-            end: s.end + startTime,
-            words: s.words?.map(w => ({
-                ...w,
-                start: w.start + startTime,
-                end: w.end + startTime
-            }))
-        }));
+            // Adjust timestamps and merge
+            const adjustedSegments = result.segments.map(s => ({
+                ...s,
+                start: s.start + startTime,
+                end: s.end + startTime,
+                words: s.words?.map(w => ({
+                    ...w,
+                    start: w.start + startTime,
+                    end: w.end + startTime
+                }))
+            }));
 
-        allSegments = [...allSegments, ...adjustedSegments];
-        fullText += (fullText ? ' ' : '') + result.fullText;
+            allSegments = [...allSegments, ...adjustedSegments];
+            fullText += (fullText ? ' ' : '') + result.fullText;
 
-        if (i === 0 && result.language) {
-            detectedLanguage = result.language;
+            if (i === 0 && result.language) {
+                detectedLanguage = result.language;
+            }
+        } catch (error) {
+            console.error(`Erro no chunk ${i + 1}:`, error);
+            // Continue with next chunk instead of aborting
+            fullText += (fullText ? ' ' : '') + `[Parte ${i + 1} não transcrita]`;
         }
     }
 
@@ -117,21 +123,40 @@ async function transcribeSingleFile(
     return data.transcription;
 }
 
-async function transcribeChunk(file: File, projectId: string): Promise<Transcription> {
-    const formData = new FormData();
-    formData.append('file', file);
-    formData.append('projectId', projectId);
+async function transcribeChunk(file: File, projectId: string, retries = 3): Promise<Transcription> {
+    let lastError: Error | null = null;
 
-    const response = await fetch('/api/transcribe', {
-        method: 'POST',
-        body: formData,
-    });
+    for (let attempt = 1; attempt <= retries; attempt++) {
+        try {
+            console.log(`Transcrevendo chunk ${file.name}, tentativa ${attempt}/${retries}`);
 
-    if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erro na transcrição do chunk');
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('projectId', projectId);
+
+            const response = await fetch('/api/transcribe', {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Erro na transcrição do chunk');
+            }
+
+            const data = await response.json();
+            console.log(`Chunk ${file.name} transcrito com sucesso`);
+            return data.transcription;
+        } catch (error) {
+            lastError = error instanceof Error ? error : new Error(String(error));
+            console.warn(`Tentativa ${attempt}/${retries} falhou para ${file.name}:`, lastError.message);
+
+            if (attempt < retries) {
+                // Wait before retry with exponential backoff
+                await new Promise(resolve => setTimeout(resolve, 1000 * attempt));
+            }
+        }
     }
 
-    const data = await response.json();
-    return data.transcription;
+    throw lastError || new Error('Erro desconhecido na transcrição do chunk');
 }

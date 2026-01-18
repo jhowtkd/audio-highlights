@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { TaskQueueProvider } from "@/contexts/task-context";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -70,7 +71,9 @@ export default function RootLayout({
     <html lang="pt-BR" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} font-sans antialiased`}>
         <ThemeProvider>
-          {children}
+          <TaskQueueProvider>
+            {children}
+          </TaskQueueProvider>
         </ThemeProvider>
       </body>
     </html>

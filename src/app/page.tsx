@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useCallback, useEffect, useRef } from 'react';
-import { Mic, Sparkles, FileText, AlertCircle, Timer, Film, X } from 'lucide-react';
+import Link from 'next/link';
+import { Mic, Sparkles, FileText, AlertCircle, Timer, Film, X, ListTodo } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster, toast } from 'sonner';
 import { Dropzone } from '@/components/upload/dropzone';
@@ -16,6 +17,7 @@ import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { formatDuration } from '@/lib/format-utils';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
+import { useTaskQueue } from '@/hooks/use-task-queue';
 import { processLargeAudioWithFFmpeg } from '@/lib/audio-chunking';
 import { downloadFile } from '@/lib/export';
 import type { Transcription, GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
@@ -50,7 +52,7 @@ export default function Home() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // FFmpeg hook
-  const { cutVideo, splitAudio, isProcessing: isFFmpegProcessing, progress: ffmpegProgress, message: ffmpegMessage } = useFFmpeg();
+  const { cutVideo, splitAudio, convertToMp3, isProcessing: isFFmpegProcessing, progress: ffmpegProgress, message: ffmpegMessage } = useFFmpeg();
 
   // Video state
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -93,7 +95,15 @@ export default function Home() {
     }
   }, [step]);
 
-  const handleFileAccepted = useCallback(async (file: File, duration: number) => {
+  // Task Queue hook
+  const { addTaskAndNavigate } = useTaskQueue();
+
+  const handleFileAccepted = useCallback((file: File, duration: number) => {
+    // Adiciona à fila de tasks e redireciona para a página de tasks
+    addTaskAndNavigate(file, duration);
+  }, [addTaskAndNavigate]);
+
+  const handleFileAcceptedDirect = useCallback(async (file: File, duration: number) => {
     // Reset states
     setAudioFile(null);
     setErrorMessage(null);
@@ -113,6 +123,16 @@ export default function Home() {
     setStatusMessage('Processando áudio...');
 
     try {
+      // Convert to MP3 if needed (M4A, AAC, etc. are not always supported by Whisper)
+      let audioToTranscribe = file;
+      const needsConversion = !file.type.includes('mpeg') && !file.name.toLowerCase().endsWith('.mp3');
+
+      if (needsConversion) {
+        setStatusMessage('Convertendo áudio para formato compatível...');
+        audioToTranscribe = await convertToMp3(file);
+        setStatusMessage('Conversão concluída!');
+      }
+
       let transcriptionResult: Transcription;
 
       // Use FFmpeg chunking for long audio (>20 minutes)
@@ -121,7 +141,7 @@ export default function Home() {
       if (duration > CHUNK_THRESHOLD_SECONDS) {
         // Long audio: use FFmpeg to split and process in chunks
         transcriptionResult = await processLargeAudioWithFFmpeg(
-          file,
+          audioToTranscribe,
           crypto.randomUUID(),
           duration,
           splitAudio,
@@ -133,7 +153,7 @@ export default function Home() {
       } else {
         // Short audio: direct API call
         const formData = new FormData();
-        formData.append('file', file);
+        formData.append('file', audioToTranscribe);
         formData.append('projectId', crypto.randomUUID());
 
         setStatusMessage('Transcrevendo áudio...');
@@ -163,7 +183,7 @@ export default function Home() {
       toast.error(message);
       setStep('error');
     }
-  }, []);
+  }, [convertToMp3, splitAudio]);
 
   const handleDownloadVideo = useCallback(async (highlight: GeneratedHighlight) => {
     if (!videoFile) return;
@@ -307,7 +327,14 @@ export default function Home() {
               </span>
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-3">
+              <Link
+                href="/tasks"
+                className="flex items-center gap-1.5 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+              >
+                <ListTodo className="h-4 w-4" />
+                Tasks
+              </Link>
               <ThemeToggle />
               {step !== 'upload' && (
                 <button
