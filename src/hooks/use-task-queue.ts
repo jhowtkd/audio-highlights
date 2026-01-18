@@ -6,6 +6,7 @@ import { toast } from 'sonner';
 import { useTaskQueueContext } from '@/contexts/task-context';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
 import { processLargeAudioWithFFmpeg } from '@/lib/audio-chunking';
+import { getFileHash, getCachedTranscription, setCachedTranscription } from '@/lib/transcription-cache';
 import type { TaskProgress, TaskResult } from '@/types/task-types';
 import type { Transcription, GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
 
@@ -57,17 +58,30 @@ export function useTaskQueue() {
                 audioToTranscribe = await convertToMp3(file);
             }
 
-            // Etapa 2: Transcrição
+            // Etapa 2: Verificar cache antes de transcrever
             updateProgress(taskId, {
                 stage: 'transcribing',
                 percent: 10,
-                message: 'Iniciando transcrição...',
+                message: 'Verificando cache...',
             });
+
+            // Check cache first
+            const cacheKey = await getFileHash(audioToTranscribe);
+            const cachedTranscription = getCachedTranscription(cacheKey);
 
             let transcription: Transcription;
             const duration = task.audioDuration || 0;
 
-            if (duration > CHUNK_THRESHOLD_SECONDS) {
+            if (cachedTranscription) {
+                // Cache hit - use cached transcription
+                transcription = cachedTranscription as Transcription;
+                updateProgress(taskId, {
+                    stage: 'transcribing',
+                    percent: 70,
+                    message: 'Usando transcrição do cache!',
+                });
+                console.log('[Cache] Using cached transcription for:', file.name);
+            } else if (duration > CHUNK_THRESHOLD_SECONDS) {
                 // Áudio longo - processar em chunks
                 transcription = await processLargeAudioWithFFmpeg(
                     audioToTranscribe,
@@ -106,6 +120,11 @@ export function useTaskQueue() {
 
                 const data = await response.json();
                 transcription = data.transcription;
+            }
+
+            // Save to cache for future use (only if not from cache)
+            if (!cachedTranscription) {
+                setCachedTranscription(cacheKey, transcription, file.name, file.size);
             }
 
             updateProgress(taskId, {

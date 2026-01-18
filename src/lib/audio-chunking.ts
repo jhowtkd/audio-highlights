@@ -2,8 +2,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { Transcription, TranscriptionSegment } from '@/types';
-
-const CHUNK_DURATION_SECONDS = 20 * 60; // 20 minutes per chunk
+import { CHUNK_DURATION_SECONDS, PARALLEL_TRANSCRIPTION_LIMIT } from '@/lib/constants';
 
 interface ChunkingProgress {
     stage: 'splitting' | 'transcribing' | 'merging';
@@ -12,10 +11,18 @@ interface ChunkingProgress {
     message: string;
 }
 
+interface ChunkResult {
+    index: number;
+    segments: TranscriptionSegment[];
+    fullText: string;
+    language?: string;
+    error?: string;
+}
+
 /**
  * Process a large audio file by:
- * 1. Using FFmpeg to split into time-based chunks (20min each)
- * 2. Transcribing each chunk via API
+ * 1. Using FFmpeg to split into time-based chunks (10min each)
+ * 2. Transcribing chunks in PARALLEL (up to 3 simultaneous)
  * 3. Merging results with adjusted timestamps
  */
 export async function processLargeAudioWithFFmpeg(
@@ -35,58 +42,88 @@ export async function processLargeAudioWithFFmpeg(
         return await transcribeSingleFile(file, projectId, onProgress);
     }
 
-    let allSegments: TranscriptionSegment[] = [];
-    let fullText = '';
-    let detectedLanguage = 'pt';
+    console.log(`[Parallel] Processing ${totalChunks} chunks with up to ${PARALLEL_TRANSCRIPTION_LIMIT} simultaneous...`);
 
-    // Process each chunk
+    // Phase 1: Prepare all chunks (0-20%)
+    onProgress(5, `Preparando ${totalChunks} partes...`);
+
+    const chunkFiles: { file: File; startTime: number; index: number }[] = [];
+
     for (let i = 0; i < totalChunks; i++) {
         const startTime = i * CHUNK_DURATION_SECONDS;
         const chunkDuration = Math.min(CHUNK_DURATION_SECONDS, audioDuration - startTime);
 
-        // Split progress: 0-30%
-        const splitProgress = Math.round((i / totalChunks) * 30);
-        onProgress(splitProgress, `Preparando parte ${i + 1} de ${totalChunks}...`);
+        const progress = Math.round((i / totalChunks) * 20);
+        onProgress(progress, `Preparando parte ${i + 1} de ${totalChunks}...`);
 
         try {
-            // Use FFmpeg to extract this chunk
             const chunkFile = await ffmpegSplitFn(file, startTime, chunkDuration, i);
-
-            // Transcribe progress: 30-90%
-            const transcribeBaseProgress = 30 + Math.round((i / totalChunks) * 60);
-            onProgress(transcribeBaseProgress, `Transcrevendo parte ${i + 1} de ${totalChunks}...`);
-
-            // Transcribe this chunk
-            const result = await transcribeChunk(chunkFile, projectId);
-
-            // Adjust timestamps and merge
-            const adjustedSegments = result.segments.map(s => ({
-                ...s,
-                start: s.start + startTime,
-                end: s.end + startTime,
-                words: s.words?.map(w => ({
-                    ...w,
-                    start: w.start + startTime,
-                    end: w.end + startTime
-                }))
-            }));
-
-            allSegments = [...allSegments, ...adjustedSegments];
-            fullText += (fullText ? ' ' : '') + result.fullText;
-
-            if (i === 0 && result.language) {
-                detectedLanguage = result.language;
-            }
+            chunkFiles.push({ file: chunkFile, startTime, index: i });
         } catch (error) {
-            console.error(`Erro no chunk ${i + 1}:`, error);
-            // Continue with next chunk instead of aborting
-            fullText += (fullText ? ' ' : '') + `[Parte ${i + 1} não transcrita]`;
+            console.error(`Erro ao preparar chunk ${i + 1}:`, error);
         }
     }
 
+    // Phase 2: Transcribe in parallel batches (20-90%)
+    const results: ChunkResult[] = [];
+    let completedChunks = 0;
+
+    // Process in batches of PARALLEL_TRANSCRIPTION_LIMIT
+    for (let batchStart = 0; batchStart < chunkFiles.length; batchStart += PARALLEL_TRANSCRIPTION_LIMIT) {
+        const batch = chunkFiles.slice(batchStart, batchStart + PARALLEL_TRANSCRIPTION_LIMIT);
+
+        const batchPromises = batch.map(async ({ file: chunkFile, startTime, index }) => {
+            try {
+                const result = await transcribeChunk(chunkFile, projectId);
+
+                // Adjust timestamps
+                const adjustedSegments = result.segments.map(s => ({
+                    ...s,
+                    start: s.start + startTime,
+                    end: s.end + startTime,
+                    words: s.words?.map(w => ({
+                        ...w,
+                        start: w.start + startTime,
+                        end: w.end + startTime
+                    }))
+                }));
+
+                completedChunks++;
+                const progress = 20 + Math.round((completedChunks / totalChunks) * 70);
+                onProgress(progress, `Transcrevendo... (${completedChunks}/${totalChunks})`);
+
+                return {
+                    index,
+                    segments: adjustedSegments,
+                    fullText: result.fullText,
+                    language: result.language
+                } as ChunkResult;
+            } catch (error) {
+                console.error(`Erro no chunk ${index + 1}:`, error);
+                completedChunks++;
+                return {
+                    index,
+                    segments: [],
+                    fullText: `[Parte ${index + 1} não transcrita]`,
+                    error: String(error)
+                } as ChunkResult;
+            }
+        });
+
+        const batchResults = await Promise.all(batchPromises);
+        results.push(...batchResults);
+    }
+
+    // Phase 3: Merge results in order (90-100%)
     onProgress(95, 'Finalizando...');
 
-    // Build final transcription
+    // Sort by original index to maintain order
+    results.sort((a, b) => a.index - b.index);
+
+    const allSegments = results.flatMap(r => r.segments);
+    const fullText = results.map(r => r.fullText).join(' ');
+    const detectedLanguage = results.find(r => r.language)?.language || 'pt';
+
     return {
         id: uuidv4(),
         projectId,

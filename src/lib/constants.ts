@@ -26,10 +26,14 @@ export const ACCEPTED_AUDIO_TYPES = {
 } as const;
 
 // API configuration
-export const GPT_MAX_TOKENS = 4000;
+export const GPT_MAX_TOKENS = 16000;
 export const GPT_TEMPERATURE = 0.7;
-export const GPT_MODEL = 'gpt-4o-mini';
+export const GPT_MODEL = 'gpt-5-nano';
 export const WHISPER_MODEL = 'whisper-1';
+
+// Parallel transcription settings
+export const PARALLEL_TRANSCRIPTION_LIMIT = 3; // max simultaneous chunks
+export const CHUNK_DURATION_SECONDS = 10 * 60; // 10 minutes per chunk (smaller = more parallelism)
 
 // Highlight configuration limits
 export const MIN_HIGHLIGHT_DURATION = 15; // seconds

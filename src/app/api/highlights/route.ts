@@ -233,9 +233,7 @@ export async function POST(request: NextRequest) {
 
     // Dynamic adjustment for short audios
     if (audioDuration < config.minDuration * 1.5) {
-      // Se o áudio é muito curto (ex: 50s) e minDuration é 30s, relaxar para permitir cortes menores
-      // ou alertar. Vamos tentar ajustar para permitir cortes mais curtos proprocionalmente.
-      config.minDuration = Math.max(5, Math.floor(audioDuration / 4)); // Mínimo 5s
+      config.minDuration = Math.max(5, Math.floor(audioDuration / 4));
       config.targetDuration = Math.max(10, Math.floor(audioDuration / 2));
       config.maxDuration = Math.min(config.maxDuration, audioDuration);
     }
@@ -249,6 +247,7 @@ export async function POST(request: NextRequest) {
     const prompt = buildPrompt(segments, config);
 
     // Call OpenAI Chat API
+    console.log('[Highlights API] Calling GPT-5 Nano...');
     const completion = await openai.chat.completions.create({
       model: GPT_MODEL,
       messages: [
@@ -261,11 +260,12 @@ export async function POST(request: NextRequest) {
           content: prompt,
         },
       ],
-      temperature: GPT_TEMPERATURE,
-      max_tokens: GPT_MAX_TOKENS,
+      max_completion_tokens: GPT_MAX_TOKENS,
     });
 
     const content = completion.choices[0]?.message?.content;
+
+    console.log('[Highlights API] Completion full response:', JSON.stringify(completion, null, 2));
 
     if (!content) {
       throw new AppError(
@@ -361,6 +361,11 @@ export async function POST(request: NextRequest) {
         averageDuration,
         coveragePercent: Math.round(coveragePercent * 10) / 10,
       },
+      usage: completion.usage ? {
+        prompt_tokens: completion.usage.prompt_tokens,
+        completion_tokens: completion.usage.completion_tokens,
+        total_tokens: completion.usage.total_tokens,
+      } : undefined,
     });
 
   } catch (error) {
