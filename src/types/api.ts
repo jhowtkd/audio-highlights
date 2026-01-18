@@ -91,5 +91,10 @@ export interface GPTHighlightsResponse {
   episodeSummary?: string;
   keyTopics?: string[];
   highlights: GPTHighlight[];
+  usage?: {
+    prompt_tokens: number;
+    completion_tokens: number;
+    total_tokens: number;
+  };
 }
 

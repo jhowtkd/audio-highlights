@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
-import OpenAI from 'openai';
+import { groq, GROQ_WHISPER_MODEL } from '@/lib/groq-client';
 import type { TranscriptionSegment, Transcription } from '@/types';
 import type { WhisperResponse } from '@/types/api';
-import { WHISPER_MODEL, ERROR_MESSAGES } from '@/lib/constants';
+import { ERROR_MESSAGES } from '@/lib/constants';
 import { createErrorResponse, requireEnvVar, AppError } from '@/lib/errors';
 import { needsConversion, convertToMp3 } from '@/lib/audio-converter';
 
 export async function POST(request: NextRequest) {
   try {
     // Validate environment variables
-    const apiKey = requireEnvVar('OPENAI_API_KEY');
+    // const apiKey = requireEnvVar('OPENAI_API_KEY'); // Not needed for transcription via Groq
 
     // Parse form data
     const formData = await request.formData();
@@ -47,10 +47,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Initialize OpenAI client
-    const openai = new OpenAI({
-      apiKey,
-      organization: process.env.OPENAI_ORG_ID,
-    });
+    // Groq client is pre-initialized in lib/groq-client.ts
 
     // Convert file if needed (M4A, AAC, etc.)
     let fileToSend = file;
@@ -78,10 +75,10 @@ export async function POST(request: NextRequest) {
 
     console.log(`[Transcription API] Sending to Whisper: ${fileToSend.name} (${fileToSend.type})`);
 
-    // Call OpenAI Whisper API - auto-detects language
-    const transcriptionResponse = await openai.audio.transcriptions.create({
+    // Call Groq Whisper API
+    const transcriptionResponse = await groq.audio.transcriptions.create({
       file: fileToSend,
-      model: WHISPER_MODEL,
+      model: GROQ_WHISPER_MODEL,
       response_format: 'verbose_json',
       timestamp_granularities: ['segment', 'word'],
     }) as unknown as WhisperResponse;
