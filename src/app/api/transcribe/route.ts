@@ -4,7 +4,7 @@ import { groq, GROQ_WHISPER_MODEL } from '@/lib/groq-client';
 import type { TranscriptionSegment, Transcription } from '@/types';
 import type { WhisperResponse } from '@/types/api';
 import { ERROR_MESSAGES } from '@/lib/constants';
-import { createErrorResponse, requireEnvVar, AppError } from '@/lib/errors';
+import { createErrorResponse, AppError } from '@/lib/errors';
 import { needsConversion, convertToMp3 } from '@/lib/audio-converter';
 
 export async function POST(request: NextRequest) {
@@ -84,25 +84,59 @@ export async function POST(request: NextRequest) {
     }) as unknown as WhisperResponse;
 
     // Process segments
+    // Optimization: Since both segments and words are sorted by time, we can avoid
+    // the nested loop O(N*M) complexity by maintaining a pointer to the current word.
+    const allWords = transcriptionResponse.words || [];
+    let currentWordIndex = 0;
+
     const segments: TranscriptionSegment[] = (transcriptionResponse.segments || []).map(
-      (segment) => ({
-        id: uuidv4(),
-        start: segment.start,
-        end: segment.end,
-        text: segment.text.trim(),
-        confidence: segment.avg_logprob ? Math.exp(segment.avg_logprob) : undefined,
-        words: (transcriptionResponse.words || [])
-          .filter(
-            (word) =>
-              word.start >= segment.start && word.end <= segment.end
-          )
-          .map((word) => ({
-            word: word.word,
-            start: word.start,
-            end: word.end,
-            confidence: undefined,
-          })),
-      })
+      (segment) => {
+        // Skip words that are before this segment
+        while (
+          currentWordIndex < allWords.length &&
+          allWords[currentWordIndex].start < segment.start
+        ) {
+          currentWordIndex++;
+        }
+
+        const segmentWords = [];
+        let tempIndex = currentWordIndex;
+
+        // Collect words within the segment
+        while (tempIndex < allWords.length) {
+          const word = allWords[tempIndex];
+
+          // If the word starts after the segment ends, we can stop searching for this segment
+          if (word.start > segment.end) {
+            break;
+          }
+
+          // Check if the word ends within the segment
+          if (word.end <= segment.end) {
+            // We already know word.start >= segment.start from the initial skip loop
+            // but for the words after the first one, we rely on the sorted order.
+            // Just to be safe and strictly follow the original logic:
+            if (word.start >= segment.start) {
+              segmentWords.push({
+                word: word.word,
+                start: word.start,
+                end: word.end,
+                confidence: undefined,
+              });
+            }
+          }
+          tempIndex++;
+        }
+
+        return {
+          id: uuidv4(),
+          start: segment.start,
+          end: segment.end,
+          text: segment.text.trim(),
+          confidence: segment.avg_logprob ? Math.exp(segment.avg_logprob) : undefined,
+          words: segmentWords,
+        };
+      }
     );
 
     // Calculate total duration
