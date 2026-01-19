@@ -32,6 +32,27 @@ interface TranscriptViewerProps {
   className?: string;
 }
 
+// Binary search to find the active segment index efficiently
+function findActiveSegmentIndex(segments: TranscriptionSegment[], currentTime: number): number {
+  let low = 0;
+  let high = segments.length - 1;
+
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    const segment = segments[mid];
+
+    if (currentTime >= segment.start && currentTime < segment.end) {
+      return mid;
+    } else if (currentTime < segment.start) {
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return -1;
+}
+
 export function TranscriptViewer({
   segments,
   currentTime,
@@ -48,9 +69,8 @@ export function TranscriptViewer({
   const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Encontra o segmento ativo baseado no tempo atual
-  const activeSegmentIndex = segments.findIndex(
-    (segment) => currentTime >= segment.start && currentTime < segment.end
-  );
+  // Optimized: Use binary search instead of findIndex
+  const activeSegmentIndex = findActiveSegmentIndex(segments, currentTime);
 
   // Get IDs of matching segments for highlighting
   const matchingSegmentIds = new Set(searchResults.map(r => r.segmentId));
