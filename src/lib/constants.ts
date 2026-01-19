@@ -41,6 +41,7 @@ export const MAX_HIGHLIGHT_DURATION = 600; // seconds (10 minutes)
 export const MIN_HIGHLIGHT_QUANTITY = 1;
 export const MAX_HIGHLIGHT_QUANTITY = 20;
 export const DEFAULT_TARGET_DURATION = 60; // seconds
+export const CUT_PADDING_SECONDS = 0.5; // seconds (padding start/end to avoid clipping words)
 
 // Platform Templates - preconfigured settings for different social platforms
 export const PLATFORM_TEMPLATES = {

@@ -136,7 +136,7 @@ export function useFFmpeg() {
     }, [load]);
 
     /**
-     * Cut video clip
+     * Cut video clip with improved accuracy
      */
     const cutVideo = useCallback(async (videoFile: File, start: number, end: number): Promise<Blob> => {
         await load();
@@ -150,18 +150,24 @@ export function useFFmpeg() {
         try {
             await ffmpeg.writeFile('input.mp4', await fetchFile(videoFile));
 
-            const duration = end - start;
+            // Apply padding to avoid clipping words, but respect file boundaries
+            // (Assuming file duration is long enough, we can't easily check video length here without probing)
+            // But 'start' cannot be < 0.
+            const PAD = 0.5; // Fixed local constant or import. Using 0.5s safety.
 
-            // Precise cut: -i first, then -ss for accurate seeking
-            // -avoid_negative_ts make_zero helps with timestamp issues
+            const safeStart = Math.max(0, start - PAD);
+            const safeEnd = end + PAD;
+            const duration = safeEnd - safeStart;
+
+            // Input seeking (-ss before -i) is generally faster and handles "restarting" timestamp better for cutting
             await ffmpeg.exec([
+                '-ss', safeStart.toString(),
                 '-i', 'input.mp4',
-                '-ss', start.toString(),
                 '-t', duration.toString(),
                 '-c:v', 'libx264',
                 '-preset', 'ultrafast',
                 '-c:a', 'aac',
-                '-avoid_negative_ts', 'make_zero',
+                // '-avoid_negative_ts', 'make_zero', // Not strictly needed with input seeking as new timestamp starts at 0
                 'output.mp4'
             ]);
 
