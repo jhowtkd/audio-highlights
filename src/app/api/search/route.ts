@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { GPT_MODEL } from '@/lib/constants';
-import { createErrorResponse, requireEnvVar, AppError } from '@/lib/errors';
+import { createErrorResponse, requireEnvVar } from '@/lib/errors';
 import { z } from 'zod';
 
 // Validation schema
@@ -25,36 +25,36 @@ interface SearchResult {
     matchReason: string;
 }
 
-export async function POST(request: NextRequest) {
-    try {
-        const apiKey = requireEnvVar('OPENAI_API_KEY');
+interface Segment {
+    id: string;
+    start: number;
+    end: number;
+    text: string;
+}
 
-        const body = await request.json();
-        const { query, segments, maxResults } = searchRequestSchema.parse(body);
+// Chunk size for splitting the transcript
+const CHUNK_SIZE = 150; // Adjust based on average segment length and model context limits
 
-        if (segments.length === 0) {
-            return NextResponse.json({ results: [] });
-        }
+async function processChunk(
+    openai: OpenAI,
+    chunkSegments: Segment[],
+    chunkOffset: number,
+    query: string,
+    maxResults: number
+): Promise<{ index: number; relevanceScore: number; matchReason: string }[]> {
+    const transcriptPart = chunkSegments
+        .map((s, i) => `[${chunkOffset + i}] ${s.text}`)
+        .join('\n');
 
-        const openai = new OpenAI({
-            apiKey,
-            organization: process.env.OPENAI_ORG_ID,
-        });
-
-        // Build transcript with segment IDs for reference
-        const transcriptWithIds = segments
-            .map((s, i) => `[${i}] ${s.text}`)
-            .join('\n');
-
-        const prompt = `Você é um assistente especializado em busca semântica em transcrições de áudio.
+    const prompt = `Você é um assistente especializado em busca semântica em transcrições de áudio.
 
 ## TAREFA
 O usuário está buscando por: "${query}"
 
-Sua tarefa é identificar os ${maxResults} segmentos mais relevantes que correspondem semanticamente à busca. A busca é SEMÂNTICA, não literal - você deve encontrar trechos que RELACIONAM com o conceito buscado, mesmo que não mencionem as palavras exatas.
+Sua tarefa é identificar os segmentos mais relevantes NESTE TRECHO DA TRANSCRIÇÃO que correspondem semanticamente à busca. A busca é SEMÂNTICA, não literal.
 
-## TRANSCRIÇÃO (formato: [índice] texto)
-${transcriptWithIds}
+## TRECHO DA TRANSCRIÇÃO (formato: [índice] texto)
+${transcriptPart}
 
 ## RESPOSTA
 Retorne APENAS um JSON válido:
@@ -63,18 +63,19 @@ Retorne APENAS um JSON válido:
     {
       "index": 0,
       "relevanceScore": 95,
-      "matchReason": "Breve explicação de por que este segmento é relevante para a busca"
+      "matchReason": "Breve explicação de por que este segmento é relevante"
     }
   ]
 }
 
 REGRAS:
-- Retorne no máximo ${maxResults} resultados
+- Retorne no máximo ${maxResults} resultados DESTE TRECHO
 - Ordene por relevanceScore (maior primeiro)
 - relevanceScore deve ser de 0-100
 - Só inclua segmentos com relevanceScore >= 50
 - Se nenhum segmento for relevante, retorne {"results": []}`;
 
+    try {
         const completion = await openai.chat.completions.create({
             model: GPT_MODEL,
             messages: [
@@ -92,31 +93,80 @@ REGRAS:
         });
 
         const content = completion.choices[0]?.message?.content;
+        if (!content) return [];
 
-        if (!content) {
+        const cleanContent = content
+            .replace(/```json\n?/g, '')
+            .replace(/```\n?/g, '')
+            .trim();
+
+        const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
+        if (!jsonMatch) return [];
+
+        const parsedResponse = JSON.parse(jsonMatch[0]);
+
+        // Validate indices are within this chunk's range (logical check)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (parsedResponse.results || []).filter((r: any) =>
+            typeof r.index === 'number' &&
+            r.index >= chunkOffset &&
+            r.index < chunkOffset + chunkSegments.length
+        );
+
+    } catch (error) {
+        console.error(`[Search API] Error processing chunk ${chunkOffset}:`, error);
+        return [];
+    }
+}
+
+export async function POST(request: NextRequest) {
+    try {
+        const apiKey = requireEnvVar('OPENAI_API_KEY');
+
+        const body = await request.json();
+        const { query, segments, maxResults } = searchRequestSchema.parse(body);
+
+        if (segments.length === 0) {
             return NextResponse.json({ results: [] });
         }
 
-        // Parse response
-        let parsedResponse: { results: { index: number; relevanceScore: number; matchReason: string }[] };
-        try {
-            const cleanContent = content
-                .replace(/```json\n?/g, '')
-                .replace(/```\n?/g, '')
-                .trim();
+        const openai = new OpenAI({
+            apiKey,
+            organization: process.env.OPENAI_ORG_ID,
+        });
 
-            const jsonMatch = cleanContent.match(/\{[\s\S]*\}/);
-            parsedResponse = JSON.parse(jsonMatch ? jsonMatch[0] : cleanContent);
-        } catch {
-            console.error('[Search API] Failed to parse response:', content);
-            return NextResponse.json({ results: [] });
+        // Split segments into chunks
+        const chunks = [];
+        for (let i = 0; i < segments.length; i += CHUNK_SIZE) {
+            chunks.push({
+                offset: i,
+                data: segments.slice(i, i + CHUNK_SIZE)
+            });
         }
 
-        // Map results to full segment data
-        const results: SearchResult[] = parsedResponse.results
-            .filter((r) => r.index >= 0 && r.index < segments.length)
+        // Process chunks in parallel
+        // Note: For very large numbers of chunks, we might want to limit concurrency (e.g. p-limit),
+        // but for typical transcripts (hours), Promise.all is fine.
+        const chunkResults = await Promise.all(
+            chunks.map(chunk =>
+                processChunk(openai, chunk.data, chunk.offset, query, maxResults)
+            )
+        );
+
+        // Flatten results
+        const allResults = chunkResults.flat();
+
+        // Sort by relevance and take top N
+        const topResults = allResults
+            .sort((a, b) => b.relevanceScore - a.relevanceScore)
+            .slice(0, maxResults);
+
+        // Map back to segment data
+        const results: SearchResult[] = topResults
             .map((r) => {
                 const segment = segments[r.index];
+                if (!segment) return null; // Should not happen given the filter in processChunk
+
                 return {
                     segmentId: segment.id,
                     text: segment.text,
@@ -126,7 +176,7 @@ REGRAS:
                     matchReason: r.matchReason,
                 };
             })
-            .sort((a, b) => b.relevanceScore - a.relevanceScore);
+            .filter((r): r is SearchResult => r !== null);
 
         return NextResponse.json({
             success: true,
