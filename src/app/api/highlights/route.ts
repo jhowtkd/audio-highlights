@@ -4,7 +4,7 @@ import OpenAI from 'openai';
 import type { TranscriptionSegment, HighlightConfig, GeneratedHighlight } from '@/types';
 import type { GPTHighlight, GPTHighlightsResponse } from '@/types/api';
 import { formatTime } from '@/lib/format-utils';
-import { GPT_MODEL, GPT_MAX_TOKENS, GPT_TEMPERATURE } from '@/lib/constants';
+import { GPT_MODEL, GPT_MAX_TOKENS } from '@/lib/constants';
 import { createErrorResponse, requireEnvVar, AppError } from '@/lib/errors';
 import { generateHighlightsRequestSchema } from '@/lib/validations';
 
@@ -202,18 +202,66 @@ function getPlatformInstructions(platform?: string): string {
   }
 }
 
+/**
+ * Finds the insertion point for a value in a sorted array (by start time).
+ * Equivalent to Python's bisect_left.
+ */
+function bisectLeft(segments: TranscriptionSegment[], time: number): number {
+  let low = 0;
+  let high = segments.length;
+  while (low < high) {
+    const mid = (low + high) >>> 1;
+    if (segments[mid].start < time) {
+      low = mid + 1;
+    } else {
+      high = mid;
+    }
+  }
+  return low;
+}
+
 function extractTranscriptForHighlight(
   segments: TranscriptionSegment[],
   startTime: number,
   endTime: number
 ): string {
-  // Fixed: Include segments that overlap with the highlight range
-  return segments
-    .filter((s) =>
-      (s.start >= startTime && s.start < endTime) ||
-      (s.end > startTime && s.end <= endTime) ||
-      (s.start <= startTime && s.end >= endTime)
-    )
+  if (segments.length === 0) return '';
+
+  // 1. Find the first segment that starts at or after endTime.
+  // All segments from this index onwards are strictly after the highlight range.
+  const endIndex = bisectLeft(segments, endTime);
+
+  // 2. Find the first segment that starts at or after startTime.
+  // All segments from this index up to endIndex-1 are within [startTime, endTime)
+  // regarding their start time, so they are definitely included.
+  const startIndex = bisectLeft(segments, startTime);
+
+  const resultSegments: TranscriptionSegment[] = [];
+
+  // 3. Scan backwards from startIndex - 1 to find segments that started before
+  // startTime but end after startTime (overlapping the start boundary).
+  // We use a safe lookback window (e.g., 600s) to avoid scanning the entire array
+  // in pathological cases, while being correct for all practical transcription data.
+  const SAFE_LOOKBACK_WINDOW = 600;
+
+  for (let i = startIndex - 1; i >= 0; i--) {
+    const s = segments[i];
+    if (s.end > startTime) {
+      resultSegments.unshift(s);
+    }
+
+    // Stop if we are too far back in time
+    if (startTime - s.start > SAFE_LOOKBACK_WINDOW) {
+      break;
+    }
+  }
+
+  // 4. Add segments found in the binary search range
+  for (let i = startIndex; i < endIndex; i++) {
+    resultSegments.push(segments[i]);
+  }
+
+  return resultSegments
     .map((s) => s.text)
     .join(' ');
 }
@@ -294,7 +342,7 @@ export async function POST(request: NextRequest) {
       console.log('[Highlights API] Clean content preview:', cleanContent.substring(0, 200));
 
       parsedResponse = JSON.parse(cleanContent);
-    } catch (parseError) {
+    } catch (_parseError) {
       console.error('[Highlights API] Failed to parse JSON. Content:', content.substring(0, 500));
       throw new AppError(
         'Invalid JSON response from GPT',
