@@ -15,6 +15,7 @@ import {
   generateFullTranscriptMarkdown
 } from '@/lib/export';
 import type { TranscriptionSegment } from '@/types';
+import { TranscriptSegment } from './transcript-segment';
 
 interface SearchResult {
   segmentId: string;
@@ -350,43 +351,14 @@ export function TranscriptViewer({
             const isMatch = matchingSegmentIds.has(segment.id);
 
             return (
-              <div
+              <TranscriptSegment
                 key={segment.id}
                 ref={isActive ? activeSegmentRef : null}
-                onClick={() => onSegmentClick(segment.start)}
-                className={cn(
-                  'p-3 rounded-lg cursor-pointer transition-all duration-200',
-                  isActive
-                    ? 'bg-blue-100 dark:bg-blue-900/50 border-l-4 border-blue-500'
-                    : isMatch
-                      ? 'bg-yellow-50 dark:bg-yellow-900/20 border-l-4 border-yellow-500'
-                      : 'hover:bg-slate-100 dark:hover:bg-slate-800 border-l-4 border-transparent'
-                )}
-              >
-                <div className="flex items-start gap-3">
-                  <span
-                    className={cn(
-                      'text-xs font-mono px-2 py-1 rounded shrink-0',
-                      isActive
-                        ? 'bg-blue-500 text-white'
-                        : 'bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400'
-                    )}
-                  >
-                    {formatTime(segment.start)}
-                  </span>
-
-                  <p
-                    className={cn(
-                      'text-sm leading-relaxed',
-                      isActive
-                        ? 'text-slate-900 dark:text-slate-100 font-medium'
-                        : 'text-slate-700 dark:text-slate-300'
-                    )}
-                  >
-                    {segment.text}
-                  </p>
-                </div>
-              </div>
+                segment={segment}
+                isActive={isActive}
+                isMatch={isMatch}
+                onSegmentClick={onSegmentClick}
+              />
             );
           })
         )}
