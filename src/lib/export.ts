@@ -4,14 +4,59 @@ import type { GeneratedHighlight, TranscriptionSegment } from '@/types';
 /**
  * Gera arquivo SRT a partir de um highlight
  */
+/**
+ * Encontra segmentos relevantes para um highlight usando busca binária
+ * Otimizado para arrays ordenados por tempo
+ */
+function findRelevantSegments(
+  highlight: GeneratedHighlight,
+  segments: TranscriptionSegment[]
+): TranscriptionSegment[] {
+  if (segments.length === 0) return [];
+
+  // Busca binária para encontrar o primeiro segmento potencial
+  let low = 0;
+  let high = segments.length - 1;
+  let startIndex = -1;
+
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (segments[mid].start >= highlight.startTime) {
+      startIndex = mid;
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  // Se nenhum segmento começa depois do início do highlight, retorna vazio
+  if (startIndex === -1) return [];
+
+  const result: TranscriptionSegment[] = [];
+
+  // Itera a partir do índice encontrado até sair do range
+  for (let i = startIndex; i < segments.length; i++) {
+    const s = segments[i];
+
+    // Otimização: se o início do segmento já passou do fim do highlight, podemos parar
+    // (assumindo que start <= end para qualquer segmento)
+    if (s.start > highlight.endTime) break;
+
+    // Verifica se o segmento está totalmente dentro do range
+    if (s.end <= highlight.endTime) {
+      result.push(s);
+    }
+  }
+
+  return result;
+}
+
 export function generateSRT(
   highlight: GeneratedHighlight,
   segments: TranscriptionSegment[]
 ): string {
   // Filtra segmentos que estão dentro do range do highlight
-  const relevantSegments = segments.filter(
-    (s) => s.start >= highlight.startTime && s.end <= highlight.endTime
-  );
+  const relevantSegments = findRelevantSegments(highlight, segments);
 
   if (relevantSegments.length === 0) {
     // Se não encontrar segmentos exatos, cria um único bloco
@@ -41,9 +86,7 @@ export function generateVTT(
   highlight: GeneratedHighlight,
   segments: TranscriptionSegment[]
 ): string {
-  const relevantSegments = segments.filter(
-    (s) => s.start >= highlight.startTime && s.end <= highlight.endTime
-  );
+  const relevantSegments = findRelevantSegments(highlight, segments);
 
   const header = 'WEBVTT\n\n';
 
