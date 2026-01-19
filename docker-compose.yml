@@ -1,0 +1,17 @@
+version: '3.8'
+
+services:
+  app:
+    container_name: audio-highlights
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3000:3000"
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - GROQ_API_KEY=${GROQ_API_KEY}
+    # Persist data if needed (e.g. for uploads if we change logic, but currently local storage is in-memory/browser)
+    # volumes:
+    #   - ./uploads:/app/public/uploads

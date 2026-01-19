@@ -56,6 +56,7 @@ export type TaskAction =
     | { type: 'FAIL_TASK'; payload: { taskId: string; error: string } }
     | { type: 'REMOVE_TASK'; payload: { taskId: string } }
     | { type: 'CLEAR_COMPLETED' }
+    | { type: 'RESET_TASK'; payload: { taskId: string } }
     | { type: 'LOAD_FROM_STORAGE'; payload: { tasks: Task[] } };
 
 // Constantes

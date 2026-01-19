@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, use } from 'react';
+import { useState, useCallback, useEffect, use, useRef, ChangeEvent } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -12,6 +12,7 @@ import {
     X,
     AlertCircle,
     Loader2,
+    RefreshCw,
 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster, toast } from 'sonner';
@@ -41,10 +42,38 @@ interface TaskPageParams {
 export default function TaskDetailPage({ params }: { params: Promise<TaskPageParams> }) {
     const { id } = use(params);
     const router = useRouter();
-    const { getTask, tasks } = useTaskQueue();
+    const { getTask, tasks, retryTask } = useTaskQueue();
     const { cutVideo } = useFFmpeg();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
+
+    const handleRetranscribe = () => {
+        if (!task) return;
+
+        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
+            return;
+        }
+
+        // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
+        const success = retryTask(task.id);
+        if (!success) {
+            // Arquivo não está na memória, abrir seletor
+            fileInputRef.current?.click();
+        }
+    };
+
+    const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file || !task) return;
+
+        retryTask(task.id, file);
+
+        // Limpar input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
+    };
     const [highlights, setHighlights] = useState<GeneratedHighlight[]>([]);
     const [highlightStats, setHighlightStats] = useState<HighlightStats | null>(null);
     const [episodeAnalysis, setEpisodeAnalysis] = useState<EpisodeAnalysis | null>(null);
@@ -189,7 +218,29 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                     </span>
                                 </div>
                             </div>
-                            <ThemeToggle />
+
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleRetranscribe}
+                                    className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                                    title="Retranscrever arquivo"
+                                >
+                                    <RefreshCw className="h-4 w-4 mr-2" />
+                                    Retranscrever
+                                </Button>
+                                <ThemeToggle />
+
+                                {/* Hidden file input for restoration */}
+                                <input
+                                    type="file"
+                                    ref={fileInputRef}
+                                    onChange={handleFileSelect}
+                                    className="hidden"
+                                    accept="audio/*,video/*"
+                                />
+                            </div>
                         </div>
                     </div>
                 </header>

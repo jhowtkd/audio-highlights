@@ -74,6 +74,20 @@ export function getCachedTranscription(cacheKey: string): unknown | null {
 }
 
 /**
+ * Remove specific transcription from cache
+ */
+export function removeCachedTranscription(cacheKey: string): void {
+    if (typeof window === 'undefined') return;
+
+    try {
+        localStorage.removeItem(CACHE_PREFIX + cacheKey);
+        console.log('[Cache] Removed transcription for:', cacheKey);
+    } catch (error) {
+        console.error('[Cache] Error removing from cache:', error);
+    }
+}
+
+/**
  * Save transcription to cache
  */
 export function setCachedTranscription(

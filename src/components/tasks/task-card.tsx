@@ -3,6 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { useRef, ChangeEvent } from 'react';
 import {
     FileAudio,
     Trash2,
@@ -66,7 +67,8 @@ const statusConfig = {
 
 export function TaskCard({ task }: TaskCardProps) {
     const router = useRouter();
-    const { removeTask } = useTaskQueue();
+    const { removeTask, retryTask } = useTaskQueue();
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
@@ -75,6 +77,38 @@ export function TaskCard({ task }: TaskCardProps) {
     const handleViewResult = () => {
         // TODO: Navegar para página de resultado com a task
         router.push(`/tasks/${task.id}`);
+    };
+
+    const handleRetranscribe = () => {
+        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
+            return;
+        }
+
+        // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
+        const success = retryTask(task.id);
+        if (!success) {
+            // Arquivo não está na memória, abrir seletor
+            fileInputRef.current?.click();
+        }
+    };
+
+    const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+
+        // Opcional: Verificar se o nome bate (pode ser restritivo demais se usuário renomeou)
+        // if (file.name !== task.filename) {
+        //     if (!confirm(`O arquivo selecionado (${file.name}) parece diferente do original (${task.filename}). Deseja continuar?`)) {
+        //         return;
+        //     }
+        // }
+
+        retryTask(task.id, file);
+
+        // Limpar input
+        if (fileInputRef.current) {
+            fileInputRef.current.value = '';
+        }
     };
 
     return (
@@ -161,12 +195,34 @@ export function TaskCard({ task }: TaskCardProps) {
                             <Button
                                 size="sm"
                                 variant="ghost"
+                                onClick={handleRetranscribe}
+                                className="text-slate-500 hover:text-blue-600"
+                                title="Retranscrever arquivo"
+                            >
+                                <RefreshCw className="h-4 w-4" />
+                            </Button>
+                        )}
+
+                        {(task.status === 'completed' || task.status === 'error' || task.status === 'pending') && (
+                            <Button
+                                size="sm"
+                                variant="ghost"
                                 onClick={() => removeTask(task.id)}
                                 className="text-slate-500 hover:text-red-600"
+                                title="Excluir task"
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         )}
+
+                        {/* Hidden file input for restoration */}
+                        <input
+                            type="file"
+                            ref={fileInputRef}
+                            onChange={handleFileSelect}
+                            className="hidden"
+                            accept="audio/*,video/*"
+                        />
                     </div>
                 </div>
             </div>

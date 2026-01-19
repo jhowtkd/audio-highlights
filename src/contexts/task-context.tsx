@@ -144,6 +144,30 @@ function taskReducer(state: TaskQueueState, action: TaskAction): TaskQueueState 
             };
         }
 
+        case 'RESET_TASK': {
+            return {
+                ...state,
+                tasks: state.tasks.map(task =>
+                    task.id === action.payload.taskId
+                        ? {
+                            ...task,
+                            status: 'pending',
+                            progress: {
+                                stage: 'pending',
+                                percent: 0,
+                                message: 'Aguardando na fila...',
+                                elapsedSeconds: 0,
+                            },
+                            result: undefined,
+                            error: undefined,
+                            startedAt: undefined,
+                            completedAt: undefined,
+                        }
+                        : task
+                ),
+            };
+        }
+
         default:
             return state;
     }
@@ -156,6 +180,7 @@ interface TaskQueueContextType {
     updateProgress: (taskId: string, progress: Partial<TaskProgress>) => void;
     completeTask: (taskId: string, result: TaskResult) => void;
     failTask: (taskId: string, error: string) => void;
+    resetTask: (taskId: string) => void;
     removeTask: (taskId: string) => void;
     clearCompleted: () => void;
     getTask: (taskId: string) => Task | undefined;
@@ -163,6 +188,7 @@ interface TaskQueueContextType {
     startProcessing: (taskId: string) => void;
     // Files são armazenados separadamente (não serializam bem)
     getTaskFile: (taskId: string) => File | undefined;
+    setTaskFile: (taskId: string, file: File) => void;
 }
 
 const TaskQueueContext = createContext<TaskQueueContextType | null>(null);
@@ -239,6 +265,11 @@ export function TaskQueueProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: 'FAIL_TASK', payload: { taskId, error } });
     }, []);
 
+    const resetTask = useCallback((taskId: string) => {
+        // Não deletamos o arquivo de filesRef pois vamos reutilizá-lo
+        dispatch({ type: 'RESET_TASK', payload: { taskId } });
+    }, []);
+
     const removeTask = useCallback((taskId: string) => {
         filesRef.current.delete(taskId);
         dispatch({ type: 'REMOVE_TASK', payload: { taskId } });
@@ -264,22 +295,28 @@ export function TaskQueueProvider({ children }: { children: React.ReactNode }) {
         return filesRef.current.get(taskId);
     }, []);
 
-    const value: TaskQueueContextType = {
-        state,
-        addTask,
-        updateProgress,
-        completeTask,
-        failTask,
-        removeTask,
-        clearCompleted,
-        getTask,
-        getNextPendingTask,
-        startProcessing,
-        getTaskFile,
-    };
+    const setTaskFile = useCallback((taskId: string, file: File) => {
+        filesRef.current.set(taskId, file);
+    }, []);
 
     return (
-        <TaskQueueContext.Provider value={value}>
+        <TaskQueueContext.Provider
+            value={{
+                state,
+                addTask,
+                updateProgress,
+                completeTask,
+                failTask,
+                resetTask,
+                removeTask,
+                clearCompleted,
+                getTask,
+                getNextPendingTask,
+                startProcessing,
+                getTaskFile,
+                setTaskFile,
+            }}
+        >
             {children}
         </TaskQueueContext.Provider>
     );

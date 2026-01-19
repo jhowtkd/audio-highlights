@@ -55,14 +55,22 @@ export async function POST(request: NextRequest) {
     if (needsConversion(file.name)) {
       console.log(`[Transcription API] Converting ${file.name} to MP3...`);
       try {
+        // Vercel doesn't have system ffmpeg, so this might fail.
+        // The client-side (useTaskQueue) should have handled it, but this is a fallback.
+        // Verify if we are in environment with ffmpeg or warn
+        if (process.env.VERCEL) {
+          throw new Error('Server-side conversion disabled on Vercel. Please convert client-side.');
+        }
         fileToSend = await convertToMp3(file);
         console.log(`[Transcription API] Conversion successful: ${fileToSend.name}`);
       } catch (conversionError) {
         console.error('[Transcription API] Conversion failed:', conversionError);
+        // Don't fail the request immediately if it's just a conversion attempt that might be handled natively
+        // But for formats like M4A that whisper might reject, we better surface the error
         throw new AppError(
           'Failed to convert audio file',
           500,
-          'Não foi possível converter o arquivo de áudio. Tente enviar em formato MP3.'
+          'Não foi possível converter o áudio no servidor. Certifique-se de que a conversão ocorreu no navegador.'
         );
       }
     }

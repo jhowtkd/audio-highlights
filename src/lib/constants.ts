@@ -28,12 +28,12 @@ export const ACCEPTED_AUDIO_TYPES = {
 // API configuration
 export const GPT_MAX_TOKENS = 16000;
 export const GPT_TEMPERATURE = 0.7;
-export const GPT_MODEL = 'gpt-5-nano';
+export const GPT_MODEL = 'gpt-4o';
 export const WHISPER_MODEL = 'whisper-1';
 
 // Parallel transcription settings
 export const PARALLEL_TRANSCRIPTION_LIMIT = 3; // max simultaneous chunks
-export const CHUNK_DURATION_SECONDS = 10 * 60; // 10 minutes per chunk (smaller = more parallelism)
+export const CHUNK_DURATION_SECONDS = 4 * 60; // 4 minutes per chunk (smaller = more parallelism, < 4.5MB for Vercel)
 
 // Highlight configuration limits
 export const MIN_HIGHLIGHT_DURATION = 15; // seconds
@@ -92,7 +92,7 @@ export const DEFAULT_VOLUME = 1;
 
 // Error messages
 export const ERROR_MESSAGES = {
-  FILE_TOO_LARGE: 'Arquivo muito grande. Máximo permitido: 25MB (Limite da OpenAI)',
+  FILE_TOO_LARGE: 'Arquivo muito grande. Máximo trans direto: 4.5MB (Limit Vercel). Arquivos maiores são processados automaticamente em partes.',
   AUDIO_TOO_LONG: 'Áudio muito longo. Máximo permitido: 4 horas',
   NO_FILE_PROVIDED: 'Nenhum arquivo enviado',
   TRANSCRIPTION_FAILED: 'Erro ao processar a transcrição',
