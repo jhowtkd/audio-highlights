@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, useCallback } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
 import { Search, X, Loader2, Sparkles, Download, FileText, FileCode } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatTime } from '@/lib/format-utils';
@@ -53,7 +53,7 @@ export function TranscriptViewer({
   );
 
   // Get IDs of matching segments for highlighting
-  const matchingSegmentIds = new Set(searchResults.map(r => r.segmentId));
+  const matchingSegmentIds = useMemo(() => new Set(searchResults.map(r => r.segmentId)), [searchResults]);
 
   // Auto-scroll para o segmento ativo
   useEffect(() => {
