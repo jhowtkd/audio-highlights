@@ -64,55 +64,63 @@ export async function processLargeAudioWithFFmpeg(
         }
     }
 
-    // Phase 2: Transcribe in parallel batches (20-90%)
+    // Phase 2: Transcribe using a concurrency pool (20-90%)
     const results: ChunkResult[] = [];
     let completedChunks = 0;
+    let currentIndex = 0;
 
-    // Process in batches of PARALLEL_TRANSCRIPTION_LIMIT
-    for (let batchStart = 0; batchStart < chunkFiles.length; batchStart += PARALLEL_TRANSCRIPTION_LIMIT) {
-        const batch = chunkFiles.slice(batchStart, batchStart + PARALLEL_TRANSCRIPTION_LIMIT);
+    const processChunk = async (chunkIndex: number) => {
+        const { file: chunkFile, startTime, index } = chunkFiles[chunkIndex];
+        try {
+            const result = await transcribeChunk(chunkFile, projectId);
 
-        const batchPromises = batch.map(async ({ file: chunkFile, startTime, index }) => {
-            try {
-                const result = await transcribeChunk(chunkFile, projectId);
+            // Adjust timestamps
+            const adjustedSegments = result.segments.map(s => ({
+                ...s,
+                start: s.start + startTime,
+                end: s.end + startTime,
+                words: s.words?.map(w => ({
+                    ...w,
+                    start: w.start + startTime,
+                    end: w.end + startTime
+                }))
+            }));
 
-                // Adjust timestamps
-                const adjustedSegments = result.segments.map(s => ({
-                    ...s,
-                    start: s.start + startTime,
-                    end: s.end + startTime,
-                    words: s.words?.map(w => ({
-                        ...w,
-                        start: w.start + startTime,
-                        end: w.end + startTime
-                    }))
-                }));
+            completedChunks++;
+            const progress = 20 + Math.round((completedChunks / totalChunks) * 70);
+            onProgress(progress, `Transcrevendo... (${completedChunks}/${totalChunks})`);
 
-                completedChunks++;
-                const progress = 20 + Math.round((completedChunks / totalChunks) * 70);
-                onProgress(progress, `Transcrevendo... (${completedChunks}/${totalChunks})`);
+            results.push({
+                index,
+                segments: adjustedSegments,
+                fullText: result.fullText,
+                language: result.language
+            } as ChunkResult);
+        } catch (error) {
+            console.error(`Erro no chunk ${index + 1}:`, error);
+            completedChunks++;
+            results.push({
+                index,
+                segments: [],
+                fullText: `[Parte ${index + 1} não transcrita]`,
+                error: String(error)
+            } as ChunkResult);
+        }
+    };
 
-                return {
-                    index,
-                    segments: adjustedSegments,
-                    fullText: result.fullText,
-                    language: result.language
-                } as ChunkResult;
-            } catch (error) {
-                console.error(`Erro no chunk ${index + 1}:`, error);
-                completedChunks++;
-                return {
-                    index,
-                    segments: [],
-                    fullText: `[Parte ${index + 1} não transcrita]`,
-                    error: String(error)
-                } as ChunkResult;
-            }
-        });
+    const worker = async () => {
+        while (currentIndex < chunkFiles.length) {
+            const index = currentIndex++;
+            await processChunk(index);
+        }
+    };
 
-        const batchResults = await Promise.all(batchPromises);
-        results.push(...batchResults);
-    }
+    const workers = Array.from(
+        { length: Math.min(PARALLEL_TRANSCRIPTION_LIMIT, chunkFiles.length) },
+        () => worker()
+    );
+
+    await Promise.all(workers);
 
     // Phase 3: Merge results in order (90-100%)
     onProgress(95, 'Finalizando...');
