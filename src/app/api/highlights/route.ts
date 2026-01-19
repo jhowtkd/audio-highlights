@@ -207,13 +207,47 @@ function extractTranscriptForHighlight(
   startTime: number,
   endTime: number
 ): string {
-  // Fixed: Include segments that overlap with the highlight range
+  if (segments.length === 0) return '';
+
+  // Optimized: Use binary search to find overlapping segments
+  // This reduces complexity from O(N) to O(log N + K) where N is total segments and K is segments in highlight
+
+  // Find first segment where end > startTime
+  let low = 0;
+  let high = segments.length - 1;
+  let startIndex = -1;
+
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (segments[mid].end > startTime) {
+      startIndex = mid;
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  if (startIndex === -1) return '';
+
+  // Find last segment where start < endTime
+  low = startIndex;
+  high = segments.length - 1;
+  let endIndex = -1;
+
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    if (segments[mid].start < endTime) {
+      endIndex = mid;
+      low = mid + 1;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  if (endIndex === -1) return '';
+
   return segments
-    .filter((s) =>
-      (s.start >= startTime && s.start < endTime) ||
-      (s.end > startTime && s.end <= endTime) ||
-      (s.start <= startTime && s.end >= endTime)
-    )
+    .slice(startIndex, endIndex + 1)
     .map((s) => s.text)
     .join(' ');
 }
