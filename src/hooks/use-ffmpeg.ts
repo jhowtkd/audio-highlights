@@ -136,30 +136,74 @@ export function useFFmpeg() {
     }, [load]);
 
     /**
-     * Cut video clip with improved accuracy
+     * Cut video clip - uses server-side FFmpeg if available, falls back to WASM
      */
     const cutVideo = useCallback(async (videoFile: File, start: number, end: number): Promise<Blob> => {
+        const serviceUrl = process.env.NEXT_PUBLIC_FFMPEG_SERVICE_URL;
+
+        // Try server-side processing first (much faster)
+        if (serviceUrl) {
+            setIsProcessing(true);
+            setProgress(10);
+            setMessage('Enviando para processamento...');
+
+            try {
+                const formData = new FormData();
+                formData.append('video', videoFile);
+                formData.append('start', start.toString());
+                formData.append('end', end.toString());
+
+                setProgress(30);
+                setMessage('Processando vídeo no servidor...');
+
+                const response = await fetch(`${serviceUrl}/cut-video`, {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) {
+                    const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+                    throw new Error(error.error || `HTTP ${response.status}`);
+                }
+
+                setProgress(90);
+                setMessage('Baixando resultado...');
+
+                const blob = await response.blob();
+
+                setProgress(100);
+                setMessage('Concluído!');
+
+                return blob;
+            } catch (err) {
+                console.warn('[FFmpeg] Server processing failed, falling back to WASM:', err);
+                // Fall through to WASM processing
+            } finally {
+                setIsProcessing(false);
+                setProgress(0);
+                setMessage('');
+            }
+        }
+
+        // Fallback to WASM processing (slower but works offline)
         await load();
         const ffmpeg = ffmpegRef.current;
         if (!ffmpeg) throw new Error('FFmpeg não inicializado');
 
         setIsProcessing(true);
         setProgress(0);
-        setMessage('Cortando vídeo...');
+        setMessage('Cortando vídeo (local)...');
 
         try {
             await ffmpeg.writeFile('input.mp4', await fetchFile(videoFile));
 
             // Apply padding to avoid clipping words, but respect file boundaries
-            // (Assuming file duration is long enough, we can't easily check video length here without probing)
-            // But 'start' cannot be < 0.
-            const PAD = 0.5; // Fixed local constant or import. Using 0.5s safety.
+            const PAD = 0.5;
 
             const safeStart = Math.max(0, start - PAD);
             const safeEnd = end + PAD;
             const duration = safeEnd - safeStart;
 
-            // Input seeking (-ss before -i) is generally faster and handles "restarting" timestamp better for cutting
             await ffmpeg.exec([
                 '-ss', safeStart.toString(),
                 '-i', 'input.mp4',
@@ -167,7 +211,6 @@ export function useFFmpeg() {
                 '-c:v', 'libx264',
                 '-preset', 'ultrafast',
                 '-c:a', 'aac',
-                // '-avoid_negative_ts', 'make_zero', // Not strictly needed with input seeking as new timestamp starts at 0
                 'output.mp4'
             ]);
 
