@@ -103,8 +103,8 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
         // Audio-only: just extract and re-encode audio
         ffmpegArgs = [
             '-y',
+            '-ss', safeStart.toString(), // Input seeking for audio
             '-i', file.path,
-            '-ss', safeStart.toString(),
             '-t', safeDuration.toString(),
             '-vn',  // No video
             '-c:a', 'libmp3lame',
@@ -112,18 +112,16 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
             outputPath,
         ];
     } else {
-        // Video: transcode both video and audio
+        // Video: use STREAM COPY for FAST processing (no re-encoding)
+        // -ss before -i = input seeking (fast seek to keyframe)
+        console.log('[FFmpeg] Using stream copy (fast mode) for video');
         ffmpegArgs = [
             '-y',
+            '-ss', safeStart.toString(), // Input seeking (fast)
             '-i', file.path,
-            '-ss', safeStart.toString(),
             '-t', safeDuration.toString(),
-            '-c:v', 'libx264',
-            '-preset', 'fast',
-            '-crf', '23',
-            '-c:a', 'aac',
-            '-b:a', '128k',
-            '-movflags', '+faststart',
+            '-c', 'copy',  // Stream copy - no re-encoding = much faster!
+            '-avoid_negative_ts', 'make_zero',
             outputPath,
         ];
     }
