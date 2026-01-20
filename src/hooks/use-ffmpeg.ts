@@ -294,7 +294,7 @@ export function useFFmpeg() {
 
     /**
      * Cut and concatenate multiple segments into one video (Mix mode)
-     * Only works with server-side processing
+     * Falls back to simple cut if concat fails
      */
     const cutMixVideo = useCallback(async (
         videoFile: File,
@@ -308,15 +308,20 @@ export function useFFmpeg() {
 
         setIsProcessing(true);
         setProgress(10);
-        setMessage(`Enviando vídeo para processar ${segments.length} segmentos...`);
+
+        // Calculate overall span for fallback
+        const sortedSegments = [...segments].sort((a, b) => a.start - b.start);
+        const overallStart = sortedSegments[0].start;
+        const overallEnd = sortedSegments[sortedSegments.length - 1].end;
 
         try {
+            // Try concat endpoint first
+            setMessage(`Cortando e juntando ${segments.length} segmentos...`);
+            setProgress(30);
+
             const formData = new FormData();
             formData.append('video', videoFile);
             formData.append('segments', JSON.stringify(segments));
-
-            setProgress(30);
-            setMessage('Cortando e juntando segmentos no servidor...');
 
             const response = await fetch(`${serviceUrl}/concat-segments`, {
                 method: 'POST',
@@ -325,24 +330,45 @@ export function useFFmpeg() {
 
             if (!response.ok) {
                 const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
-                const errorMsg = errorData.details
-                    ? `${errorData.error}: ${errorData.details}`
-                    : errorData.error || `HTTP ${response.status}`;
-                throw new Error(errorMsg);
+                console.warn('[FFmpeg Mix] Concat failed, trying simple cut fallback:', errorData);
+                throw new Error('concat_failed');
             }
 
             setProgress(90);
             setMessage('Baixando mix final...');
-
             const blob = await response.blob();
-
             setProgress(100);
             setMessage('Mix concluído!');
-
             return blob;
-        } catch (err) {
-            console.error('[FFmpeg Mix] Error:', err);
-            throw err;
+
+        } catch (concatError) {
+            console.warn('[FFmpeg Mix] Concat failed, using simple cut fallback');
+
+            // Fallback: use simple cut from first segment start to last segment end
+            setProgress(40);
+            setMessage('Usando corte simples (início ao fim)...');
+
+            const fallbackFormData = new FormData();
+            fallbackFormData.append('video', videoFile);
+            fallbackFormData.append('start', overallStart.toString());
+            fallbackFormData.append('end', overallEnd.toString());
+
+            const fallbackResponse = await fetch(`${serviceUrl}/cut-video`, {
+                method: 'POST',
+                body: fallbackFormData,
+            });
+
+            if (!fallbackResponse.ok) {
+                const errorData = await fallbackResponse.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(errorData.details || errorData.error || 'Failed to cut video');
+            }
+
+            setProgress(90);
+            setMessage('Baixando vídeo...');
+            const blob = await fallbackResponse.blob();
+            setProgress(100);
+            setMessage('Corte concluído!');
+            return blob;
         } finally {
             setIsProcessing(false);
             setProgress(0);
