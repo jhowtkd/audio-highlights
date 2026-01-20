@@ -65,7 +65,6 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
         return;
     }
 
-    const outputPath = path.join('/tmp', `output_${uuidv4()}.mp4`);
     const duration = endTime - startTime;
 
     // Add padding for better cut accuracy
@@ -73,9 +72,15 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     const safeStart = Math.max(0, startTime - PAD);
     const safeDuration = duration + PAD * 2;
 
+    // Detect if file is audio-only based on mimetype or extension
+    const audioExtensions = ['.mp3', '.wav', '.m4a', '.aac', '.ogg', '.flac', '.wma'];
+    const isAudioOnly = file.mimetype?.startsWith('audio/') ||
+        audioExtensions.some(ext => file.originalname.toLowerCase().endsWith(ext));
+
     // Log file info for debugging
     console.log(`[FFmpeg] Input file: ${file.originalname} (${file.size} bytes, mimetype: ${file.mimetype})`);
     console.log(`[FFmpeg] File path: ${file.path}`);
+    console.log(`[FFmpeg] Is audio-only: ${isAudioOnly}`);
     console.log(`[FFmpeg] Cutting from ${safeStart}s for ${safeDuration}s`);
 
     // Check if file exists and has content
@@ -88,19 +93,40 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
         return;
     }
 
-    const ffmpegArgs = [
-        '-y',
-        '-i', file.path,           // Input first
-        '-ss', safeStart.toString(), // Seek after input (output seeking - more accurate)
-        '-t', safeDuration.toString(),
-        '-c:v', 'libx264',
-        '-preset', 'fast',
-        '-crf', '23',
-        '-c:a', 'aac',
-        '-b:a', '128k',
-        '-movflags', '+faststart',
-        outputPath,
-    ];
+    // Choose output format based on input type
+    const outputExt = isAudioOnly ? 'mp3' : 'mp4';
+    const outputPath = path.join('/tmp', `output_${uuidv4()}.${outputExt}`);
+
+    let ffmpegArgs: string[];
+
+    if (isAudioOnly) {
+        // Audio-only: just extract and re-encode audio
+        ffmpegArgs = [
+            '-y',
+            '-i', file.path,
+            '-ss', safeStart.toString(),
+            '-t', safeDuration.toString(),
+            '-vn',  // No video
+            '-c:a', 'libmp3lame',
+            '-b:a', '192k',
+            outputPath,
+        ];
+    } else {
+        // Video: transcode both video and audio
+        ffmpegArgs = [
+            '-y',
+            '-i', file.path,
+            '-ss', safeStart.toString(),
+            '-t', safeDuration.toString(),
+            '-c:v', 'libx264',
+            '-preset', 'fast',
+            '-crf', '23',
+            '-c:a', 'aac',
+            '-b:a', '128k',
+            '-movflags', '+faststart',
+            outputPath,
+        ];
+    }
 
     const ffmpeg = spawn('ffmpeg', ffmpegArgs);
 
@@ -120,9 +146,12 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
             return;
         }
 
-        // Stream the output file back
-        res.setHeader('Content-Type', 'video/mp4');
-        res.setHeader('Content-Disposition', `attachment; filename="clip_${Date.now()}.mp4"`);
+        // Stream the output file back with correct content type
+        const contentType = isAudioOnly ? 'audio/mpeg' : 'video/mp4';
+        const filename = isAudioOnly ? `clip_${Date.now()}.mp3` : `clip_${Date.now()}.mp4`;
+
+        res.setHeader('Content-Type', contentType);
+        res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
 
         const readStream = fs.createReadStream(outputPath);
         readStream.pipe(res);
@@ -136,7 +165,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
             console.error('[Stream] Error:', err);
             fs.unlink(outputPath, () => { });
             if (!res.headersSent) {
-                res.status(500).json({ error: 'Failed to stream video' });
+                res.status(500).json({ error: 'Failed to stream file' });
             }
         });
     });
