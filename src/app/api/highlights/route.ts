@@ -16,6 +16,10 @@ function buildPrompt(
     .map((s) => `[${formatTime(s.start)}] ${s.text}`)
     .join('\n');
 
+  if (config.isMix) {
+    return buildMixPrompt(transcriptWithTimestamps, config);
+  }
+
   const platformInstructions = getPlatformInstructions(config.platform);
 
   return `Você é um ENGENHEIRO DE ATENÇÃO especializado em transformar conteúdo de áudio longo em micro-clips virais. Sua análise é baseada em neurociência da atenção e métricas algorítmicas do Instagram Reels 2025.
@@ -167,6 +171,68 @@ ${transcriptWithTimestamps}
 - Retorne APENAS JSON válido, sem texto adicional`;
 }
 
+function buildMixPrompt(transcriptWithTimestamps: string, config: HighlightConfig): string {
+  return `Você é um DIRETOR DE STORYTELLING especializado em criar narrativas épicas a partir de conteúdo longo. 
+Seu objetivo é criar UM ÚNICO VÍDEO (Mix) composto por múltiplos trechos da transcrição que, juntos, contem uma história coesa e impactante.
+
+## SEU PAPEL: DIRETOR DE MIX
+Você deve escanear todo o conteúdo e selecionar os MELHORES momentos que se conectam tematicamente para criar uma jornada narrativa.
+Não queremos trechos aleatórios. Queremos Começo, Meio e Fim.
+
+## DURAÇÃO DO MIX
+- Duração TOTAL Aproximada: ${config.mixDuration || 180} segundos
+- Você pode selecionar quantos trechos forem necessários para atingir essa duração e contar a história.
+
+## TÓPICOS PRIORITÁRIOS
+${config.focusTopics?.length ? `Foque a história em: ${config.focusTopics.join(', ')}` : 'Encontre o tema mais engajante e emocional do episódio.'}
+
+## TRANSCRIÇÃO COM TIMESTAMPS
+${transcriptWithTimestamps}
+
+## FORMATO DE RESPOSTA (JSON PURO)
+{
+  "episodeSummary": "Resumo do tema central deste mix",
+  "keyTopics": ["tema_central", "subtema"],
+  "highlights": [
+    {
+      "title": "Título Épico para o Mix (Storytelling)",
+      "summary": "Sinopse da narrativa criada neste mix",
+      "startTime": 0,
+      "endTime": 0,
+      "relevanceScore": 100,
+      "emotionTone": "inspirational",
+      "viralFactors": {
+        "hasHook": true,
+        "hasStorytelling": true,
+        "hasSurprise": true,
+        "emotionalIntensity": 9,
+        "hookType": "promise",
+        "contentArchetype": "story",
+        "loopPotential": false,
+        "saveability": 8,
+        "shareability": 10,
+        "completionPotential": 9
+      },
+      "segments": [
+        { "start": 10.5, "end": 45.2 },
+        { "start": 120.0, "end": 150.5 },
+        { "start": 300.2, "end": 340.0 }
+      ],
+      "reasoning": "Explicação da narrativa construída e por que esses trechos se conectam bem.",
+      "tags": ["storytelling", "mix", "best_moments"]
+    }
+  ]
+}
+
+## INSTRUÇÕES CRÍTICAS
+1. Retorne APENAS UM item na lista "highlights".
+2. Preencha o array "segments" com os trechos reais que compõem a história.
+3. A soma das durações dos segments deve ser próxima de ${config.mixDuration || 180} segundos.
+4. Os segments DEVEM estar em ordem cronológica de narrativa (que pode não ser a ordem cronológica do áudio original, se fizer sentido para a história, mas prefira a ordem linear se possível para manter fluxo natural).
+5. Certifique-se que o áudio não corte no meio de frases importantes.
+`;
+}
+
 function getPlatformInstructions(platform?: string): string {
   switch (platform) {
     case 'instagram_reels':
@@ -287,8 +353,8 @@ export async function POST(request: NextRequest) {
     // Calculate total duration from segments
     const audioDuration = segments.length > 0 ? segments[segments.length - 1].end : 0;
 
-    // Dynamic adjustment for short audios
-    if (audioDuration < config.minDuration * 1.5) {
+    // Dynamic adjustment for short audios (only for normal mode)
+    if (!config.isMix && audioDuration < config.minDuration * 1.5) {
       config.minDuration = Math.max(5, Math.floor(audioDuration / 4));
       config.targetDuration = Math.max(10, Math.floor(audioDuration / 2));
       config.maxDuration = Math.min(config.maxDuration, audioDuration);
@@ -303,7 +369,7 @@ export async function POST(request: NextRequest) {
     const prompt = buildPrompt(segments, config);
 
     // Call OpenAI Chat API
-    console.log('[Highlights API] Calling GPT-5 Nano...');
+    console.log('[Highlights API] Calling GPT-5 Nano...', config.isMix ? '(Mix Mode)' : '(Standard Mode)');
     const completion = await openai.chat.completions.create({
       model: GPT_MODEL,
       messages: [
@@ -362,19 +428,38 @@ export async function POST(request: NextRequest) {
     // Process and validate highlights
     const highlights: GeneratedHighlight[] = parsedResponse.highlights
       .map((h: GPTHighlight) => {
-        const duration = h.endTime - h.startTime;
-        const transcript = extractTranscriptForHighlight(
-          segments,
-          h.startTime,
-          h.endTime
-        );
+        let transcript = '';
+        let duration = 0;
+        let startTime = h.startTime;
+        let endTime = h.endTime;
+
+        // Handling segments for Mix mode
+        if (h.segments && h.segments.length > 0) {
+          // Concatenate transcripts from all segments
+          transcript = h.segments.map(seg => extractTranscriptForHighlight(segments, seg.start, seg.end)).join(' ... ');
+
+          // Calculate total duration
+          duration = h.segments.reduce((acc, seg) => acc + (seg.end - seg.start), 0);
+
+          // Start/End time for the whole mix (first start, last end)
+          startTime = h.segments[0].start;
+          endTime = h.segments[h.segments.length - 1].end;
+        } else {
+          // Standard mode
+          duration = h.endTime - h.startTime;
+          transcript = extractTranscriptForHighlight(
+            segments,
+            h.startTime,
+            h.endTime
+          );
+        }
 
         return {
           id: uuidv4(),
           title: h.title,
           summary: h.summary,
-          startTime: h.startTime,
-          endTime: h.endTime,
+          startTime,
+          endTime,
           duration,
           transcript,
           relevanceScore: h.relevanceScore,
@@ -388,11 +473,16 @@ export async function POST(request: NextRequest) {
           // Novos campos de análise de gancho
           hookAnalysis: h.hookAnalysis,
           openingLine: h.openingLine,
+          // Segments if available
+          segments: h.segments,
         };
       })
       .filter((h: GeneratedHighlight) => {
-        // Validate duration
-        return h.duration >= config.minDuration && h.duration <= config.maxDuration;
+        // Validate duration only if NOT mix mode (mix mode duration is more flexible/approximate)
+        if (!config.isMix) {
+          return h.duration >= config.minDuration && h.duration <= config.maxDuration;
+        }
+        return true;
       })
       .sort((a: GeneratedHighlight, b: GeneratedHighlight) => b.relevanceScore - a.relevanceScore);
 

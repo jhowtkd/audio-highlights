@@ -85,6 +85,11 @@ export interface GPTHighlight {
   // Novos campos de análise de gancho
   hookAnalysis?: string; // Análise específica dos primeiros 3 segundos
   openingLine?: string; // Primeira frase do corte (para avaliar pattern interrupt)
+  // Suporte a segmentos múltiplos (Mix Mode)
+  segments?: {
+    start: number;
+    end: number;
+  }[];
 }
 
 export interface GPTHighlightsResponse {

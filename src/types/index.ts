@@ -64,7 +64,10 @@ export interface HighlightConfig {
   quantity: number;         // 1-20
   focusTopics?: string[];   // tópicos prioritários
   excludeTopics?: string[]; // tópicos a ignorar
-  platform?: PlatformTemplate; // template de plataforma selecionado
+  isMix?: boolean;          // modo storytelling/mix
+  mixDuration?: number;     // duração total para o mix
+
+  platform?: PlatformTemplate; // template de plataforma selecionado (mantido para compatibilidade, mas opcional)
 }
 
 export interface GeneratedHighlight {
@@ -86,6 +89,11 @@ export interface GeneratedHighlight {
   // Novos campos de análise de gancho
   hookAnalysis?: string;
   openingLine?: string;
+  // Suporte a segmentos múltiplos (Mix Mode)
+  segments?: {         
+    start: number;
+    end: number;
+  }[];
 }
 
 export type ProjectStatus =
