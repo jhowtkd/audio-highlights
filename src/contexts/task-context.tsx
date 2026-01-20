@@ -168,6 +168,20 @@ function taskReducer(state: TaskQueueState, action: TaskAction): TaskQueueState 
             };
         }
 
+        case 'UPDATE_RESULT': {
+            return {
+                ...state,
+                tasks: state.tasks.map(task =>
+                    task.id === action.payload.taskId
+                        ? {
+                            ...task,
+                            result: { ...task.result, ...action.payload.result },
+                        }
+                        : task
+                ),
+            };
+        }
+
         default:
             return state;
     }
@@ -179,6 +193,7 @@ interface TaskQueueContextType {
     addTask: (file: File, audioDuration?: number) => string;
     updateProgress: (taskId: string, progress: Partial<TaskProgress>) => void;
     completeTask: (taskId: string, result: TaskResult) => void;
+    updateResult: (taskId: string, result: Partial<TaskResult>) => void;
     failTask: (taskId: string, error: string) => void;
     resetTask: (taskId: string) => void;
     removeTask: (taskId: string) => void;
@@ -260,6 +275,10 @@ export function TaskQueueProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: 'COMPLETE_TASK', payload: { taskId, result } });
     }, []);
 
+    const updateResult = useCallback((taskId: string, result: Partial<TaskResult>) => {
+        dispatch({ type: 'UPDATE_RESULT', payload: { taskId, result } });
+    }, []);
+
     const failTask = useCallback((taskId: string, error: string) => {
         filesRef.current.delete(taskId);
         dispatch({ type: 'FAIL_TASK', payload: { taskId, error } });
@@ -306,6 +325,7 @@ export function TaskQueueProvider({ children }: { children: React.ReactNode }) {
                 addTask,
                 updateProgress,
                 completeTask,
+                updateResult,
                 failTask,
                 resetTask,
                 removeTask,

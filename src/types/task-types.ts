@@ -57,6 +57,7 @@ export type TaskAction =
     | { type: 'REMOVE_TASK'; payload: { taskId: string } }
     | { type: 'CLEAR_COMPLETED' }
     | { type: 'RESET_TASK'; payload: { taskId: string } }
+    | { type: 'UPDATE_RESULT'; payload: { taskId: string; result: Partial<TaskResult> } }
     | { type: 'LOAD_FROM_STORAGE'; payload: { tasks: Task[] } };
 
 // Constantes

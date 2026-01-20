@@ -25,6 +25,7 @@ import { Waveform } from '@/components/audio/waveform';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { useTaskQueue } from '@/hooks/use-task-queue';
+import { useTaskQueueContext } from '@/contexts/task-context';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
 import { downloadFile } from '@/lib/export';
 import type { GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
@@ -43,6 +44,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const { id } = use(params);
     const router = useRouter();
     const { getTask, tasks, retryTask } = useTaskQueue();
+    const { updateResult } = useTaskQueueContext();
     const { cutVideo, cutMixVideo } = useFFmpeg();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -90,6 +92,16 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
             setTask(updatedTask);
         }
     }, [tasks, id]);
+
+    // Carrega highlights salvos do result da task
+    useEffect(() => {
+        if (task?.result?.highlights && task.result.highlights.length > 0 && highlights.length === 0) {
+            setHighlights(task.result.highlights);
+            if (task.result.episodeAnalysis) {
+                setEpisodeAnalysis(task.result.episodeAnalysis);
+            }
+        }
+    }, [task?.result?.highlights, task?.result?.episodeAnalysis, highlights.length]);
 
     // Muda para a tab de highlights quando são gerados
     useEffect(() => {
@@ -141,6 +153,14 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
             setHighlights(data.highlights);
             setHighlightStats(data.stats);
             setEpisodeAnalysis(data.episodeAnalysis || null);
+
+            // Salva highlights no result da task para persistência
+            updateResult(id, {
+                highlights: data.highlights,
+                episodeAnalysis: data.episodeAnalysis || null,
+                highlightConfig: config,
+            });
+
             toast.success(`${data.highlights.length} highlights gerados!`);
         } catch (error) {
             console.error('Erro:', error);
@@ -148,7 +168,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
         } finally {
             setIsGenerating(false);
         }
-    }, [task]);
+    }, [task, id, updateResult]);
 
     const handleDownloadVideo = useCallback(async (highlight: GeneratedHighlight) => {
         if (!videoFile) return;
