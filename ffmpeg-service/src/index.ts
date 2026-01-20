@@ -206,34 +206,40 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         // Step 2: Create concat list file
         const concatContent = segmentFiles.map(f => `file '${f}'`).join('\n');
         fs.writeFileSync(concatListPath, concatContent);
+        console.log('[FFmpeg Concat] Concat list:', concatContent);
 
-        // Step 3: Concatenate all segments
-        console.log('[FFmpeg Concat] Joining segments...');
+        // Step 3: Concatenate all segments using stream copy (faster, no re-encoding)
+        console.log('[FFmpeg Concat] Joining segments with copy codec...');
         await new Promise<void>((resolve, reject) => {
             const ffmpeg = spawn('ffmpeg', [
                 '-y',
                 '-f', 'concat',
                 '-safe', '0',
                 '-i', concatListPath,
-                '-c:v', 'libx264',
-                '-preset', 'fast',
-                '-crf', '23',
-                '-c:a', 'aac',
-                '-b:a', '128k',
+                '-c', 'copy',  // Stream copy - no re-encoding, much faster
                 '-movflags', '+faststart',
                 outputPath,
             ]);
 
             let stderr = '';
-            ffmpeg.stderr.on('data', (data: Buffer) => { stderr += data.toString(); });
+            ffmpeg.stderr.on('data', (data: Buffer) => {
+                const msg = data.toString();
+                stderr += msg;
+                console.log('[FFmpeg Concat]', msg.trim());
+            });
             ffmpeg.on('close', (code: number) => {
                 if (code !== 0) {
-                    reject(new Error(`Concat failed: ${stderr.slice(-300)}`));
+                    console.error('[FFmpeg Concat] Failed with code', code);
+                    reject(new Error(`Concat failed (code ${code}): ${stderr.slice(-500)}`));
                 } else {
+                    console.log('[FFmpeg Concat] Success!');
                     resolve();
                 }
             });
-            ffmpeg.on('error', reject);
+            ffmpeg.on('error', (err) => {
+                console.error('[FFmpeg Concat] Spawn error:', err);
+                reject(err);
+            });
         });
 
         // Step 4: Stream result
