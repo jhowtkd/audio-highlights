@@ -324,8 +324,11 @@ export function useFFmpeg() {
             });
 
             if (!response.ok) {
-                const error = await response.json().catch(() => ({ error: 'Unknown error' }));
-                throw new Error(error.error || `HTTP ${response.status}`);
+                const errorData = await response.json().catch(() => ({ error: 'Unknown error' }));
+                const errorMsg = errorData.details
+                    ? `${errorData.error}: ${errorData.details}`
+                    : errorData.error || `HTTP ${response.status}`;
+                throw new Error(errorMsg);
             }
 
             setProgress(90);
