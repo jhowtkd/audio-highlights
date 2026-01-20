@@ -53,7 +53,7 @@ export default function Home() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // FFmpeg hook
-  const { cutVideo, splitAudio, convertToMp3, isProcessing: isFFmpegProcessing, progress: ffmpegProgress, message: ffmpegMessage } = useFFmpeg();
+  const { cutVideo, cutMixVideo, splitAudio, convertToMp3, isProcessing: isFFmpegProcessing, progress: ffmpegProgress, message: ffmpegMessage } = useFFmpeg();
 
   // Video state
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -207,19 +207,37 @@ export default function Home() {
     const safeTitle = highlight.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
     const filename = `${safeTitle}.mp4`;
 
-    // Show toast for feedback
-    toast.promise(
-      cutVideo(videoFile, highlight.startTime, highlight.endTime),
-      {
-        loading: 'Cortando vídeo...',
-        success: (blob) => {
-          downloadFile(blob, filename);
-          return 'Vídeo baixado com sucesso!';
-        },
-        error: 'Erro ao cortar vídeo'
-      }
-    );
-  }, [videoFile, cutVideo]);
+    // Check if this is a Mix mode highlight (has segments array)
+    const isMixMode = highlight.segments && highlight.segments.length > 0;
+
+    if (isMixMode) {
+      // Mix mode: cut and concatenate multiple segments
+      toast.promise(
+        cutMixVideo(videoFile, highlight.segments!),
+        {
+          loading: `Processando mix com ${highlight.segments!.length} segmentos...`,
+          success: (blob) => {
+            downloadFile(blob, filename);
+            return 'Mix baixado com sucesso!';
+          },
+          error: (err) => `Erro ao criar mix: ${err.message}`
+        }
+      );
+    } else {
+      // Standard mode: simple cut
+      toast.promise(
+        cutVideo(videoFile, highlight.startTime, highlight.endTime),
+        {
+          loading: 'Cortando vídeo...',
+          success: (blob) => {
+            downloadFile(blob, filename);
+            return 'Vídeo baixado com sucesso!';
+          },
+          error: 'Erro ao cortar vídeo'
+        }
+      );
+    }
+  }, [videoFile, cutVideo, cutMixVideo]);
 
   const handleVideoSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];

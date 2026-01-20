@@ -43,7 +43,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const { id } = use(params);
     const router = useRouter();
     const { getTask, tasks, retryTask } = useTaskQueue();
-    const { cutVideo } = useFFmpeg();
+    const { cutVideo, cutMixVideo } = useFFmpeg();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
@@ -156,18 +156,37 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
         const safeTitle = highlight.title.replace(/[^a-z0-9]/gi, '_').toLowerCase();
         const filename = `${safeTitle}.mp4`;
 
-        toast.promise(
-            cutVideo(videoFile, highlight.startTime, highlight.endTime),
-            {
-                loading: 'Cortando vídeo...',
-                success: (blob) => {
-                    downloadFile(blob, filename);
-                    return 'Vídeo baixado com sucesso!';
-                },
-                error: 'Erro ao cortar vídeo'
-            }
-        );
-    }, [videoFile, cutVideo]);
+        // Check if this is a Mix mode highlight (has segments array)
+        const isMixMode = highlight.segments && highlight.segments.length > 0;
+
+        if (isMixMode) {
+            // Mix mode: cut and concatenate multiple segments
+            toast.promise(
+                cutMixVideo(videoFile, highlight.segments!),
+                {
+                    loading: `Processando mix com ${highlight.segments!.length} segmentos...`,
+                    success: (blob) => {
+                        downloadFile(blob, filename);
+                        return 'Mix baixado com sucesso!';
+                    },
+                    error: (err) => `Erro ao criar mix: ${err.message}`
+                }
+            );
+        } else {
+            // Standard mode: simple cut
+            toast.promise(
+                cutVideo(videoFile, highlight.startTime, highlight.endTime),
+                {
+                    loading: 'Cortando vídeo...',
+                    success: (blob) => {
+                        downloadFile(blob, filename);
+                        return 'Vídeo baixado com sucesso!';
+                    },
+                    error: 'Erro ao cortar vídeo'
+                }
+            );
+        }
+    }, [videoFile, cutVideo, cutMixVideo]);
 
     const handleVideoSelect = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];

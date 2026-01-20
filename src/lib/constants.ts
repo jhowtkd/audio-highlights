@@ -28,7 +28,7 @@ export const ACCEPTED_AUDIO_TYPES = {
 // API configuration
 export const GPT_MAX_TOKENS = 16000;
 export const GPT_TEMPERATURE = 0.7;
-export const GPT_MODEL = 'gpt-4o';
+export const GPT_MODEL = 'gpt-5';
 export const WHISPER_MODEL = 'whisper-1';
 
 // Parallel transcription settings

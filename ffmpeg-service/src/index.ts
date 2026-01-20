@@ -135,6 +135,137 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     });
 });
 
+// Concatenate multiple segments into one video (for Mix mode)
+app.post('/concat-segments', upload.single('video'), async (req: Request, res: Response, _next: NextFunction) => {
+    const file = req.file;
+    const { segments } = req.body;
+
+    if (!file) {
+        res.status(400).json({ error: 'No video file provided' });
+        return;
+    }
+
+    let parsedSegments: Array<{ start: number; end: number }>;
+    try {
+        parsedSegments = typeof segments === 'string' ? JSON.parse(segments) : segments;
+        if (!Array.isArray(parsedSegments) || parsedSegments.length === 0) {
+            throw new Error('Invalid segments array');
+        }
+    } catch {
+        res.status(400).json({ error: 'Invalid segments format. Expected JSON array of {start, end} objects.' });
+        return;
+    }
+
+    const sessionId = uuidv4();
+    const tempDir = path.join('/tmp', sessionId);
+    fs.mkdirSync(tempDir, { recursive: true });
+
+    const segmentFiles: string[] = [];
+    const concatListPath = path.join(tempDir, 'concat_list.txt');
+    const outputPath = path.join(tempDir, 'final_output.mp4');
+
+    console.log(`[FFmpeg Concat] Processing ${parsedSegments.length} segments`);
+
+    try {
+        // Step 1: Extract each segment
+        for (let i = 0; i < parsedSegments.length; i++) {
+            const seg = parsedSegments[i];
+            const segmentPath = path.join(tempDir, `segment_${i}.mp4`);
+            segmentFiles.push(segmentPath);
+
+            const duration = seg.end - seg.start;
+            console.log(`[FFmpeg Concat] Extracting segment ${i + 1}: ${seg.start}s - ${seg.end}s (${duration}s)`);
+
+            await new Promise<void>((resolve, reject) => {
+                const ffmpeg = spawn('ffmpeg', [
+                    '-y',
+                    '-ss', seg.start.toString(),
+                    '-i', file.path,
+                    '-t', duration.toString(),
+                    '-c:v', 'libx264',
+                    '-preset', 'fast',
+                    '-crf', '23',
+                    '-c:a', 'aac',
+                    '-b:a', '128k',
+                    segmentPath,
+                ]);
+
+                let stderr = '';
+                ffmpeg.stderr.on('data', (data: Buffer) => { stderr += data.toString(); });
+                ffmpeg.on('close', (code: number) => {
+                    if (code !== 0) {
+                        reject(new Error(`Segment extraction failed: ${stderr.slice(-300)}`));
+                    } else {
+                        resolve();
+                    }
+                });
+                ffmpeg.on('error', reject);
+            });
+        }
+
+        // Step 2: Create concat list file
+        const concatContent = segmentFiles.map(f => `file '${f}'`).join('\n');
+        fs.writeFileSync(concatListPath, concatContent);
+
+        // Step 3: Concatenate all segments
+        console.log('[FFmpeg Concat] Joining segments...');
+        await new Promise<void>((resolve, reject) => {
+            const ffmpeg = spawn('ffmpeg', [
+                '-y',
+                '-f', 'concat',
+                '-safe', '0',
+                '-i', concatListPath,
+                '-c:v', 'libx264',
+                '-preset', 'fast',
+                '-crf', '23',
+                '-c:a', 'aac',
+                '-b:a', '128k',
+                '-movflags', '+faststart',
+                outputPath,
+            ]);
+
+            let stderr = '';
+            ffmpeg.stderr.on('data', (data: Buffer) => { stderr += data.toString(); });
+            ffmpeg.on('close', (code: number) => {
+                if (code !== 0) {
+                    reject(new Error(`Concat failed: ${stderr.slice(-300)}`));
+                } else {
+                    resolve();
+                }
+            });
+            ffmpeg.on('error', reject);
+        });
+
+        // Step 4: Stream result
+        res.setHeader('Content-Type', 'video/mp4');
+        res.setHeader('Content-Disposition', `attachment; filename="mix_${Date.now()}.mp4"`);
+
+        const readStream = fs.createReadStream(outputPath);
+        readStream.pipe(res);
+
+        readStream.on('end', () => {
+            // Cleanup
+            fs.rm(tempDir, { recursive: true, force: true }, () => { });
+            fs.unlink(file.path, () => { });
+        });
+
+        readStream.on('error', (err) => {
+            console.error('[Stream] Error:', err);
+            fs.rm(tempDir, { recursive: true, force: true }, () => { });
+            fs.unlink(file.path, () => { });
+            if (!res.headersSent) {
+                res.status(500).json({ error: 'Failed to stream video' });
+            }
+        });
+
+    } catch (err) {
+        console.error('[FFmpeg Concat] Error:', err);
+        fs.rm(tempDir, { recursive: true, force: true }, () => { });
+        fs.unlink(file.path, () => { });
+        res.status(500).json({ error: 'Concat processing failed', details: String(err) });
+    }
+});
+
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error('[Error]', err);

@@ -292,5 +292,60 @@ export function useFFmpeg() {
         }
     }, [load]);
 
-    return { isLoaded, isProcessing, progress, message, load, extractAudio, convertToMp3, cutVideo, splitAudio };
+    /**
+     * Cut and concatenate multiple segments into one video (Mix mode)
+     * Only works with server-side processing
+     */
+    const cutMixVideo = useCallback(async (
+        videoFile: File,
+        segments: Array<{ start: number; end: number }>
+    ): Promise<Blob> => {
+        const serviceUrl = process.env.NEXT_PUBLIC_FFMPEG_SERVICE_URL;
+
+        if (!serviceUrl) {
+            throw new Error('Mix mode requires server-side processing. Configure NEXT_PUBLIC_FFMPEG_SERVICE_URL.');
+        }
+
+        setIsProcessing(true);
+        setProgress(10);
+        setMessage(`Enviando vídeo para processar ${segments.length} segmentos...`);
+
+        try {
+            const formData = new FormData();
+            formData.append('video', videoFile);
+            formData.append('segments', JSON.stringify(segments));
+
+            setProgress(30);
+            setMessage('Cortando e juntando segmentos no servidor...');
+
+            const response = await fetch(`${serviceUrl}/concat-segments`, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ error: 'Unknown error' }));
+                throw new Error(error.error || `HTTP ${response.status}`);
+            }
+
+            setProgress(90);
+            setMessage('Baixando mix final...');
+
+            const blob = await response.blob();
+
+            setProgress(100);
+            setMessage('Mix concluído!');
+
+            return blob;
+        } catch (err) {
+            console.error('[FFmpeg Mix] Error:', err);
+            throw err;
+        } finally {
+            setIsProcessing(false);
+            setProgress(0);
+            setMessage('');
+        }
+    }, []);
+
+    return { isLoaded, isProcessing, progress, message, load, extractAudio, convertToMp3, cutVideo, cutMixVideo, splitAudio };
 }

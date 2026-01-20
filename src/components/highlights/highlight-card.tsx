@@ -231,6 +231,33 @@ export function HighlightCard({
             </div>
           )}
 
+          {/* Mix Mode Segments Preview */}
+          {highlight.segments && highlight.segments.length > 0 && (
+            <div className="bg-gradient-to-r from-indigo-50 to-purple-50 dark:from-indigo-950/20 dark:to-purple-950/20 rounded-lg p-3 border border-indigo-200/50 dark:border-indigo-800/50">
+              <div className="flex items-center gap-1 mb-2 text-xs font-medium text-indigo-700 dark:text-indigo-400">
+                🎬 Segmentos do Mix ({highlight.segments.length} trechos)
+              </div>
+              <div className="space-y-2">
+                {highlight.segments.map((seg, i) => (
+                  <div key={i} className="flex items-center gap-2 text-sm">
+                    <span className="shrink-0 w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900/50 flex items-center justify-center text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                      {i + 1}
+                    </span>
+                    <span className="font-mono text-xs text-indigo-600 dark:text-indigo-400">
+                      {formatTime(seg.start)} → {formatTime(seg.end)}
+                    </span>
+                    <span className="text-xs text-slate-500">
+                      ({Math.round(seg.end - seg.start)}s)
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-2 pt-2 border-t border-indigo-200/50 dark:border-indigo-700/50 text-xs text-indigo-600 dark:text-indigo-400">
+                Duração total: {formatDuration(highlight.segments.reduce((acc, seg) => acc + (seg.end - seg.start), 0))}
+              </div>
+            </div>
+          )}
+
           {/* Transcript Preview */}
           <div className="bg-slate-50 dark:bg-slate-900 rounded-lg p-3">
             <p className="text-sm text-slate-700 dark:text-slate-300 italic line-clamp-3">
