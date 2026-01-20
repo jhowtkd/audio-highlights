@@ -74,6 +74,7 @@ export function TranscriptViewer({
   const activeSegmentIndex = findActiveSegmentIndex(segments, currentTime);
 
   // Get IDs of matching segments for highlighting
+  // Optimized: useMemo ensures the Set is only recreated when search results change, avoiding unnecessary object creation on every render
   const matchingSegmentIds = useMemo(() => new Set(searchResults.map(r => r.segmentId)), [searchResults]);
 
   // Auto-scroll para o segmento ativo
