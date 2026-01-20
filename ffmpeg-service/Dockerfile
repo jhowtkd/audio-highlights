@@ -15,18 +15,25 @@ FROM node:20-alpine
 # Install FFmpeg
 RUN apk add --no-cache ffmpeg
 
+# Create non-root user first
+RUN addgroup -g 1001 -S nodejs && \
+    adduser -S nodejs -u 1001
+
 WORKDIR /app
 
-# Create tmp directories for uploads
-RUN mkdir -p /tmp/uploads
+# Create tmp directories with correct ownership
+RUN mkdir -p /tmp/uploads && \
+    chown -R nodejs:nodejs /tmp/uploads && \
+    chmod 755 /tmp/uploads
 
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/node_modules ./node_modules
 COPY package*.json ./
 
-# Non-root user for security
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+# Set ownership of app files
+RUN chown -R nodejs:nodejs /app
+
+# Switch to non-root user
 USER nodejs
 
 EXPOSE 3001
