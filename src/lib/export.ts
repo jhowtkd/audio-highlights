@@ -5,8 +5,12 @@ import type { GeneratedHighlight, TranscriptionSegment } from '@/types';
  * Gera arquivo SRT a partir de um highlight
  */
 /**
- * Encontra segmentos relevantes para um highlight usando busca binária
- * Otimizado para arrays ordenados por tempo
+ * Encontra segmentos relevantes para um highlight usando busca binária.
+ *
+ * Esta função otimiza a busca de segmentos, reduzindo a complexidade de O(N) para O(log N + K),
+ * onde N é o total de segmentos e K é o número de segmentos relevantes.
+ *
+ * Otimizado para arrays ordenados por tempo.
  */
 function findRelevantSegments(
   highlight: GeneratedHighlight,
