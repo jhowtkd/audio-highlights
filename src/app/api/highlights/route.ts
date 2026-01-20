@@ -236,18 +236,18 @@ function extractTranscriptForHighlight(
   // regarding their start time, so they are definitely included.
   const startIndex = bisectLeft(segments, startTime);
 
-  const resultSegments: TranscriptionSegment[] = [];
+  // Optimized: Collect strings directly to avoid intermediate object array allocation
+  const texts: string[] = [];
+  const SAFE_LOOKBACK_WINDOW = 600;
 
   // 3. Scan backwards from startIndex - 1 to find segments that started before
   // startTime but end after startTime (overlapping the start boundary).
-  // We use a safe lookback window (e.g., 600s) to avoid scanning the entire array
-  // in pathological cases, while being correct for all practical transcription data.
-  const SAFE_LOOKBACK_WINDOW = 600;
+  const prefixTexts: string[] = [];
 
   for (let i = startIndex - 1; i >= 0; i--) {
     const s = segments[i];
     if (s.end > startTime) {
-      resultSegments.unshift(s);
+      prefixTexts.push(s.text);
     }
 
     // Stop if we are too far back in time
@@ -256,14 +256,17 @@ function extractTranscriptForHighlight(
     }
   }
 
-  // 4. Add segments found in the binary search range
-  for (let i = startIndex; i < endIndex; i++) {
-    resultSegments.push(segments[i]);
+  // Add prefix texts in correct chronological order
+  for (let i = prefixTexts.length - 1; i >= 0; i--) {
+    texts.push(prefixTexts[i]);
   }
 
-  return resultSegments
-    .map((s) => s.text)
-    .join(' ');
+  // 4. Add segments found in the binary search range
+  for (let i = startIndex; i < endIndex; i++) {
+    texts.push(segments[i].text);
+  }
+
+  return texts.join(' ');
 }
 
 export async function POST(request: NextRequest) {
