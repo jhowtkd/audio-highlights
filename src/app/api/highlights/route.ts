@@ -244,16 +244,24 @@ function extractTranscriptForHighlight(
   // in pathological cases, while being correct for all practical transcription data.
   const SAFE_LOOKBACK_WINDOW = 600;
 
+  // Use a temporary array to avoid costly unshift operations
+  const overlapSegments: TranscriptionSegment[] = [];
+
   for (let i = startIndex - 1; i >= 0; i--) {
     const s = segments[i];
     if (s.end > startTime) {
-      resultSegments.unshift(s);
+      overlapSegments.push(s);
     }
 
     // Stop if we are too far back in time
     if (startTime - s.start > SAFE_LOOKBACK_WINDOW) {
       break;
     }
+  }
+
+  // Add overlapped segments in correct order (they were pushed in reverse order)
+  for (let i = overlapSegments.length - 1; i >= 0; i--) {
+    resultSegments.push(overlapSegments[i]);
   }
 
   // 4. Add segments found in the binary search range
