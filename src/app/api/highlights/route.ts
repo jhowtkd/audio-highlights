@@ -172,31 +172,49 @@ ${transcriptWithTimestamps}
 }
 
 function buildMixPrompt(transcriptWithTimestamps: string, config: HighlightConfig): string {
-  return `Você é um DIRETOR DE STORYTELLING especializado em criar narrativas épicas a partir de conteúdo longo. 
-Seu objetivo é criar UM ÚNICO VÍDEO (Mix) composto por múltiplos trechos da transcrição que, juntos, contem uma história coesa e impactante.
+  const targetDuration = config.mixDuration || 180;
+  const minSegmentDuration = 15; // Cada segmento deve ter pelo menos 15s
+  const estimatedSegments = Math.max(3, Math.ceil(targetDuration / 45)); // ~45s por segmento em média
 
-## SEU PAPEL: DIRETOR DE MIX
-Você deve escanear todo o conteúdo e selecionar os MELHORES momentos que se conectam tematicamente para criar uma jornada narrativa.
-Não queremos trechos aleatórios. Queremos Começo, Meio e Fim.
+  return `Você é um DIRETOR DE STORYTELLING especializado em criar compilações narrativas épicas.
+Sua missão é criar UM ÚNICO VÍDEO LONGO (Mix) composto por MÚLTIPLOS TRECHOS da transcrição que juntos formam uma história coesa.
 
-## DURAÇÃO DO MIX
-- Duração TOTAL Aproximada: ${config.mixDuration || 180} segundos
-- Você pode selecionar quantos trechos forem necessários para atingir essa duração e contar a história.
+## ⚠️ REGRA CRÍTICA DE DURAÇÃO
+- Duração TOTAL OBRIGATÓRIA: **${targetDuration} segundos** (aproximadamente ${Math.round(targetDuration / 60)} minutos)
+- Você DEVE selecionar entre **${estimatedSegments} e ${estimatedSegments + 3} segmentos**
+- Cada segmento DEVE ter entre **${minSegmentDuration} e 60 segundos**
+- A SOMA das durações de todos os segments DEVE ser próxima de ${targetDuration} segundos
+- ❌ NÃO RETORNE segmentos curtos demais (< ${minSegmentDuration}s)
+- ❌ NÃO RETORNE apenas 1 ou 2 segmentos pequenos
 
-## TÓPICOS PRIORITÁRIOS
-${config.focusTopics?.length ? `Foque a história em: ${config.focusTopics.join(', ')}` : 'Encontre o tema mais engajante e emocional do episódio.'}
+## COMO CONSTRUIR O MIX
+1. **ABERTURA (Hook)**: Selecione um trecho que capture atenção imediatamente
+2. **DESENVOLVIMENTO**: 2-4 trechos que desenvolvam a narrativa/tema principal
+3. **CLÍMAX**: O momento mais impactante ou revelador
+4. **FECHAMENTO**: Um trecho que conclua ou deixe reflexão
 
-## TRANSCRIÇÃO COM TIMESTAMPS
+## O QUE PROCURAR NOS SEGMENTOS
+✅ Trechos com conteúdo DENSO e significativo
+✅ Momentos emocionais ou reveladores
+✅ Explicações claras de conceitos importantes
+✅ Histórias pessoais ou anedotas marcantes
+❌ EVITE intros/outros ("olá", "obrigado", "até a próxima")
+❌ EVITE silêncios ou falas vazias
+❌ EVITE repetições do mesmo ponto
+
+${config.focusTopics?.length ? `## TEMA PRIORITÁRIO\nFoque a narrativa em: ${config.focusTopics.join(', ')}` : '## TEMA PRIORITÁRIO\nEncontre o tema mais engajante e emocional do episódio.'}
+
+## TRANSCRIÇÃO COMPLETA COM TIMESTAMPS
 ${transcriptWithTimestamps}
 
-## FORMATO DE RESPOSTA (JSON PURO)
+## FORMATO DE RESPOSTA (JSON PURO, SEM MARKDOWN)
 {
-  "episodeSummary": "Resumo do tema central deste mix",
-  "keyTopics": ["tema_central", "subtema"],
+  "episodeSummary": "Resumo do tema central em 2-3 frases",
+  "keyTopics": ["tema_central", "subtema1", "subtema2"],
   "highlights": [
     {
-      "title": "Título Épico para o Mix (Storytelling)",
-      "summary": "Sinopse da narrativa criada neste mix",
+      "title": "Título Épico para o Mix",
+      "summary": "Sinopse da narrativa criada (3-4 frases descrevendo a jornada)",
       "startTime": 0,
       "endTime": 0,
       "relevanceScore": 100,
@@ -214,22 +232,32 @@ ${transcriptWithTimestamps}
         "completionPotential": 9
       },
       "segments": [
-        { "start": 10.5, "end": 45.2 },
-        { "start": 120.0, "end": 150.5 },
-        { "start": 300.2, "end": 340.0 }
+        { "start": 45.0, "end": 92.5 },
+        { "start": 150.0, "end": 195.0 },
+        { "start": 280.0, "end": 330.5 },
+        { "start": 400.0, "end": 445.0 },
+        { "start": 520.0, "end": 560.0 }
       ],
-      "reasoning": "Explicação da narrativa construída e por que esses trechos se conectam bem.",
+      "reasoning": "Explicação de como os segmentos se conectam narrativamente.",
       "tags": ["storytelling", "mix", "best_moments"]
     }
   ]
 }
 
-## INSTRUÇÕES CRÍTICAS
-1. Retorne APENAS UM item na lista "highlights".
-2. Preencha o array "segments" com os trechos reais que compõem a história.
-3. A soma das durações dos segments deve ser próxima de ${config.mixDuration || 180} segundos.
-4. Os segments DEVEM estar em ordem cronológica de narrativa (que pode não ser a ordem cronológica do áudio original, se fizer sentido para a história, mas prefira a ordem linear se possível para manter fluxo natural).
-5. Certifique-se que o áudio não corte no meio de frases importantes.
+## CHECKLIST ANTES DE RESPONDER
+1. ✅ Somei as durações dos segments? Total próximo de ${targetDuration}s?
+2. ✅ Tenho pelo menos ${estimatedSegments} segments?
+3. ✅ Cada segment tem pelo menos ${minSegmentDuration} segundos?
+4. ✅ Os timestamps existem na transcrição?
+5. ✅ Os segments contam uma história coesa?
+6. ✅ Evitei intros/outros/agradecimentos?
+
+## REGRAS FINAIS
+- Retorne APENAS UM item na lista "highlights"
+- Os campos startTime e endTime do highlight principal podem ser 0 (serão calculados pelo sistema)
+- O array "segments" é OBRIGATÓRIO e deve conter os trechos reais
+- Timestamps devem ser números decimais (ex: 123.5, não "02:03")
+- Retorne APENAS JSON válido, sem texto adicional
 `;
 }
 
