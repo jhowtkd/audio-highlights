@@ -73,19 +73,32 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     const safeStart = Math.max(0, startTime - PAD);
     const safeDuration = duration + PAD * 2;
 
-    console.log(`[FFmpeg] Cutting video: ${file.originalname} from ${safeStart}s for ${safeDuration}s`);
+    // Log file info for debugging
+    console.log(`[FFmpeg] Input file: ${file.originalname} (${file.size} bytes, mimetype: ${file.mimetype})`);
+    console.log(`[FFmpeg] File path: ${file.path}`);
+    console.log(`[FFmpeg] Cutting from ${safeStart}s for ${safeDuration}s`);
+
+    // Check if file exists and has content
+    try {
+        const stats = fs.statSync(file.path);
+        console.log(`[FFmpeg] File exists, size on disk: ${stats.size} bytes`);
+    } catch (err) {
+        console.error(`[FFmpeg] File not found: ${file.path}`);
+        res.status(500).json({ error: 'Uploaded file not found on disk' });
+        return;
+    }
 
     const ffmpegArgs = [
         '-y',
-        '-ss', safeStart.toString(),
-        '-i', file.path,
+        '-i', file.path,           // Input first
+        '-ss', safeStart.toString(), // Seek after input (output seeking - more accurate)
         '-t', safeDuration.toString(),
         '-c:v', 'libx264',
-        '-preset', 'fast', // Good balance of speed vs quality
-        '-crf', '23',      // Reasonable quality
+        '-preset', 'fast',
+        '-crf', '23',
         '-c:a', 'aac',
         '-b:a', '128k',
-        '-movflags', '+faststart', // Optimize for web streaming
+        '-movflags', '+faststart',
         outputPath,
     ];
 
