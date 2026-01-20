@@ -207,10 +207,11 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
     console.log(`[FFmpeg Concat] Processing ${parsedSegments.length} segments`);
 
     try {
-        // Step 1: Extract each segment
+        // Step 1: Extract each segment using STREAM COPY (fast!)
+        // Using .ts (MPEG-TS) format for segments - concatenates better
         for (let i = 0; i < parsedSegments.length; i++) {
             const seg = parsedSegments[i];
-            const segmentPath = path.join(tempDir, `segment_${i}.mp4`);
+            const segmentPath = path.join(tempDir, `segment_${i}.ts`);
             segmentFiles.push(segmentPath);
 
             const duration = seg.end - seg.start;
@@ -222,11 +223,9 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
                     '-ss', seg.start.toString(),
                     '-i', file.path,
                     '-t', duration.toString(),
-                    '-c:v', 'libx264',
-                    '-preset', 'fast',
-                    '-crf', '23',
-                    '-c:a', 'aac',
-                    '-b:a', '128k',
+                    '-c', 'copy',  // Stream copy - fast!
+                    '-bsf:v', 'h264_mp4toannexb',  // Required for .ts output
+                    '-f', 'mpegts',
                     segmentPath,
                 ]);
 
@@ -234,8 +233,10 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
                 ffmpeg.stderr.on('data', (data: Buffer) => { stderr += data.toString(); });
                 ffmpeg.on('close', (code: number) => {
                     if (code !== 0) {
+                        console.error(`[FFmpeg Concat] Segment ${i + 1} failed:`, stderr.slice(-500));
                         reject(new Error(`Segment extraction failed: ${stderr.slice(-300)}`));
                     } else {
+                        console.log(`[FFmpeg Concat] Segment ${i + 1} extracted successfully`);
                         resolve();
                     }
                 });
