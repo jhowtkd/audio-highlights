@@ -4,12 +4,15 @@ Ferramenta web para transcrever podcasts e gerar highlights automaticamente usan
 
 ## Funcionalidades
 
-- **Upload de Áudio**: Suporta MP3, WAV, M4A, OGG e WebM (até 500MB, máx 4 horas)
-- **Transcrição Automática**: Usa OpenAI Whisper com timestamps precisos em nível de palavra e segmento
-- **Geração de Highlights**: GPT-4o identifica automaticamente os melhores momentos para clips virais
+- **Upload de Áudio/Vídeo**: Suporta MP3, WAV, M4A, MP4, MOV (até 500MB, máx 4 horas)
+- **Transcrição Automática**: Usa Groq Whisper com timestamps precisos e chunking automático para arquivos grandes
+- **Geração de Highlights**: GPT-5 identifica automaticamente os melhores momentos para clips virais
+- **Mix Mode (Storytelling)**: Combina múltiplos trechos não-contíguos em um único vídeo editado
+- **Corte de Vídeo Server-Side**: Microserviço FFmpeg no Railway para cortes rápidos (stream copy)
+- **Persistência**: Highlights salvos automaticamente - recarregue a página sem perder trabalho
 - **Configuração Flexível**: Controle duração mínima, máxima, média e quantidade de highlights
-- **Exportação Múltipla**: SRT/VTT para legendas, Markdown/TXT para texto, JSON para dados estruturados
-- **Player Integrado**: Reproduza e navegue pelo áudio com controles completos
+- **Exportação Múltipla**: SRT/VTT para legendas, Markdown/TXT para texto, MP3/MP4 para clips
+- **Player Integrado**: Reproduza e navegue pelo áudio/vídeo com controles completos
 - **Dark Mode**: Interface adaptável com tema claro/escuro
 - **Acessibilidade**: Suporte completo a leitores de tela e navegação por teclado
 
@@ -110,11 +113,13 @@ src/
 - **Framework**: Next.js 16 (App Router)
 - **Linguagem**: TypeScript 5 (strict mode)
 - **UI**: React 19 + Tailwind CSS v4 + shadcn/ui
-- **IA**: OpenAI API (Whisper + GPT-4o)
+- **Transcrição**: Groq API (Whisper)
+- **Highlights**: OpenAI API (GPT-5)
+- **Vídeo**: FFmpeg (microserviço Docker)
 - **Validação**: Zod
 - **Ícones**: Lucide React
 - **Toast**: Sonner
-- **Deploy**: Netlify
+- **Deploy**: Vercel (Frontend) + Railway (FFmpeg)
 
 ## APIs
 
