@@ -74,7 +74,13 @@ export function TranscriptViewer({
   const activeSegmentIndex = findActiveSegmentIndex(segments, currentTime);
 
   // Get IDs of matching segments for highlighting
-  const matchingSegmentIds = useMemo(() => new Set(searchResults.map(r => r.segmentId)), [searchResults]);
+  const matchingSegmentIds = useMemo(() => {
+    const ids = new Set<string>();
+    for (const result of searchResults) {
+      ids.add(result.segmentId);
+    }
+    return ids;
+  }, [searchResults]);
 
   // Auto-scroll para o segmento ativo
   useEffect(() => {
