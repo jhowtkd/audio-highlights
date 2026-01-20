@@ -69,9 +69,37 @@ export function TranscriptViewer({
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
+  // Cache the last active index to optimize for sequential playback
+  const lastActiveIndexRef = useRef<number>(-1);
+
   // Encontra o segmento ativo baseado no tempo atual
-  // Optimized: Use binary search instead of findIndex
-  const activeSegmentIndex = findActiveSegmentIndex(segments, currentTime);
+  // Optimized: Use caching for O(1) sequential access, fallback to binary search O(log N)
+  const activeSegmentIndex = useMemo(() => {
+    const lastIndex = lastActiveIndexRef.current;
+
+    // Check if the last known segment is still active
+    if (lastIndex !== -1 && lastIndex < segments.length) {
+      const segment = segments[lastIndex];
+      if (currentTime >= segment.start && currentTime < segment.end) {
+        return lastIndex;
+      }
+
+      // Check the next segment (common case during playback)
+      const nextIndex = lastIndex + 1;
+      if (nextIndex < segments.length) {
+        const nextSegment = segments[nextIndex];
+        if (currentTime >= nextSegment.start && currentTime < nextSegment.end) {
+          lastActiveIndexRef.current = nextIndex;
+          return nextIndex;
+        }
+      }
+    }
+
+    // Fallback to binary search
+    const index = findActiveSegmentIndex(segments, currentTime);
+    lastActiveIndexRef.current = index;
+    return index;
+  }, [segments, currentTime]);
 
   // Get IDs of matching segments for highlighting
   const matchingSegmentIds = useMemo(() => new Set(searchResults.map(r => r.segmentId)), [searchResults]);
