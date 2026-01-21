@@ -74,17 +74,19 @@ export async function processLargeAudioWithFFmpeg(
         try {
             const result = await transcribeChunk(chunkFile, projectId);
 
-            // Adjust timestamps
-            const adjustedSegments = result.segments.map(s => ({
-                ...s,
-                start: s.start + startTime,
-                end: s.end + startTime,
-                words: s.words?.map(w => ({
-                    ...w,
-                    start: w.start + startTime,
-                    end: w.end + startTime
-                }))
-            }));
+            // Adjust timestamps - Optimization: Mutate in place to avoid O(N) allocations
+            // result.segments is a fresh array from the API response
+            for (const segment of result.segments) {
+                segment.start += startTime;
+                segment.end += startTime;
+                if (segment.words) {
+                    for (const word of segment.words) {
+                        word.start += startTime;
+                        word.end += startTime;
+                    }
+                }
+            }
+            const adjustedSegments = result.segments;
 
             completedChunks++;
             const progress = 20 + Math.round((completedChunks / totalChunks) * 70);
