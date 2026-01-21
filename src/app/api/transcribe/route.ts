@@ -92,7 +92,8 @@ export async function POST(request: NextRequest) {
       timestamp_granularities: ['segment', 'word'],
     }) as unknown as WhisperResponse;
 
-    // Process segments with optimized word alignment (O(N+M))
+    // Process segments with optimized word alignment
+    // Uses O(N+M) algorithm instead of O(N*M) nested loops for performance
     const alignedSegments = alignWordsToSegments(
       transcriptionResponse.segments || [],
       transcriptionResponse.words || []
