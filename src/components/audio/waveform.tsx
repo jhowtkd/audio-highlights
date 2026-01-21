@@ -85,6 +85,14 @@ export function Waveform({
         generateWaveform();
     }, [audioUrl]);
 
+    // Cache for waveform layout to avoid recalculating on every frame
+    const layoutCache = useRef<{
+        width: number;
+        height: number;
+        data: number[];
+        bars: { x: number; y: number; w: number; h: number }[];
+    } | null>(null);
+
     // Draw waveform on canvas
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -97,11 +105,18 @@ export function Waveform({
         // Set canvas size
         const dpr = window.devicePixelRatio || 1;
         const rect = container.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        canvas.style.width = `${rect.width}px`;
-        canvas.style.height = `${rect.height}px`;
-        ctx.scale(dpr, dpr);
+
+        // Avoid resetting canvas if dimensions haven't changed
+        const targetWidth = Math.floor(rect.width * dpr);
+        const targetHeight = Math.floor(rect.height * dpr);
+
+        if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            canvas.style.width = `${rect.width}px`;
+            canvas.style.height = `${rect.height}px`;
+            ctx.scale(dpr, dpr);
+        }
 
         const width = rect.width;
         const height = rect.height;
@@ -120,21 +135,40 @@ export function Waveform({
             ctx.fillRect(startX, 0, endX - startX, height);
         });
 
-        // Draw waveform bars
-        waveformData.forEach((value, index) => {
-            const x = index * barWidth;
-            const barHeight = value * (height * 0.8);
-            const y = (height - barHeight) / 2;
+        // Optimize waveform drawing with caching and batched fillStyle
+        // Check if we need to recalculate layout
+        if (!layoutCache.current ||
+            layoutCache.current.width !== width ||
+            layoutCache.current.height !== height ||
+            layoutCache.current.data !== waveformData
+        ) {
+             const bars = waveformData.map((value, index) => {
+                 const x = index * barWidth;
+                 const barHeight = value * (height * 0.8);
+                 const y = (height - barHeight) / 2;
+                 return { x, y, w: barWidth - 1, h: barHeight };
+             });
+             layoutCache.current = { width, height, data: waveformData, bars };
+        }
 
-            // Color based on played position
-            if (x < playedPosition) {
-                ctx.fillStyle = '#3b82f6'; // blue-500
-            } else {
-                ctx.fillStyle = '#cbd5e1'; // slate-300
-            }
+        const bars = layoutCache.current.bars;
 
-            ctx.fillRect(x, y, barWidth - 1, barHeight);
-        });
+        // Draw Blue bars (Played)
+        ctx.fillStyle = '#3b82f6'; // blue-500
+        let i = 0;
+        for (; i < bars.length; i++) {
+             // Stop when we reach unplayed section
+             if (bars[i].x >= playedPosition) break;
+             const b = bars[i];
+             ctx.fillRect(b.x, b.y, b.w, b.h);
+        }
+
+        // Draw Grey bars (Unplayed)
+        ctx.fillStyle = '#cbd5e1'; // slate-300
+        for (; i < bars.length; i++) {
+             const b = bars[i];
+             ctx.fillRect(b.x, b.y, b.w, b.h);
+        }
 
         // Draw playhead
         ctx.fillStyle = '#ef4444'; // red-500
