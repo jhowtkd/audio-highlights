@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { GPT_MODEL } from '@/lib/constants';
 import { createErrorResponse, requireEnvVar } from '@/lib/errors';
+import { calculateLocalRelevance } from '@/lib/search-utils';
 import { z } from 'zod';
 
 // Validation schema
@@ -144,11 +145,35 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        // Process chunks in parallel
-        // Note: For very large numbers of chunks, we might want to limit concurrency (e.g. p-limit),
-        // but for typical transcripts (hours), Promise.all is fine.
+        // Pre-calculate relevance locally to save tokens
+        const chunksWithScore = chunks.map(chunk => ({
+            ...chunk,
+            localScore: calculateLocalRelevance(chunk.data, query)
+        }));
+
+        // Sort by relevance and take top N chunks
+        // This avoids sending the full transcript to OpenAI for every query
+        // We prioritize chunks that contain query terms
+        const MAX_CHUNKS_TO_PROCESS = 5;
+
+        let targetChunks = chunksWithScore
+            .filter(c => c.localScore > 0)
+            .sort((a, b) => b.localScore - a.localScore);
+
+        // If too many matches, limit to top K
+        if (targetChunks.length > MAX_CHUNKS_TO_PROCESS) {
+             targetChunks = targetChunks.slice(0, MAX_CHUNKS_TO_PROCESS);
+        }
+
+        // If NO chunks matched locally (score 0), fall back to checking the first few chunks
+        // to handle semantic matches that might not share keywords (though less likely to work well without vector search)
+        if (targetChunks.length === 0) {
+             targetChunks = chunksWithScore.slice(0, Math.min(chunks.length, 3));
+        }
+
+        // Process only relevant chunks in parallel
         const chunkResults = await Promise.all(
-            chunks.map(chunk =>
+            targetChunks.map(chunk =>
                 processChunk(openai, chunk.data, chunk.offset, query, maxResults)
             )
         );
