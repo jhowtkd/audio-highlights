@@ -3,6 +3,7 @@ import OpenAI from 'openai';
 import { GPT_MODEL } from '@/lib/constants';
 import { createErrorResponse, requireEnvVar } from '@/lib/errors';
 import { z } from 'zod';
+import { cosineSimilarity } from '@/lib/math';
 
 // Validation schema
 const searchRequestSchema = z.object({
@@ -34,6 +35,24 @@ interface Segment {
 
 // Chunk size for splitting the transcript
 const CHUNK_SIZE = 150; // Adjust based on average segment length and model context limits
+const EMBEDDING_MODEL = 'text-embedding-3-small';
+const CHUNKS_TO_SEARCH = 3; // Number of chunks to process with LLM
+
+async function getEmbeddings(openai: OpenAI, texts: string[]): Promise<number[][]> {
+    try {
+        // Handle token limits if necessary, but 150 segments * batch size should be fine for now
+        // If texts is very large, we might need to batch the requests to embedding API
+        // For now, assuming reasonable usage pattern.
+        const response = await openai.embeddings.create({
+            model: EMBEDDING_MODEL,
+            input: texts,
+        });
+        return response.data.map(item => item.embedding);
+    } catch (error) {
+        console.error('Error generating embeddings:', error);
+        throw error;
+    }
+}
 
 async function processChunk(
     openai: OpenAI,
@@ -144,11 +163,54 @@ export async function POST(request: NextRequest) {
             });
         }
 
-        // Process chunks in parallel
-        // Note: For very large numbers of chunks, we might want to limit concurrency (e.g. p-limit),
-        // but for typical transcripts (hours), Promise.all is fine.
+        // Optimization: Use embeddings to filter chunks before sending to LLM
+        // 1. Generate embedding for query
+        // 2. Generate embeddings for each chunk (text)
+        // 3. Compute cosine similarity
+        // 4. Select top K chunks
+
+        let targetChunks = chunks;
+
+        try {
+            // Generate query embedding
+            const queryEmbeddingPromise = getEmbeddings(openai, [query]).then(res => res[0]);
+
+            // Generate chunk embeddings
+            // We concatenate the text of the chunk for embedding
+            const chunkTexts = chunks.map(chunk => chunk.data.map(s => s.text).join(' '));
+            const chunkEmbeddingsPromise = getEmbeddings(openai, chunkTexts);
+
+            const [queryEmbedding, chunkEmbeddings] = await Promise.all([
+                queryEmbeddingPromise,
+                chunkEmbeddingsPromise
+            ]);
+
+            // Calculate similarities
+            const chunkSimilarities = chunks.map((chunk, index) => {
+                const similarity = cosineSimilarity(queryEmbedding, chunkEmbeddings[index]);
+                return { chunk, index, similarity };
+            });
+
+            // Sort by similarity descending
+            chunkSimilarities.sort((a, b) => b.similarity - a.similarity);
+
+            // Select top K chunks
+            // We take at least 1, and up to CHUNKS_TO_SEARCH
+            // But if we have fewer chunks than CHUNKS_TO_SEARCH, we take all
+            targetChunks = chunkSimilarities
+                .slice(0, Math.min(chunkSimilarities.length, CHUNKS_TO_SEARCH))
+                .map(item => item.chunk);
+
+            console.log(`[Search API] Filtered ${chunks.length} chunks to ${targetChunks.length} using embeddings.`);
+
+        } catch (embeddingError) {
+            console.warn('[Search API] Embedding optimization failed, falling back to full search:', embeddingError);
+            // Fallback: targetChunks remains as all chunks
+        }
+
+        // Process selected chunks in parallel
         const chunkResults = await Promise.all(
-            chunks.map(chunk =>
+            targetChunks.map(chunk =>
                 processChunk(openai, chunk.data, chunk.offset, query, maxResults)
             )
         );
