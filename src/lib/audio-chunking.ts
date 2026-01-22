@@ -156,20 +156,23 @@ async function transcribeSingleFile(
 
     const response = await fetch('/api/transcribe', {
         method: 'POST',
-        const responseText = await response.text();
-        let data;
-        try {
-            data = JSON.parse(responseText);
-        } catch(e) {
-            console.error('Response was not JSON:', responseText.substring(0, 200));
-            throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
-        }
+        body: formData,
+    });
 
-    if(!response.ok) {
-            throw new Error(data.error || 'Erro na transcrição');
-}
+    const responseText = await response.text();
+    let data;
+    try {
+        data = JSON.parse(responseText);
+    } catch (e) {
+        console.error('Response was not JSON:', responseText.substring(0, 200));
+        throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
+    }
 
-return data.transcription;
+    if (!response.ok) {
+        throw new Error(data.error || 'Erro na transcrição');
+    }
+
+    return data.transcription;
 }
 
 async function transcribeChunk(file: File, projectId: string, retries = 3): Promise<Transcription> {
