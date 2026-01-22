@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
-import { groq, GROQ_WHISPER_MODEL } from '@/lib/groq-client';
+import { getGroqClient, GROQ_WHISPER_MODEL } from '@/lib/groq-client';
 import type { TranscriptionSegment, Transcription } from '@/types';
 import type { WhisperResponse } from '@/types/api';
 import { ERROR_MESSAGES } from '@/lib/constants';
@@ -83,14 +83,59 @@ export async function POST(request: NextRequest) {
     }
 
     console.log(`[Transcription API] Sending to Whisper: ${fileToSend.name} (${fileToSend.type})`);
+    console.log(`[Transcription API] File size: ${(fileToSend.size / 1024 / 1024).toFixed(2)} MB`);
 
-    // Call Groq Whisper API
-    const transcriptionResponse = await groq.audio.transcriptions.create({
-      file: fileToSend,
-      model: GROQ_WHISPER_MODEL,
-      response_format: 'verbose_json',
-      timestamp_granularities: ['segment', 'word'],
-    }) as unknown as WhisperResponse;
+    // Call Groq Whisper API with enhanced error handling
+    let transcriptionResponse: WhisperResponse;
+    try {
+      transcriptionResponse = await getGroqClient().audio.transcriptions.create({
+        file: fileToSend,
+        model: GROQ_WHISPER_MODEL,
+        response_format: 'verbose_json',
+        timestamp_granularities: ['segment', 'word'],
+      }) as unknown as WhisperResponse;
+    } catch (groqError: any) {
+      // Capture detailed error information from Groq
+      console.error('[Transcription API] Groq API Error:', groqError);
+
+      // Check if it's an API error with response
+      if (groqError.response) {
+        console.error('[Transcription API] Groq Response Status:', groqError.response.status);
+        console.error('[Transcription API] Groq Response Headers:', groqError.response.headers);
+
+        // Try to get response body
+        try {
+          const errorBody = await groqError.response.text();
+          console.error('[Transcription API] Groq Response Body:', errorBody);
+        } catch (e) {
+          console.error('[Transcription API] Could not read error response body');
+        }
+      }
+
+      // Check if it's a rate limit or auth error
+      if (groqError.status === 403) {
+        throw new AppError(
+          'Groq API returned 403 Forbidden',
+          403,
+          'Erro de autenticação com o serviço de transcrição. Verifique as configurações da API.'
+        );
+      }
+
+      if (groqError.status === 429) {
+        throw new AppError(
+          'Groq API rate limit exceeded',
+          429,
+          'Limite de requisições excedido. Tente novamente em alguns instantes.'
+        );
+      }
+
+      // Generic API error
+      throw new AppError(
+        `Groq API error: ${groqError.message}`,
+        groqError.status || 500,
+        'Erro ao transcrever áudio. Tente novamente ou use um arquivo diferente.'
+      );
+    }
 
     // Process segments with optimized word alignment (O(N+M))
     const alignedSegments = alignWordsToSegments(
