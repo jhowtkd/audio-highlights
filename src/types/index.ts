@@ -66,6 +66,7 @@ export interface HighlightConfig {
   excludeTopics?: string[]; // tópicos a ignorar
   isMix?: boolean;          // modo storytelling/mix
   mixDuration?: number;     // duração total para o mix
+  episodeTitle?: string;    // título do episódio/projeto para contexto
 
   platform?: PlatformTemplate; // template de plataforma selecionado (mantido para compatibilidade, mas opcional)
 }
@@ -90,7 +91,7 @@ export interface GeneratedHighlight {
   hookAnalysis?: string;
   openingLine?: string;
   // Suporte a segmentos múltiplos (Mix Mode)
-  segments?: {         
+  segments?: {
     start: number;
     end: number;
   }[];

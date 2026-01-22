@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Mic, Sparkles, FileText, AlertCircle, Timer, Film, X, ListTodo } from 'lucide-react';
+import { Mic, Sparkles, FileText, AlertCircle, Timer, Film, X, ListTodo, Scissors } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster, toast } from 'sonner';
 import { Dropzone } from '@/components/upload/dropzone';
@@ -12,6 +12,7 @@ import { ConfigPanel } from '@/components/highlights/config-panel';
 import { HighlightList } from '@/components/highlights/highlight-list';
 import { EpisodeSummary } from '@/components/highlights/episode-summary';
 import { Waveform } from '@/components/audio/waveform';
+import { DecupagemView } from '@/components/decupagem/decupagem-view';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -280,7 +281,10 @@ export default function Home() {
         },
         body: JSON.stringify({
           segments: transcription.segments,
-          config,
+          config: {
+            ...config,
+            episodeTitle: audioFile?.name.replace(/\.[^/.]+$/, '') || 'Episódio',
+          },
         }),
       });
 
@@ -552,6 +556,10 @@ export default function Home() {
                       <Sparkles className="h-4 w-4 mr-2" />
                       Highlights ({highlights.length})
                     </TabsTrigger>
+                    <TabsTrigger value="decupagem" disabled={!transcription}>
+                      <Scissors className="h-4 w-4 mr-2" />
+                      Decupagem
+                    </TabsTrigger>
                   </TabsList>
 
                   <TabsContent value="transcription">
@@ -625,6 +633,17 @@ export default function Home() {
                         onPlay={handlePlayHighlight}
                         onDownloadVideo={videoFile ? handleDownloadVideo : undefined}
                       />
+                    </div>
+                  </TabsContent>
+
+                  <TabsContent value="decupagem">
+                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-1 h-[600px]">
+                      {transcription && (
+                        <DecupagemView
+                          segments={transcription.segments}
+                          projectId={transcription.projectId || 'temp-project'}
+                        />
+                      )}
                     </div>
                   </TabsContent>
                 </Tabs>
