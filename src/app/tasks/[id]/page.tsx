@@ -13,7 +13,9 @@ import {
     AlertCircle,
     Loader2,
     RefreshCw,
+    Scissors,
 } from 'lucide-react';
+import { DecupagemView } from '@/components/decupagem/decupagem-view';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster, toast } from 'sonner';
 import { AudioPlayer } from '@/components/audio/player';
@@ -380,6 +382,10 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                         <Sparkles className="h-4 w-4 mr-2" />
                                         Highlights ({highlights.length})
                                     </TabsTrigger>
+                                    <TabsTrigger value="decupagem" disabled={!transcription}>
+                                        <Scissors className="h-4 w-4 mr-2" />
+                                        Decupagem
+                                    </TabsTrigger>
                                 </TabsList>
 
                                 <TabsContent value="transcription">
@@ -453,6 +459,17 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                             onPlay={handlePlayHighlight}
                                             onDownloadVideo={videoFile ? handleDownloadVideo : undefined}
                                         />
+                                    </div>
+                                </TabsContent>
+
+                                <TabsContent value="decupagem">
+                                    <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-1 h-[600px]">
+                                        {transcription && (
+                                            <DecupagemView
+                                                segments={transcription.segments}
+                                                projectId={task.id}
+                                            />
+                                        )}
                                     </div>
                                 </TabsContent>
                             </Tabs>
