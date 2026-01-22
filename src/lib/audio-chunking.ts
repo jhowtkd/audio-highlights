@@ -156,24 +156,20 @@ async function transcribeSingleFile(
 
     const response = await fetch('/api/transcribe', {
         method: 'POST',
-        body: formData,
-    });
-
-    if (!response.ok) {
-        let errorMsg = 'Erro na transcrição';
+        const responseText = await response.text();
+        let data;
         try {
-            const errorData = await response.json();
-            errorMsg = errorData.error || errorMsg;
-        } catch (e) {
-            const rawText = await response.text();
-            console.error('Response was not JSON:', rawText.substring(0, 200));
-            errorMsg = `Server Error (${response.status}): ${rawText.substring(0, 100)}...`;
+            data = JSON.parse(responseText);
+        } catch(e) {
+            console.error('Response was not JSON:', responseText.substring(0, 200));
+            throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
         }
-        throw new Error(errorMsg);
-    }
 
-    const data = await response.json();
-    return data.transcription;
+    if(!response.ok) {
+            throw new Error(data.error || 'Erro na transcrição');
+}
+
+return data.transcription;
 }
 
 async function transcribeChunk(file: File, projectId: string, retries = 3): Promise<Transcription> {
@@ -192,20 +188,19 @@ async function transcribeChunk(file: File, projectId: string, retries = 3): Prom
                 body: formData,
             });
 
-            if (!response.ok) {
-                let errorMsg = 'Erro na transcrição do chunk';
-                try {
-                    const errorData = await response.json();
-                    errorMsg = errorData.error || errorMsg;
-                } catch (e) {
-                    const rawText = await response.text();
-                    console.error('Response was not JSON:', rawText.substring(0, 200));
-                    errorMsg = `Server Error (${response.status}): ${rawText.substring(0, 100)}...`;
-                }
-                throw new Error(errorMsg);
+            const responseText = await response.text();
+            let data;
+            try {
+                data = JSON.parse(responseText);
+            } catch (e) {
+                console.error('Response was not JSON:', responseText.substring(0, 200));
+                throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
             }
 
-            const data = await response.json();
+            if (!response.ok) {
+                throw new Error(data.error || 'Erro na transcrição do chunk');
+            }
+
             console.log(`Chunk ${file.name} transcrito com sucesso`);
             return data.transcription;
         } catch (error) {

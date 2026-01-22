@@ -185,14 +185,18 @@ export default function Home() {
           throw new Error(errorData.error || 'Erro na transcrição');
         }
 
+        const responseText = await response.text();
         let data;
         try {
-          data = await response.json();
+          data = JSON.parse(responseText);
         } catch (parseError) {
-          // If JSON parse fails, it's likely an HTML error page (Forbidden, 404, etc)
-          const rawText = await response.text();
-          console.error('Response was not JSON:', rawText.substring(0, 200));
-          throw new Error(`Server Error (${response.status}): ${rawText.substring(0, 100)}...`);
+          console.error('Response was not JSON:', responseText.substring(0, 200));
+          throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
+        }
+
+        // Check if API returned a logical error wrapped in JSON
+        if (data.error) {
+          throw new Error(data.error);
         }
 
         transcriptionResult = data.transcription;
