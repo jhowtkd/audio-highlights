@@ -115,19 +115,19 @@ export function useTaskQueue() {
                     body: formData,
                 });
 
-                if (!response.ok) {
-                    let errorData;
-                    try {
-                        errorData = await response.json();
-                    } catch (e) {
-                        // Fallback for non-JSON errors (like 403 Forbidden HTML)
-                        const rawText = await response.text();
-                        throw new Error(`Server Error (${response.status}): ${rawText.substring(0, 50)}...`);
-                    }
-                    throw new Error(errorData.error || 'Erro na transcrição');
+                const responseText = await response.text();
+                let data;
+                try {
+                    data = JSON.parse(responseText);
+                } catch (e) {
+                    // Fallback for non-JSON errors (like 403 Forbidden HTML)
+                    throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
                 }
 
-                const data = await response.json();
+                if (!response.ok) {
+                    throw new Error(data.error || 'Erro na transcrição');
+                }
+
                 transcription = data.transcription;
             }
 
