@@ -33,7 +33,7 @@ export const WHISPER_MODEL = 'whisper-1';
 
 // Parallel transcription settings
 export const PARALLEL_TRANSCRIPTION_LIMIT = 3; // max simultaneous chunks
-export const CHUNK_DURATION_SECONDS = 4 * 60; // 4 minutes per chunk (smaller = more parallelism, < 4.5MB for Vercel)
+export const CHUNK_DURATION_SECONDS = 90; // 90 seconds per chunk (max ~3.5MB @ 320kbps, safe for 4.5MB Vercel limit)
 
 // Highlight configuration limits
 export const MIN_HIGHLIGHT_DURATION = 15; // seconds

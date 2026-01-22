@@ -151,8 +151,8 @@ export default function Home() {
 
       let transcriptionResult: Transcription;
 
-      // Use FFmpeg chunking for long audio (>3 minutes) OR large files (>4MB)
-      const CHUNK_THRESHOLD_SECONDS = 3 * 60; // 3 minutes
+      // Use FFmpeg chunking for long audio (>90 seconds) OR large files (>4MB)
+      const CHUNK_THRESHOLD_SECONDS = 90; // 90 seconds (match server constant)
       const FILE_SIZE_LIMIT = 4 * 1024 * 1024; // 4MB (Vercel limit is 4.5MB)
 
       if (duration > CHUNK_THRESHOLD_SECONDS || file.size > FILE_SIZE_LIMIT) {

@@ -10,7 +10,7 @@ import { getFileHash, getCachedTranscription, setCachedTranscription, removeCach
 import type { TaskProgress, TaskResult } from '@/types/task-types';
 import type { Transcription, GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
 
-const CHUNK_THRESHOLD_SECONDS = 10 * 60; // 10 minutes - lowered to avoid Vercel's body size limit
+const CHUNK_THRESHOLD_SECONDS = 90; // 90 seconds - lowered to avoid Vercel's body size limit
 
 export function useTaskQueue() {
     const context = useTaskQueueContext();
