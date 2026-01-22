@@ -1,6 +1,3 @@
-import { Segment } from '@/app/api/search/route'; // Or define a compatible interface here to avoid circular deps if needed.
-// Actually, it's better to define the interface here and use it.
-
 export interface SearchSegment {
     id: string;
     start: number;
