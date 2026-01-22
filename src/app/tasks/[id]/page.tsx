@@ -139,7 +139,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    segments: task.result.transcription.segments,
+                    segments: task.result.transcription.segments.map(({ words, ...s }: any) => s),
                     config: {
                         ...config,
                         episodeTitle: task.filename.replace(/\.[^/.]+$/, ''), // Remove extensão
