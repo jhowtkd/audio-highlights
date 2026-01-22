@@ -6,27 +6,43 @@ export async function GET() {
         // Check client initialization
         const client = getGroqClient();
 
-        // Create a tiny valid dummy WAV file in memory (RIFF header + 1 second of silence)
-        // Minimal standard 44 byte WAV header for 16-bit mono 44.1kHz
-        const buffer = Buffer.from([
-            0x52, 0x49, 0x46, 0x46, // "RIFF"
-            0x24, 0x00, 0x00, 0x00, // ChunkSize (36 + data size)
-            0x57, 0x41, 0x56, 0x45, // "WAVE"
-            0x66, 0x6d, 0x74, 0x20, // "fmt "
-            0x10, 0x00, 0x00, 0x00, // Subchunk1Size (16 for PCM)
-            0x01, 0x00,             // AudioFormat (1 for PCM)
-            0x01, 0x00,             // NumChannels (1 for mono)
-            0x44, 0xac, 0x00, 0x00, // SampleRate (44100)
-            0x88, 0x58, 0x01, 0x00, // ByteRate (44100 * 2)
-            0x02, 0x00,             // BlockAlign (2)
-            0x10, 0x00,             // BitsPerSample (16)
-            0x64, 0x61, 0x74, 0x61, // "data"
-            0x00, 0x00, 0x00, 0x00  // Subchunk2Size (0 bytes of data for now)
-        ]);
+        // Create a 1-second silence WAV file
+        // 44100 Hz, 16-bit, 1 channel = 88200 bytes per second
+        const sampleRate = 44100;
+        const numChannels = 1;
+        const bitsPerSample = 16;
+        const durationSeconds = 1;
+        const byteRate = sampleRate * numChannels * (bitsPerSample / 8);
+        const blockAlign = numChannels * (bitsPerSample / 8);
+        const dataSize = byteRate * durationSeconds;
+        const chunkSize = 36 + dataSize;
+
+        const buffer = Buffer.alloc(44 + dataSize);
+
+        // RIFF header
+        buffer.write('RIFF', 0);
+        buffer.writeUInt32LE(chunkSize, 4);
+        buffer.write('WAVE', 8);
+
+        // fmt chunk
+        buffer.write('fmt ', 12);
+        buffer.writeUInt32LE(16, 16); // Subchunk1Size
+        buffer.writeUInt16LE(1, 20);  // AudioFormat (PCM)
+        buffer.writeUInt16LE(numChannels, 22);
+        buffer.writeUInt32LE(sampleRate, 24);
+        buffer.writeUInt32LE(byteRate, 28);
+        buffer.writeUInt16LE(blockAlign, 32);
+        buffer.writeUInt16LE(bitsPerSample, 34);
+
+        // data chunk
+        buffer.write('data', 36);
+        buffer.writeUInt32LE(dataSize, 40);
+
+        // Silence is already zeros (Buffer.alloc fills with 0)
 
         const file = new File([buffer], 'silence.wav', { type: 'audio/wav' });
 
-        console.log('Testing Groq API with silence.wav...');
+        console.log(`Testing Groq API with silence.wav (${file.size} bytes)...`);
 
         const response = await client.audio.transcriptions.create({
             file: file,
@@ -46,9 +62,7 @@ export async function GET() {
             success: false,
             error: 'Groq API Test Failed',
             details: error.message,
-            // If full response available
             apiCode: error.status,
-            apiBody: error.response ? await error.response.text().catch(() => 'no-body') : undefined
-        }, { status: 500 }); // Return 200 or 500 but as JSON, not 403 HTML
+        }, { status: 500 });
     }
 }
