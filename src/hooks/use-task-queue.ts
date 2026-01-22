@@ -116,7 +116,14 @@ export function useTaskQueue() {
                 });
 
                 if (!response.ok) {
-                    const errorData = await response.json();
+                    let errorData;
+                    try {
+                        errorData = await response.json();
+                    } catch (e) {
+                        // Fallback for non-JSON errors (like 403 Forbidden HTML)
+                        const rawText = await response.text();
+                        throw new Error(`Server Error (${response.status}): ${rawText.substring(0, 50)}...`);
+                    }
                     throw new Error(errorData.error || 'Erro na transcrição');
                 }
 
