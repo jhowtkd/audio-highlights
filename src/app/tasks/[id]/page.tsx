@@ -139,7 +139,8 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                     'Content-Type': 'application/json',
                 },
                 body: JSON.stringify({
-                    segments: task.result.transcription.segments.map(({ words, ...s }: any) => s),
+                    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                    segments: task.result.transcription.segments.map(({ words, ...s }: { words?: unknown; [key: string]: unknown }) => s),
                     config: {
                         ...config,
                         episodeTitle: task.filename.replace(/\.[^/.]+$/, ''), // Remove extensão

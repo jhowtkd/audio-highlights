@@ -94,9 +94,11 @@ export async function POST(request: NextRequest) {
         response_format: 'verbose_json',
         timestamp_granularities: ['segment', 'word'],
       }) as unknown as WhisperResponse;
-    } catch (groqError: any) {
+    } catch (error: unknown) {
       // Capture detailed error information from Groq
-      console.error('[Transcription API] Groq API Error:', groqError);
+      console.error('[Transcription API] Groq API Error:', error);
+
+      const groqError = error as { response?: { status: number; headers: unknown; text: () => Promise<string> }; status?: number; message?: string };
 
       // Check if it's an API error with response
       if (groqError.response) {
@@ -107,7 +109,7 @@ export async function POST(request: NextRequest) {
         try {
           const errorBody = await groqError.response.text();
           console.error('[Transcription API] Groq Response Body:', errorBody);
-        } catch (e) {
+        } catch {
           console.error('[Transcription API] Could not read error response body');
         }
       }
@@ -131,7 +133,7 @@ export async function POST(request: NextRequest) {
 
       // Generic API error
       throw new AppError(
-        `Groq API error: ${groqError.message}`,
+        `Groq API error: ${groqError.message || String(error)}`,
         groqError.status || 500,
         'Erro ao transcrever áudio. Tente novamente ou use um arquivo diferente.'
       );

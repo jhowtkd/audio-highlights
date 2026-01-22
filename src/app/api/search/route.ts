@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 import { GPT_MODEL } from '@/lib/constants';
 import { createErrorResponse, requireEnvVar } from '@/lib/errors';
-import { groupSegmentsByTokenCount } from '@/lib/search-chunking';
 import { z } from 'zod';
 
 // Validation schema
@@ -32,6 +31,9 @@ interface Segment {
     end: number;
     text: string;
 }
+
+// Chunk size for splitting the transcript
+const CHUNK_SIZE = 150; // Adjust based on average segment length and model context limits
 
 async function processChunk(
     openai: OpenAI,
@@ -133,9 +135,14 @@ export async function POST(request: NextRequest) {
             organization: process.env.OPENAI_ORG_ID,
         });
 
-        // Split segments into chunks dynamically based on token count
-        // We aim for ~10k tokens per chunk to maximize context usage and minimize API calls
-        const chunks = groupSegmentsByTokenCount(segments, 10000);
+        // Split segments into chunks
+        const chunks = [];
+        for (let i = 0; i < segments.length; i += CHUNK_SIZE) {
+            chunks.push({
+                offset: i,
+                data: segments.slice(i, i + CHUNK_SIZE)
+            });
+        }
 
         // Process chunks in parallel
         // Note: For very large numbers of chunks, we might want to limit concurrency (e.g. p-limit),
