@@ -160,8 +160,16 @@ async function transcribeSingleFile(
     });
 
     if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || 'Erro na transcrição');
+        let errorMsg = 'Erro na transcrição';
+        try {
+            const errorData = await response.json();
+            errorMsg = errorData.error || errorMsg;
+        } catch (e) {
+            const rawText = await response.text();
+            console.error('Response was not JSON:', rawText.substring(0, 200));
+            errorMsg = `Server Error (${response.status}): ${rawText.substring(0, 100)}...`;
+        }
+        throw new Error(errorMsg);
     }
 
     const data = await response.json();
@@ -185,8 +193,16 @@ async function transcribeChunk(file: File, projectId: string, retries = 3): Prom
             });
 
             if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.error || 'Erro na transcrição do chunk');
+                let errorMsg = 'Erro na transcrição do chunk';
+                try {
+                    const errorData = await response.json();
+                    errorMsg = errorData.error || errorMsg;
+                } catch (e) {
+                    const rawText = await response.text();
+                    console.error('Response was not JSON:', rawText.substring(0, 200));
+                    errorMsg = `Server Error (${response.status}): ${rawText.substring(0, 100)}...`;
+                }
+                throw new Error(errorMsg);
             }
 
             const data = await response.json();

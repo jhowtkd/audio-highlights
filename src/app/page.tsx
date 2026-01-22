@@ -185,7 +185,16 @@ export default function Home() {
           throw new Error(errorData.error || 'Erro na transcrição');
         }
 
-        const data = await response.json();
+        let data;
+        try {
+          data = await response.json();
+        } catch (parseError) {
+          // If JSON parse fails, it's likely an HTML error page (Forbidden, 404, etc)
+          const rawText = await response.text();
+          console.error('Response was not JSON:', rawText.substring(0, 200));
+          throw new Error(`Server Error (${response.status}): ${rawText.substring(0, 100)}...`);
+        }
+
         transcriptionResult = data.transcription;
       }
 
