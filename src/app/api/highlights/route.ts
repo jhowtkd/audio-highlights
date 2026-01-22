@@ -22,6 +22,9 @@ function buildPrompt(
 
   const platformInstructions = getPlatformInstructions(config.platform);
 
+  // Título do episódio para contexto
+  const episodeContext = config.episodeTitle ? `\n## CONTEXTO DO EPISÓDIO\nNome: "${config.episodeTitle}"\nUse este nome para criar títulos contextuais.` : '';
+
   return `Você é um ENGENHEIRO DE ATENÇÃO especializado em transformar conteúdo de áudio longo em micro-clips virais. Sua análise é baseada em neurociência da atenção e métricas algorítmicas do Instagram Reels 2025.
 
 ## SEU PAPEL
@@ -30,6 +33,8 @@ Você não é um editor comum. Você entende que:
 - Os primeiros 3 SEGUNDOS determinam 90% do sucesso de um clip
 - Salvamentos (Saves) indicam UTILIDADE, Compartilhamentos (Shares) indicam RESSONÂNCIA EMOCIONAL
 - Taxa de Conclusão (Watch Through Rate) é mais valiosa que Likes
+
+${episodeContext}
 
 ## REGRAS DE DURAÇÃO (CRÍTICO)
 - Duração MÍNIMA: ${config.minDuration} segundos
@@ -98,6 +103,18 @@ ${platformInstructions}
 4. **Loop Potential** - O final conecta gramaticalmente/logicamente ao início?
 5. **Completion Potential** - Há motivo para assistir até o final?
 
+## REGRAS DE TÍTULOS (CRÍTICO)
+❌ NUNCA use títulos genéricos como:
+   - "O melhor momento"
+   - "Parte mais importante"
+   - "Trecho incrível"
+   - "Uma lição de vida"
+
+✅ USE títulos que descrevam O QUE está sendo dito:
+   - "[${config.episodeTitle || 'Episódio'}] Como a IA vai mudar o marketing em 2025"
+   - "O erro que 90% dos programadores cometem"
+   - "A história de como fundou a startup"
+
 ${config.focusTopics?.length ? `
 ## TÓPICOS PRIORITÁRIOS
 Dê preferência a trechos sobre: ${config.focusTopics.join(', ')}
@@ -117,7 +134,8 @@ ${transcriptWithTimestamps}
   "keyTopics": ["tópico1", "tópico2", "tópico3"],
   "highlights": [
     {
-      "title": "Título curto e magnético (máx 60 chars)",
+    {
+      "title": "${config.episodeTitle ? `[${config.episodeTitle}] - ` : ''}Título descritivo do conteúdo do trecho (máx 80 chars)",
       "suggestedTitles": [
         "Versão TikTok/Reels - mais provocativa",
         "Versão YouTube - mais descritiva", 

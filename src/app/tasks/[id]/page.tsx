@@ -140,7 +140,10 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                 },
                 body: JSON.stringify({
                     segments: task.result.transcription.segments.map(({ words, ...s }: any) => s),
-                    config,
+                    config: {
+                        ...config,
+                        episodeTitle: task.filename.replace(/\.[^/.]+$/, ''), // Remove extensão
+                    },
                 }),
             });
 

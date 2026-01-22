@@ -42,26 +42,41 @@ export const highlightConfigSchema = z.object({
   platform: z.enum(['tiktok', 'youtube_shorts', 'instagram_reels', 'podcast_trailer', 'custom']).optional(),
   isMix: z.boolean().optional(),
   mixDuration: z.number().optional(),
+  episodeTitle: z.string().optional(),
 });
 // .refine validations removed as they might conflict with Mix mode logic or need conditional checking. 
 // Basic type checking is sufficient for now, logic will be handled in the API.
 
-// Highlights API request validation
-export const generateHighlightsRequestSchema = z.object({
-  segments: z.array(z.object({
-    id: z.string(),
+// Shared segment schema
+export const transcriptionSegmentSchema = z.object({
+  id: z.string(),
+  start: z.number().nonnegative(),
+  end: z.number().nonnegative(),
+  text: z.string(),
+  confidence: z.number().min(0).max(1).optional(),
+  words: z.array(z.object({
+    word: z.string(),
     start: z.number().nonnegative(),
     end: z.number().nonnegative(),
-    text: z.string(),
     confidence: z.number().min(0).max(1).optional(),
-    words: z.array(z.object({
-      word: z.string(),
-      start: z.number().nonnegative(),
-      end: z.number().nonnegative(),
-      confidence: z.number().min(0).max(1).optional(),
-    })).optional(),
-  })).min(1, 'At least one segment is required'),
+  })).optional(),
+});
+
+// Highlights API request validation
+export const generateHighlightsRequestSchema = z.object({
+  segments: z.array(transcriptionSegmentSchema).min(1, 'At least one segment is required'),
   config: highlightConfigSchema,
+});
+
+// Decupagem API request validation
+export const decupageRequestSchema = z.object({
+  segments: z.array(transcriptionSegmentSchema),
+  config: z.object({
+    silenceThreshold: z.number().min(500).max(10000).default(2000),
+    detectFillers: z.boolean().default(true),
+    detectOffTopic: z.boolean().default(true),
+    narrativeContext: z.string().optional(),
+  }),
 });
 
 // Environment variables validation
