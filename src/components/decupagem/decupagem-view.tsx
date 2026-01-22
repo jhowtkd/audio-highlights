@@ -32,7 +32,10 @@ export function DecupagemView({ segments, projectId }: DecupagemViewProps) {
                 })
             });
 
-            if (!response.ok) throw new Error('Falha na análise');
+            if (!response.ok) {
+                const errorData = await response.json();
+                throw new Error(errorData.error || 'Falha na análise');
+            }
 
             const data = await response.json();
             if (data.success) {
