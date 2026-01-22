@@ -8,6 +8,16 @@ import { GPT_MODEL } from '@/lib/constants';
 import type { DecupageResult, DecupageSegment, DecupageProblemType } from '@/types/decupagem';
 import type { TranscriptionSegment } from '@/types';
 
+interface LLMSegmentRaw {
+    startTime: number;
+    endTime: number;
+    text: string;
+    problemType: string;
+    severity?: string;
+    suggestion?: string;
+    reason: string;
+}
+
 function buildAnalysisPrompt(segments: TranscriptionSegment[], context?: string): string {
     const transcriptText = segments
         .map(s => `[${s.start.toFixed(1)}-${s.end.toFixed(1)}] ${s.text}`)
@@ -98,7 +108,7 @@ export async function POST(request: NextRequest) {
         const llmResult = JSON.parse(content);
 
         // 3. Merge Results
-        const llmSegments: DecupageSegment[] = (llmResult.segments || []).map((s: any) => ({
+        const llmSegments: DecupageSegment[] = (llmResult.segments || []).map((s: LLMSegmentRaw) => ({
             id: uuidv4(),
             startTime: s.startTime,
             endTime: s.endTime,
