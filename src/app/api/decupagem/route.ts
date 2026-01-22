@@ -8,11 +8,6 @@ import { GPT_MODEL } from '@/lib/constants';
 import type { DecupageResult, DecupageSegment, DecupageProblemType } from '@/types/decupagem';
 import type { TranscriptionSegment } from '@/types';
 
-// Helper to estimate token count (rough approximation)
-function estimateTokens(text: string): number {
-    return Math.ceil(text.length / 4);
-}
-
 function buildAnalysisPrompt(segments: TranscriptionSegment[], context?: string): string {
     const transcriptText = segments
         .map(s => `[${s.start.toFixed(1)}-${s.end.toFixed(1)}] ${s.text}`)
