@@ -1,13 +1,21 @@
 import OpenAI from 'openai';
 
-if (!process.env.GROQ_API_KEY) {
-    throw new Error('GROQ_API_KEY is not defined in environment variables');
-}
+let groqInstance: OpenAI | null = null;
 
-export const groq = new OpenAI({
-    apiKey: process.env.GROQ_API_KEY,
-    baseURL: 'https://api.groq.com/openai/v1',
-});
+export const getGroqClient = () => {
+    if (!process.env.GROQ_API_KEY) {
+        throw new Error('GROQ_API_KEY is not defined in environment variables');
+    }
+
+    if (!groqInstance) {
+        groqInstance = new OpenAI({
+            apiKey: process.env.GROQ_API_KEY,
+            baseURL: 'https://api.groq.com/openai/v1',
+        });
+    }
+
+    return groqInstance;
+};
 
 // Configure Whisper using Groq
 // Note: Groq is compatible with OpenAI API format but uses different model names

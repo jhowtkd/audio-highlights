@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
-import { groq, GROQ_WHISPER_MODEL } from '@/lib/groq-client';
+import { getGroqClient, GROQ_WHISPER_MODEL } from '@/lib/groq-client';
 import type { TranscriptionSegment, Transcription } from '@/types';
 import type { WhisperResponse } from '@/types/api';
 import { ERROR_MESSAGES } from '@/lib/constants';
@@ -85,7 +85,7 @@ export async function POST(request: NextRequest) {
     console.log(`[Transcription API] Sending to Whisper: ${fileToSend.name} (${fileToSend.type})`);
 
     // Call Groq Whisper API
-    const transcriptionResponse = await groq.audio.transcriptions.create({
+    const transcriptionResponse = await getGroqClient().audio.transcriptions.create({
       file: fileToSend,
       model: GROQ_WHISPER_MODEL,
       response_format: 'verbose_json',
