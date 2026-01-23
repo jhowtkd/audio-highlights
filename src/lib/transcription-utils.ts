@@ -2,6 +2,7 @@ import type { WhisperSegment, WhisperWord } from '@/types/api';
 
 /**
  * Aligns words to segments efficiently (O(N+M)) assuming both are sorted by start time.
+ * This optimization avoids the O(N*M) nested loop performance bottleneck.
  *
  * @param segments List of transcription segments (must be sorted by start time)
  * @param words List of transcription words (must be sorted by start time)
@@ -16,6 +17,8 @@ export function alignWordsToSegments(
 
   return (segments || []).map((segment) => {
     // Skip words that are before this segment
+    // Since words are sorted, we can maintain a pointer (currentWordIndex)
+    // and never look back, ensuring O(N+M) complexity.
     while (
       currentWordIndex < allWords.length &&
       allWords[currentWordIndex].start < segment.start
@@ -31,6 +34,7 @@ export function alignWordsToSegments(
       const word = allWords[tempIndex];
 
       // If the word starts after the segment ends, we can stop searching for this segment
+      // because subsequent words will also be outside (due to sorting).
       if (word.start > segment.end) {
         break;
       }
