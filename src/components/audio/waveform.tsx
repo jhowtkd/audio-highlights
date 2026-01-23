@@ -85,26 +85,50 @@ export function Waveform({
         generateWaveform();
     }, [audioUrl]);
 
+    const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+
+    // Monitor container size changes
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const observer = new ResizeObserver(() => {
+            const { width, height } = container.getBoundingClientRect();
+            setDimensions({ width, height });
+        });
+
+        observer.observe(container);
+
+        // Set initial size
+        const { width, height } = container.getBoundingClientRect();
+        setDimensions({ width, height });
+
+        return () => observer.disconnect();
+    }, []);
+
     // Draw waveform on canvas
     useEffect(() => {
         const canvas = canvasRef.current;
-        const container = containerRef.current;
-        if (!canvas || !container || waveformData.length === 0) return;
+        if (!canvas || waveformData.length === 0 || dimensions.width === 0 || dimensions.height === 0) return;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
 
-        // Set canvas size
         const dpr = window.devicePixelRatio || 1;
-        const rect = container.getBoundingClientRect();
-        canvas.width = rect.width * dpr;
-        canvas.height = rect.height * dpr;
-        canvas.style.width = `${rect.width}px`;
-        canvas.style.height = `${rect.height}px`;
-        ctx.scale(dpr, dpr);
+        const targetWidth = Math.floor(dimensions.width * dpr);
+        const targetHeight = Math.floor(dimensions.height * dpr);
 
-        const width = rect.width;
-        const height = rect.height;
+        // Only resize and scale if dimensions changed (avoids clearing context and layout thrashing)
+        if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
+            canvas.width = targetWidth;
+            canvas.height = targetHeight;
+            canvas.style.width = `${dimensions.width}px`;
+            canvas.style.height = `${dimensions.height}px`;
+            ctx.scale(dpr, dpr);
+        }
+
+        const width = dimensions.width;
+        const height = dimensions.height;
         const barWidth = width / waveformData.length;
         const playedPosition = duration > 0 ? (currentTime / duration) * width : 0;
 
@@ -140,7 +164,7 @@ export function Waveform({
         ctx.fillStyle = '#ef4444'; // red-500
         ctx.fillRect(playedPosition - 1, 0, 2, height);
 
-    }, [waveformData, currentTime, duration, highlights]);
+    }, [waveformData, currentTime, duration, highlights, dimensions]);
 
     // Handle click to seek
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
