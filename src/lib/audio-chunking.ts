@@ -128,16 +128,32 @@ export async function processLargeAudioWithFFmpeg(
     // Sort by original index to maintain order
     results.sort((a, b) => a.index - b.index);
 
-    const allSegments = results.flatMap(r => r.segments);
-    const fullText = results.map(r => r.fullText).join(' ');
-    const detectedLanguage = results.find(r => r.language)?.language || 'pt';
+    // Optimize merging: Single pass reduce is faster than multiple iterations (flatMap + map + find)
+    const { allSegments, fullTextParts, detectedLanguage } = results.reduce((acc, r) => {
+        // Efficiently append segments
+        // Using a loop with push is faster and safer (avoids stack overflow) than spread operator for large arrays
+        for (const segment of r.segments) {
+            acc.allSegments.push(segment);
+        }
+
+        acc.fullTextParts.push(r.fullText);
+
+        if (!acc.detectedLanguage && r.language) {
+            acc.detectedLanguage = r.language;
+        }
+        return acc;
+    }, {
+        allSegments: [] as TranscriptionSegment[],
+        fullTextParts: [] as string[],
+        detectedLanguage: ''
+    });
 
     return {
         id: uuidv4(),
         projectId,
-        fullText,
+        fullText: fullTextParts.join(' '),
         segments: allSegments,
-        language: detectedLanguage,
+        language: detectedLanguage || 'pt',
         duration: audioDuration,
         createdAt: new Date(),
     };
