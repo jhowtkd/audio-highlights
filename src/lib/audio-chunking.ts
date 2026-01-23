@@ -4,19 +4,18 @@ import { v4 as uuidv4 } from 'uuid';
 import type { Transcription, TranscriptionSegment } from '@/types';
 import { CHUNK_DURATION_SECONDS, PARALLEL_TRANSCRIPTION_LIMIT } from '@/lib/constants';
 
-interface ChunkingProgress {
-    stage: 'splitting' | 'transcribing' | 'merging';
-    currentChunk: number;
-    totalChunks: number;
-    message: string;
-}
-
 interface ChunkResult {
     index: number;
     segments: TranscriptionSegment[];
     fullText: string;
     language?: string;
     error?: string;
+}
+
+interface ChunkTask {
+    file: File;
+    startTime: number;
+    index: number;
 }
 
 /**
@@ -44,85 +43,141 @@ export async function processLargeAudioWithFFmpeg(
 
     console.log(`[Parallel] Processing ${totalChunks} chunks with up to ${PARALLEL_TRANSCRIPTION_LIMIT} simultaneous...`);
 
-    // Phase 1: Prepare all chunks (0-20%)
-    onProgress(5, `Preparando ${totalChunks} partes...`);
-
-    const chunkFiles: { file: File; startTime: number; index: number }[] = [];
-
-    for (let i = 0; i < totalChunks; i++) {
-        const startTime = i * CHUNK_DURATION_SECONDS;
-        const chunkDuration = Math.min(CHUNK_DURATION_SECONDS, audioDuration - startTime);
-
-        const progress = Math.round((i / totalChunks) * 20);
-        onProgress(progress, `Preparando parte ${i + 1} de ${totalChunks}...`);
-
-        try {
-            const chunkFile = await ffmpegSplitFn(file, startTime, chunkDuration, i);
-            chunkFiles.push({ file: chunkFile, startTime, index: i });
-        } catch (error) {
-            console.error(`Erro ao preparar chunk ${i + 1}:`, error);
-        }
-    }
-
-    // Phase 2: Transcribe using a concurrency pool (20-90%)
+    // Shared State
+    const chunkQueue: ChunkTask[] = [];
     const results: ChunkResult[] = [];
-    let completedChunks = 0;
-    let currentIndex = 0;
+    let chunksSplitCount = 0;
+    let chunksTranscribedCount = 0;
+    let splittingComplete = false;
+    let splitError: Error | null = null;
 
-    const processChunk = async (chunkIndex: number) => {
-        const { file: chunkFile, startTime, index } = chunkFiles[chunkIndex];
+    // Helper to update progress
+    const updateProgress = () => {
+        // Split: 0-30% contribution
+        // Transcribe: 0-65% contribution
+        // Merging: 95-100%
+        const splitProgress = (chunksSplitCount / totalChunks) * 30;
+        const transcribeProgress = (chunksTranscribedCount / totalChunks) * 65;
+        const total = Math.min(95, Math.round(splitProgress + transcribeProgress));
+
+        const message = splittingComplete
+            ? `Transcrevendo... (${chunksTranscribedCount}/${totalChunks})`
+            : `Preparando e transcrevendo... (${chunksTranscribedCount}/${totalChunks})`;
+
+        onProgress(total, message);
+    };
+
+    onProgress(0, `Iniciando processamento de ${totalChunks} partes...`);
+
+    // Producer: Split Audio
+    const splitter = async () => {
         try {
-            const result = await transcribeChunk(chunkFile, projectId);
+            for (let i = 0; i < totalChunks; i++) {
+                const startTime = i * CHUNK_DURATION_SECONDS;
+                const chunkDuration = Math.min(CHUNK_DURATION_SECONDS, audioDuration - startTime);
 
-            // Adjust timestamps
-            const adjustedSegments = result.segments.map(s => ({
-                ...s,
-                start: s.start + startTime,
-                end: s.end + startTime,
-                words: s.words?.map(w => ({
-                    ...w,
-                    start: w.start + startTime,
-                    end: w.end + startTime
-                }))
-            }));
+                // Check for previous errors to abort early
+                // (Note: we continue splitting even if transcription fails, but good to check)
 
-            completedChunks++;
-            const progress = 20 + Math.round((completedChunks / totalChunks) * 70);
-            onProgress(progress, `Transcrevendo... (${completedChunks}/${totalChunks})`);
-
-            results.push({
-                index,
-                segments: adjustedSegments,
-                fullText: result.fullText,
-                language: result.language
-            } as ChunkResult);
-        } catch (error) {
-            console.error(`Erro no chunk ${index + 1}:`, error);
-            completedChunks++;
-            results.push({
-                index,
-                segments: [],
-                fullText: `[Parte ${index + 1} não transcrita]`,
-                error: String(error)
-            } as ChunkResult);
+                try {
+                    const chunkFile = await ffmpegSplitFn(file, startTime, chunkDuration, i);
+                    chunkQueue.push({ file: chunkFile, startTime, index: i });
+                    chunksSplitCount++;
+                    updateProgress();
+                } catch (error) {
+                    console.error(`Erro ao preparar chunk ${i + 1}:`, error);
+                    // If splitting fails, we can't transcribe this chunk.
+                    // We push an error placeholder or handle it.
+                    // For simplicity, we just won't push to queue, and transcriber loop will finish eventually.
+                    // But we should record the error in results?
+                    results.push({
+                        index: i,
+                        segments: [],
+                        fullText: `[Erro ao dividir parte ${i + 1}]`,
+                        error: String(error)
+                    });
+                    // Count as "transcribed" (processed) to avoid stuck progress
+                    chunksTranscribedCount++;
+                }
+            }
+        } catch (err) {
+            splitError = err as Error;
+            console.error('Fatal error in splitter:', err);
+        } finally {
+            splittingComplete = true;
         }
     };
 
-    const worker = async () => {
-        while (currentIndex < chunkFiles.length) {
-            const index = currentIndex++;
-            await processChunk(index);
+    // Consumer: Transcribe Audio
+    const transcriber = async () => {
+        while (true) {
+            let task: ChunkTask | undefined;
+
+            // Critical section: Get task from queue
+            if (chunkQueue.length > 0) {
+                task = chunkQueue.shift();
+            } else {
+                if (splittingComplete) break;
+                if (splitError) break;
+
+                // Wait for more tasks
+                await new Promise(r => setTimeout(r, 200));
+                continue;
+            }
+
+            if (!task) continue;
+
+            const { file: chunkFile, startTime, index } = task;
+
+            try {
+                const result = await transcribeChunk(chunkFile, projectId);
+
+                // Adjust timestamps
+                const adjustedSegments = result.segments.map(s => ({
+                    ...s,
+                    start: s.start + startTime,
+                    end: s.end + startTime,
+                    words: s.words?.map(w => ({
+                        ...w,
+                        start: w.start + startTime,
+                        end: w.end + startTime
+                    }))
+                }));
+
+                results.push({
+                    index,
+                    segments: adjustedSegments,
+                    fullText: result.fullText,
+                    language: result.language
+                });
+            } catch (error) {
+                console.error(`Erro no chunk ${index + 1}:`, error);
+                results.push({
+                    index,
+                    segments: [],
+                    fullText: `[Parte ${index + 1} não transcrita]`,
+                    error: String(error)
+                });
+            } finally {
+                chunksTranscribedCount++;
+                updateProgress();
+            }
         }
     };
 
-    const workers = Array.from(
-        { length: Math.min(PARALLEL_TRANSCRIPTION_LIMIT, chunkFiles.length) },
-        () => worker()
-    );
+    // Start Pipeline
+    // 1. Start splitter
+    const splitPromise = splitter();
 
-    await Promise.all(workers);
+    // 2. Start workers (up to limit)
+    // We launch workers immediately; they will wait for chunks.
+    const workerCount = Math.min(PARALLEL_TRANSCRIPTION_LIMIT, totalChunks);
+    const workers = Array.from({ length: workerCount }, () => transcriber());
 
-    // Phase 3: Merge results in order (90-100%)
+    // 3. Wait for all to finish
+    await Promise.all([splitPromise, ...workers]);
+
+    // Phase 3: Merge results (95-100%)
     onProgress(95, 'Finalizando...');
 
     // Sort by original index to maintain order
