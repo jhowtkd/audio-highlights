@@ -58,7 +58,7 @@ export function CutSuggestionCard({ segment, onAction }: CutSuggestionCardProps)
                 </div>
 
                 <p className="text-sm font-medium italic text-muted-foreground mb-2">
-                    "{segment.text}"
+                    &quot;{segment.text}&quot;
                 </p>
 
                 <p className="text-xs text-muted-foreground">

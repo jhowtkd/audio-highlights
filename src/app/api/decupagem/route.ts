@@ -8,11 +8,6 @@ import { GPT_MODEL } from '@/lib/constants';
 import type { DecupageResult, DecupageSegment, DecupageProblemType } from '@/types/decupagem';
 import type { TranscriptionSegment } from '@/types';
 
-// Helper to estimate token count (rough approximation)
-function estimateTokens(text: string): number {
-    return Math.ceil(text.length / 4);
-}
-
 function buildAnalysisPrompt(segments: TranscriptionSegment[], context?: string): string {
     const transcriptText = segments
         .map(s => `[${s.start.toFixed(1)}-${s.end.toFixed(1)}] ${s.text}`)
@@ -103,6 +98,7 @@ export async function POST(request: NextRequest) {
         const llmResult = JSON.parse(content);
 
         // 3. Merge Results
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const llmSegments: DecupageSegment[] = (llmResult.segments || []).map((s: any) => ({
             id: uuidv4(),
             startTime: s.startTime,
