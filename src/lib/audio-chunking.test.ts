@@ -37,7 +37,7 @@ describe('processLargeAudioWithFFmpeg', () => {
     // Setup mocks
     const mockFile = new File([], 'test.mp3', { type: 'audio/mpeg' });
     const projectId = 'test-project';
-    const duration = CHUNK_DURATION_SECONDS * 6; // 6 chunks
+    const duration = CHUNK_DURATION_SECONDS * 2; // 2 chunks
 
     // Mock split function
     const splitFn = vi.fn().mockImplementation(async (file, start, dur, index) => {
@@ -49,14 +49,24 @@ describe('processLargeAudioWithFFmpeg', () => {
     // Mock fetch for transcription
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     (global.fetch as any).mockImplementation(async () => {
-      // Simulate transcription time (200ms)
-      await new Promise(resolve => setTimeout(resolve, 200));
+      // Simulate transcription time (100ms)
+      await new Promise(resolve => setTimeout(resolve, 100));
       return {
         ok: true,
-        json: async () => ({
+        text: async () => JSON.stringify({
           transcription: {
             text: 'test transcription',
-            segments: [],
+            segments: [
+              {
+                start: 0,
+                end: 10,
+                text: 'segment text',
+                words: [
+                  { start: 0, end: 5, word: 'segment' },
+                  { start: 5, end: 10, word: 'text' }
+                ]
+              }
+            ],
             language: 'en'
           }
         })
@@ -76,8 +86,23 @@ describe('processLargeAudioWithFFmpeg', () => {
     const endTime = Date.now();
 
     expect(result).toBeDefined();
-    expect(splitFn).toHaveBeenCalledTimes(6);
-    expect(global.fetch).toHaveBeenCalledTimes(6);
+    expect(splitFn).toHaveBeenCalledTimes(2);
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+
+    // Check segments count
+    expect(result.segments).toHaveLength(2);
+
+    // Check first chunk segment (no offset)
+    const seg0 = result.segments[0];
+    expect(seg0.start).toBe(0);
+    expect(seg0.end).toBe(10);
+    expect(seg0.words![0].start).toBe(0);
+
+    // Check second chunk segment (offset by CHUNK_DURATION_SECONDS)
+    const seg1 = result.segments[1];
+    expect(seg1.start).toBe(CHUNK_DURATION_SECONDS);
+    expect(seg1.end).toBe(CHUNK_DURATION_SECONDS + 10);
+    expect(seg1.words![0].start).toBe(CHUNK_DURATION_SECONDS);
 
     console.log(`Total time: ${endTime - startTime}ms`);
   });
