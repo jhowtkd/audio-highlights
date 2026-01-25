@@ -3,7 +3,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getGroqClient, GROQ_WHISPER_MODEL } from '@/lib/groq-client';
 import type { TranscriptionSegment, Transcription } from '@/types';
 import type { WhisperResponse } from '@/types/api';
-import { ERROR_MESSAGES } from '@/lib/constants';
+import { ERROR_MESSAGES, MAX_FILE_SIZE } from '@/lib/constants';
 import { createErrorResponse, AppError } from '@/lib/errors';
 import { needsConversion, convertToMp3 } from '@/lib/audio-converter';
 import { alignWordsToSegments } from '@/lib/transcription-utils';
@@ -23,6 +23,15 @@ export async function POST(request: NextRequest) {
         'No file provided',
         400,
         ERROR_MESSAGES.NO_FILE_PROVIDED
+      );
+    }
+
+    // Validate file size
+    if (file.size > MAX_FILE_SIZE) {
+      throw new AppError(
+        `File size exceeds limit: ${file.size} > ${MAX_FILE_SIZE}`,
+        400,
+        ERROR_MESSAGES.FILE_TOO_LARGE
       );
     }
 
