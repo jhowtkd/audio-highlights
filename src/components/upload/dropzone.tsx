@@ -115,7 +115,11 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
 
   if (isUploading) {
     return (
-      <div className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center bg-slate-50 dark:bg-slate-900">
+      <div
+        role="status"
+        aria-live="polite"
+        className="border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl p-8 text-center bg-slate-50 dark:bg-slate-900"
+      >
         <Loader2 className="mx-auto h-12 w-12 text-slate-400 animate-spin mb-4" />
         <p className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-2">
           Enviando áudio...
@@ -162,7 +166,10 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
         </div>
 
         {audioFile.duration < 60 && (
-          <div className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg flex items-start gap-2">
+          <div
+            role="status"
+            className="mt-4 p-3 bg-amber-50 dark:bg-amber-900/30 border border-amber-200 dark:border-amber-800 rounded-lg flex items-start gap-2"
+          >
             <span className="text-amber-600 dark:text-amber-400 mt-0.5">⚠️</span>
             <div className="text-sm text-amber-800 dark:text-amber-200">
               <p className="font-medium">Áudio curto detectado ({formatDuration(audioFile.duration)})</p>
@@ -187,7 +194,10 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
   return (
     <div>
       <div
-        {...getRootProps()}
+        {...getRootProps({
+          role: 'button',
+          'aria-label': 'Área de upload de arquivo. Arraste e solte ou clique para selecionar.',
+        })}
         className={cn(
           'border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 outline-none',
           isFocused ? 'ring-2 ring-ring/50 ring-offset-2 border-slate-400 dark:border-slate-500' : '',
@@ -240,7 +250,10 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
       </div>
 
       {error && (
-        <div className="mt-4 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg">
+        <div
+          role="alert"
+          className="mt-4 p-4 bg-red-50 dark:bg-red-950 border border-red-200 dark:border-red-800 rounded-lg"
+        >
           <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
         </div>
       )}
