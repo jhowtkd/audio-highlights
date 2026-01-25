@@ -92,7 +92,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
     }
   }, []);
 
-  const { getRootProps, getInputProps, isDragActive, isDragReject } = useDropzone({
+  const { getRootProps, getInputProps, isDragActive, isDragReject, isFocused } = useDropzone({
     onDrop,
     accept: ACCEPTED_AUDIO_TYPES,
     maxFiles: 1,
@@ -154,6 +154,8 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
             size="icon"
             onClick={handleRemoveFile}
             className="text-slate-500 hover:text-slate-700"
+            aria-label="Remover arquivo"
+            title="Remover arquivo"
           >
             <X className="h-5 w-5" />
           </Button>
@@ -187,7 +189,8 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
       <div
         {...getRootProps()}
         className={cn(
-          'border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200',
+          'border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 outline-none',
+          isFocused ? 'ring-2 ring-ring/50 ring-offset-2 border-slate-400 dark:border-slate-500' : '',
           isDragActive && !isDragReject
             ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
             : isDragReject
