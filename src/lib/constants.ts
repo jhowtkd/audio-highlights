@@ -93,12 +93,12 @@ export const DEFAULT_VOLUME = 1;
 
 // Error messages
 export const ERROR_MESSAGES = {
-  FILE_TOO_LARGE: 'Arquivo muito grande. Máximo trans direto: 4.5MB (Limit Vercel). Arquivos maiores são processados automaticamente em partes.',
+  FILE_TOO_LARGE: 'O arquivo é muito grande (máximo 500MB). Tente comprimir o áudio ou dividir em partes menores.',
   AUDIO_TOO_LONG: 'Áudio muito longo. Máximo permitido: 4 horas',
   NO_FILE_PROVIDED: 'Nenhum arquivo enviado',
   TRANSCRIPTION_FAILED: 'Erro ao processar a transcrição',
   HIGHLIGHTS_FAILED: 'Erro ao gerar highlights',
-  INVALID_AUDIO_FILE: 'Não foi possível processar o arquivo de áudio',
+  INVALID_AUDIO_FILE: 'Formato de arquivo inválido. Tente enviar em MP3, WAV ou M4A.',
   API_KEY_MISSING: 'Chave da API OpenAI não configurada',
-  NETWORK_ERROR: 'Erro de conexão. Tente novamente.',
+  NETWORK_ERROR: 'Sem conexão com a internet. Verifique sua rede e tente novamente.',
 } as const;
