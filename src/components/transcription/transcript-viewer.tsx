@@ -298,13 +298,16 @@ export function TranscriptViewer({
             className="pl-9 pr-8"
           />
           {searchQuery && (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="icon"
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-2 top-1/2 -translate-y-1/2 h-6 w-6 text-slate-400 hover:text-slate-600"
+              aria-label="Limpar busca"
             >
-              <X className="h-4 w-4" />
-            </button>
+              <X className="h-3 w-3" />
+            </Button>
           )}
         </div>
         <Button
@@ -330,6 +333,8 @@ export function TranscriptViewer({
             variant="outline"
             size="sm"
             className="shrink-0"
+            aria-haspopup="true"
+            aria-expanded={showExportMenu}
           >
             <Download className="h-4 w-4 mr-1" />
             Baixar
@@ -344,35 +349,42 @@ export function TranscriptViewer({
               />
 
               {/* Dropdown Menu */}
-              <div className="absolute right-0 top-full mt-1 z-20 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 min-w-[180px]">
+              <div
+                role="menu"
+                className="absolute right-0 top-full mt-1 z-20 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 min-w-[180px]"
+              >
                 <button
+                  role="menuitem"
                   type="button"
                   onClick={() => handleExportTranscript('txt')}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-left"
                 >
                   <FileText className="h-4 w-4" />
                   Texto simples (.txt)
                 </button>
                 <button
+                  role="menuitem"
                   type="button"
                   onClick={() => handleExportTranscript('txt-timestamps')}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-left"
                 >
                   <FileText className="h-4 w-4" />
                   Com timestamps (.txt)
                 </button>
                 <button
+                  role="menuitem"
                   type="button"
                   onClick={() => handleExportTranscript('srt')}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-left"
                 >
                   <FileCode className="h-4 w-4" />
                   Legendas (.srt)
                 </button>
                 <button
+                  role="menuitem"
                   type="button"
                   onClick={() => handleExportTranscript('md')}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-left"
                 >
                   <FileCode className="h-4 w-4" />
                   Markdown (.md)
