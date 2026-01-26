@@ -236,9 +236,9 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
           <p className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-1">
             {isDragActive
               ? isDragReject
-                ? 'Formato não suportado'
-                : 'Solte o arquivo aqui'
-              : 'Arraste seu áudio aqui'}
+                ? 'Formato de arquivo não suportado'
+                : 'Solte para adicionar'
+              : 'Arraste e solte seu arquivo de áudio'}
           </p>
 
           <p className="text-sm text-slate-500 mb-4">ou clique para selecionar</p>
