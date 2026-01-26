@@ -98,7 +98,7 @@ export const ERROR_MESSAGES = {
   NO_FILE_PROVIDED: 'Nenhum arquivo enviado',
   TRANSCRIPTION_FAILED: 'Erro ao processar a transcrição',
   HIGHLIGHTS_FAILED: 'Erro ao gerar highlights',
-  INVALID_AUDIO_FILE: 'Formato de arquivo inválido. Tente enviar em MP3, WAV ou M4A.',
+  INVALID_AUDIO_FILE: 'Formato inválido. Aceitamos: MP3, WAV, M4A, OGG, FLAC, WebM.',
   API_KEY_MISSING: 'Chave da API OpenAI não configurada',
   NETWORK_ERROR: 'Sem conexão com a internet. Verifique sua rede e tente novamente.',
 } as const;
