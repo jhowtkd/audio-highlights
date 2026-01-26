@@ -186,6 +186,67 @@ export function TranscriptViewer({
   // Export handlers
   const [showExportMenu, setShowExportMenu] = useState(false);
 
+  // Memoize the transcript content to prevent unnecessary re-renders during playback
+  // Performance: Avoids O(N) map and React Element creation on every time update (4-30Hz)
+  const transcriptContent = useMemo(() => {
+    // If showing search results, display them first
+    if (showSearchResults && searchResults.length > 0) {
+      return (
+        <div className="space-y-2">
+          {searchResults.map((result) => (
+            <div
+              key={result.segmentId}
+              onClick={() => {
+                onSegmentClick(result.startTime);
+                clearSearch();
+              }}
+              className="p-3 rounded-lg cursor-pointer transition-all duration-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 hover:border-blue-400"
+            >
+              <div className="flex items-start gap-3">
+                <span className="text-xs font-mono px-2 py-1 rounded shrink-0 bg-blue-500 text-white">
+                  {formatTime(result.startTime)}
+                </span>
+                <div className="flex-1">
+                  <p className="text-sm leading-relaxed text-slate-900 dark:text-slate-100">
+                    {result.text}
+                  </p>
+                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                    {result.matchReason} • Score: {result.relevanceScore}
+                  </p>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    // Regular transcript view
+    return segments.map((segment, index) => {
+      const isActive = index === activeSegmentIndex;
+      const isMatch = matchingSegmentIds.has(segment.id);
+
+      return (
+        <TranscriptSegment
+          key={segment.id}
+          ref={isActive ? activeSegmentRef : null}
+          segment={segment}
+          isActive={isActive}
+          isMatch={isMatch}
+          onSegmentClick={onSegmentClick}
+        />
+      );
+    });
+  }, [
+    showSearchResults,
+    searchResults,
+    segments,
+    activeSegmentIndex,
+    matchingSegmentIds,
+    onSegmentClick,
+    clearSearch
+  ]);
+
   const handleExportTranscript = useCallback((format: 'txt' | 'txt-timestamps' | 'srt' | 'md') => {
     let content: string;
     let filename: string;
@@ -350,52 +411,7 @@ export function TranscriptViewer({
           className
         )}
       >
-        {/* If showing search results, display them first */}
-        {showSearchResults && searchResults.length > 0 ? (
-          <div className="space-y-2">
-            {searchResults.map((result) => (
-              <div
-                key={result.segmentId}
-                onClick={() => {
-                  onSegmentClick(result.startTime);
-                  clearSearch();
-                }}
-                className="p-3 rounded-lg cursor-pointer transition-all duration-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 hover:border-blue-400"
-              >
-                <div className="flex items-start gap-3">
-                  <span className="text-xs font-mono px-2 py-1 rounded shrink-0 bg-blue-500 text-white">
-                    {formatTime(result.startTime)}
-                  </span>
-                  <div className="flex-1">
-                    <p className="text-sm leading-relaxed text-slate-900 dark:text-slate-100">
-                      {result.text}
-                    </p>
-                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                      {result.matchReason} • Score: {result.relevanceScore}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          // Regular transcript view
-          segments.map((segment, index) => {
-            const isActive = index === activeSegmentIndex;
-            const isMatch = matchingSegmentIds.has(segment.id);
-
-            return (
-              <TranscriptSegment
-                key={segment.id}
-                ref={isActive ? activeSegmentRef : null}
-                segment={segment}
-                isActive={isActive}
-                isMatch={isMatch}
-                onSegmentClick={onSegmentClick}
-              />
-            );
-          })
-        )}
+        {transcriptContent}
       </div>
     </div>
   );
