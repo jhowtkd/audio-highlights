@@ -2,13 +2,14 @@
 
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
-import type { GeneratedHighlight } from '@/types';
+import type { GeneratedHighlight, TranscriptionSegment } from '@/types';
 
 interface WaveformProps {
     audioUrl: string;
     duration: number;
     currentTime: number;
     highlights?: GeneratedHighlight[];
+    segments?: TranscriptionSegment[];
     onSeek?: (time: number) => void;
     className?: string;
 }
@@ -27,6 +28,7 @@ export function Waveform({
     duration,
     currentTime,
     highlights = [],
+    segments,
     onSeek,
     className,
 }: WaveformProps) {
@@ -42,6 +44,37 @@ export function Waveform({
 
         const generateWaveform = async () => {
             setIsLoading(true);
+
+            // Optimization for large files (> 10 minutes):
+            // Decoding audio data via Web Audio API is expensive (memory & CPU) and can crash the browser
+            // for very large files (e.g. 4 hours = ~2.5GB PCM data).
+            // Instead, we approximate the waveform using the transcription segments (speech density).
+            if (duration > 600 && segments && segments.length > 0) {
+                try {
+                    const samples = 200;
+                    const barDuration = duration / samples;
+                    // Base noise level (silence)
+                    const newWaveformData = new Array(samples).fill(0.15);
+
+                    segments.forEach(seg => {
+                        const startBar = Math.floor(seg.start / barDuration);
+                        const endBar = Math.floor(seg.end / barDuration);
+
+                        for (let i = startBar; i <= Math.min(endBar, samples - 1); i++) {
+                            // Speech detected: higher amplitude with some random variation to look natural
+                            newWaveformData[i] = 0.6 + Math.random() * 0.35;
+                        }
+                    });
+
+                    setWaveformData(newWaveformData);
+                    setIsLoading(false);
+                    return;
+                } catch (e) {
+                    console.error('Error generating waveform from segments:', e);
+                    // Fallback to full decode if this fails
+                }
+            }
+
             try {
                 const response = await fetch(audioUrl);
                 const arrayBuffer = await response.arrayBuffer();
@@ -67,7 +100,7 @@ export function Waveform({
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
+                const multiplier = Math.max(...filteredData) || 1;
                 const normalizedData = filteredData.map(n => n / multiplier);
 
                 setWaveformData(normalizedData);
@@ -83,7 +116,7 @@ export function Waveform({
         };
 
         generateWaveform();
-    }, [audioUrl]);
+    }, [audioUrl, duration, segments]);
 
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 
