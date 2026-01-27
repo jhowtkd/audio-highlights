@@ -124,10 +124,10 @@ export default function TasksPage() {
                             <Mic className="h-8 w-8 text-slate-400" />
                         </div>
                         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                            Nenhuma task ainda
+                            Sua biblioteca está vazia
                         </h2>
                         <p className="text-slate-600 dark:text-slate-400 mb-6">
-                            Faça upload de um arquivo de áudio para começar!
+                            Envie um arquivo de áudio para gerar transcrições e highlights.
                         </p>
                         <Button onClick={() => setUploadDialogOpen(true)}>
                             <Plus className="h-4 w-4 mr-2" />
