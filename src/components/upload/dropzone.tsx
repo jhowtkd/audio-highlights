@@ -172,10 +172,9 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
           >
             <span className="text-amber-600 dark:text-amber-400 mt-0.5">⚠️</span>
             <div className="text-sm text-amber-800 dark:text-amber-200">
-              <p className="font-medium">Áudio curto detectado ({formatDuration(audioFile.duration)})</p>
+              <p className="font-medium">Dica: áudio curto ({formatDuration(audioFile.duration)})</p>
               <p className="mt-0.5 text-amber-700 dark:text-amber-300">
-                Para melhores resultados na geração de highlights, recomendamos áudios com mais de 1 minuto.
-                Áudios muito curtos podem não gerar cortes relevantes.
+                Arquivos com menos de 1 minuto podem não gerar bons cortes. Para melhores resultados, tente usar gravações mais longas.
               </p>
             </div>
           </div>
