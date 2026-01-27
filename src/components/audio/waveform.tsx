@@ -2,13 +2,14 @@
 
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
-import type { GeneratedHighlight } from '@/types';
+import type { GeneratedHighlight, TranscriptionSegment } from '@/types';
 
 interface WaveformProps {
     audioUrl: string;
     duration: number;
     currentTime: number;
     highlights?: GeneratedHighlight[];
+    segments?: TranscriptionSegment[];
     onSeek?: (time: number) => void;
     className?: string;
 }
@@ -27,6 +28,7 @@ export function Waveform({
     duration,
     currentTime,
     highlights = [],
+    segments = [],
     onSeek,
     className,
 }: WaveformProps) {
@@ -42,6 +44,39 @@ export function Waveform({
 
         const generateWaveform = async () => {
             setIsLoading(true);
+
+            // Optimization: For long files (> 10 mins) with segments available,
+            // generate waveform from transcription segments to avoid OOM crash from decodeAudioData.
+            if (duration > 600 && segments && segments.length > 0) {
+                try {
+                    console.log('Using optimized waveform generation from segments...');
+                    const samples = 200;
+                    const data = new Array(samples).fill(0);
+                    const bucketSize = duration / samples;
+
+                    // Calculate speech activity per bucket
+                    segments.forEach(segment => {
+                        const startBucket = Math.floor(segment.start / bucketSize);
+                        const endBucket = Math.floor(segment.end / bucketSize);
+
+                        for (let i = Math.max(0, startBucket); i <= Math.min(samples - 1, endBucket); i++) {
+                            // Add value proportional to overlap, but simple counting works for visualization
+                            data[i] += 1;
+                        }
+                    });
+
+                    // Normalize
+                    const max = Math.max(...data, 1);
+                    const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
+
+                    setWaveformData(normalizedData);
+                    setIsLoading(false);
+                    return;
+                } catch (e) {
+                    console.warn('Optimized generation failed, falling back to full decode', e);
+                }
+            }
+
             try {
                 const response = await fetch(audioUrl);
                 const arrayBuffer = await response.arrayBuffer();
@@ -83,7 +118,7 @@ export function Waveform({
         };
 
         generateWaveform();
-    }, [audioUrl]);
+    }, [audioUrl, duration, segments]);
 
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
 

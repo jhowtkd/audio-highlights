@@ -367,6 +367,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                 duration={audioDuration || 0}
                                 currentTime={currentTime}
                                 highlights={highlights}
+                                segments={transcription?.segments}
                                 onSeek={(time) => setSeekTo(time)}
                             />
                         </div>
