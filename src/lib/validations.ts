@@ -8,6 +8,10 @@ import {
   MAX_HIGHLIGHT_DURATION,
   MIN_HIGHLIGHT_QUANTITY,
   MAX_HIGHLIGHT_QUANTITY,
+  MAX_EPISODE_TITLE_LENGTH,
+  MAX_TOPIC_LENGTH,
+  MAX_NARRATIVE_CONTEXT_LENGTH,
+  MAX_SEGMENT_TEXT_LENGTH,
 } from './constants';
 
 // Transcription API validation
@@ -37,12 +41,12 @@ export const highlightConfigSchema = z.object({
     .int()
     .min(MIN_HIGHLIGHT_QUANTITY, `Minimum quantity is ${MIN_HIGHLIGHT_QUANTITY}`)
     .max(MAX_HIGHLIGHT_QUANTITY, `Maximum quantity is ${MAX_HIGHLIGHT_QUANTITY}`),
-  focusTopics: z.array(z.string()).optional(),
-  excludeTopics: z.array(z.string()).optional(),
+  focusTopics: z.array(z.string().max(MAX_TOPIC_LENGTH)).optional(),
+  excludeTopics: z.array(z.string().max(MAX_TOPIC_LENGTH)).optional(),
   platform: z.enum(['tiktok', 'youtube_shorts', 'instagram_reels', 'podcast_trailer', 'custom']).optional(),
   isMix: z.boolean().optional(),
   mixDuration: z.number().optional(),
-  episodeTitle: z.string().optional(),
+  episodeTitle: z.string().max(MAX_EPISODE_TITLE_LENGTH).optional(),
 });
 // .refine validations removed as they might conflict with Mix mode logic or need conditional checking. 
 // Basic type checking is sufficient for now, logic will be handled in the API.
@@ -52,7 +56,7 @@ export const transcriptionSegmentSchema = z.object({
   id: z.string(),
   start: z.number().nonnegative(),
   end: z.number().nonnegative(),
-  text: z.string(),
+  text: z.string().max(MAX_SEGMENT_TEXT_LENGTH),
   confidence: z.number().min(0).max(1).optional(),
   words: z.array(z.object({
     word: z.string(),
@@ -75,7 +79,7 @@ export const decupageRequestSchema = z.object({
     silenceThreshold: z.number().min(500).max(10000).default(2000),
     detectFillers: z.boolean().default(true),
     detectOffTopic: z.boolean().default(true),
-    narrativeContext: z.string().optional(),
+    narrativeContext: z.string().max(MAX_NARRATIVE_CONTEXT_LENGTH).optional(),
   }),
 });
 
