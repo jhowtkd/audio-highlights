@@ -61,7 +61,7 @@ export function TranscriptViewer({
   className,
 }: TranscriptViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const activeSegmentRef = useRef<HTMLDivElement>(null);
+  const activeSegmentRef = useRef<HTMLButtonElement>(null);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -194,15 +194,16 @@ export function TranscriptViewer({
       return (
         <div className="space-y-2">
           {searchResults.map((result) => (
-            <div
+            <button
+              type="button"
               key={result.segmentId}
               onClick={() => {
                 onSegmentClick(result.startTime);
                 clearSearch();
               }}
-              className="p-3 rounded-lg cursor-pointer transition-all duration-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 hover:border-blue-400"
+              className="w-full text-left appearance-none focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 p-3 rounded-lg cursor-pointer transition-all duration-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 hover:border-blue-400"
             >
-              <div className="flex items-start gap-3">
+              <div className="flex items-start gap-3 pointer-events-none">
                 <span className="text-xs font-mono px-2 py-1 rounded shrink-0 bg-blue-500 text-white">
                   {formatTime(result.startTime)}
                 </span>
@@ -215,7 +216,7 @@ export function TranscriptViewer({
                   </p>
                 </div>
               </div>
-            </div>
+            </button>
           ))}
         </div>
       );
@@ -302,6 +303,7 @@ export function TranscriptViewer({
               type="button"
               onClick={clearSearch}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              aria-label="Limpar busca"
             >
               <X className="h-4 w-4" />
             </button>
