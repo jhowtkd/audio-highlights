@@ -15,7 +15,7 @@ import {
   generateFullTranscriptMarkdown
 } from '@/lib/export';
 import type { TranscriptionSegment } from '@/types';
-import { TranscriptSegment } from './transcript-segment';
+import { TranscriptChunk } from './transcript-chunk';
 
 interface SearchResult {
   segmentId: string;
@@ -188,6 +188,7 @@ export function TranscriptViewer({
 
   // Memoize the transcript content to prevent unnecessary re-renders during playback
   // Performance: Avoids O(N) map and React Element creation on every time update (4-30Hz)
+  // Optimization: Uses Chunked Rendering to avoid full list reconciliation on active segment change
   const transcriptContent = useMemo(() => {
     // If showing search results, display them first
     if (showSearchResults && searchResults.length > 0) {
@@ -221,19 +222,25 @@ export function TranscriptViewer({
       );
     }
 
-    // Regular transcript view
-    return segments.map((segment, index) => {
-      const isActive = index === activeSegmentIndex;
-      const isMatch = matchingSegmentIds.has(segment.id);
+    // Regular transcript view - Optimized with Chunks
+    const CHUNK_SIZE = 50;
+    const totalChunks = Math.ceil(segments.length / CHUNK_SIZE);
+    const chunkIndices = Array.from({ length: totalChunks }, (_, i) => i);
+
+    return chunkIndices.map((chunkIndex) => {
+      const startIndex = chunkIndex * CHUNK_SIZE;
+      const endIndex = Math.min(startIndex + CHUNK_SIZE, segments.length);
 
       return (
-        <TranscriptSegment
-          key={segment.id}
-          ref={isActive ? activeSegmentRef : null}
-          segment={segment}
-          isActive={isActive}
-          isMatch={isMatch}
+        <TranscriptChunk
+          key={`chunk-${chunkIndex}`}
+          segments={segments}
+          startIndex={startIndex}
+          endIndex={endIndex}
+          activeSegmentIndex={activeSegmentIndex}
+          matchingSegmentIds={matchingSegmentIds}
           onSegmentClick={onSegmentClick}
+          activeSegmentRef={activeSegmentRef}
         />
       );
     });
