@@ -6,9 +6,9 @@ import { toast } from 'sonner';
 import { useTaskQueueContext } from '@/contexts/task-context';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
 import { processLargeAudioWithFFmpeg } from '@/lib/audio-chunking';
-import { getFileHash, getCachedTranscription, setCachedTranscription, removeCachedTranscription } from '@/lib/transcription-cache';
-import type { TaskProgress, TaskResult } from '@/types/task-types';
-import type { Transcription, GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
+import { getFileHash, getCachedTranscription, setCachedTranscription } from '@/lib/transcription-cache';
+import type {  TaskResult } from '@/types/task-types';
+import type { Transcription } from '@/types';
 
 const CHUNK_THRESHOLD_SECONDS = 90; // 90 seconds - lowered to avoid Vercel's body size limit
 
@@ -30,7 +30,7 @@ export function useTaskQueue() {
         getNextPendingTask,
         startProcessing,
         getTaskFile,
-        setTaskFile,
+
         resetTask, // Added resetTask
     } = context;
 
@@ -119,7 +119,7 @@ export function useTaskQueue() {
                 let data;
                 try {
                     data = JSON.parse(responseText);
-                } catch (e) {
+                } catch {
                     // Fallback for non-JSON errors (like 403 Forbidden HTML)
                     throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
                 }

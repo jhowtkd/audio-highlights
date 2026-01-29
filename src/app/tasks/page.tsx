@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Mic, Plus, Trash2, ArrowLeft, CheckCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
+import { Mic, Plus, Trash2,  CheckCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster } from 'sonner';
 import { Button } from '@/components/ui/button';

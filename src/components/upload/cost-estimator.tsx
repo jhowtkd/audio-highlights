@@ -1,4 +1,4 @@
-import { FileText, Calculator, DollarSign, Clock, Check, X, Info } from 'lucide-react';
+import { FileText, Calculator,  Clock, Check,  Info } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { estimateTotalCost } from '@/lib/pricing';
 import { formatDuration } from '@/lib/format-utils';

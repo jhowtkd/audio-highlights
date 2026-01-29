@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Check, X, Search, Clock, Scissors } from 'lucide-react';
+import { Check,  Search, Clock, Scissors } from 'lucide-react';
 import type { DecupageSegment, DecupageProblemType } from '@/types/decupagem';
 import { cn } from '@/lib/utils';
 
