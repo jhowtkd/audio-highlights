@@ -4,7 +4,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertCircle, Download, Play, RefreshCw, Scissors } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { CutSuggestionCard } from './cut-suggestion-card';
-import type { DecupageResult, DecupageSegment } from '@/types/decupagem';
+import type { DecupageResult } from '@/types/decupagem';
 import type { TranscriptionSegment } from '@/types';
 import { toast } from 'sonner';
 
@@ -42,9 +42,8 @@ export function DecupagemView({ segments, projectId }: DecupagemViewProps) {
                 setResult(data.data);
                 toast.success('Análise de decupagem concluída!');
             }
-        } catch (error) {
+        } catch {
             toast.error('Erro ao analisar decupagem');
-            console.error(error);
         } finally {
             setIsAnalyzing(false);
         }
@@ -97,7 +96,7 @@ export function DecupagemView({ segments, projectId }: DecupagemViewProps) {
             document.body.removeChild(a);
 
             toast.success(`Exportado como ${format.toUpperCase()}`);
-        } catch (error) {
+        } catch {
             toast.error('Erro ao exportar');
         }
     };

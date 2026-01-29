@@ -236,7 +236,7 @@ async function transcribeSingleFile(
     let data;
     try {
         data = JSON.parse(responseText);
-    } catch (e) {
+    } catch {
         console.error('Response was not JSON:', responseText.substring(0, 200));
         throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
     }
@@ -268,7 +268,7 @@ async function transcribeChunk(file: File, projectId: string, retries = 3): Prom
             let data;
             try {
                 data = JSON.parse(responseText);
-            } catch (e) {
+            } catch {
                 console.error('Response was not JSON:', responseText.substring(0, 200));
                 throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
             }
