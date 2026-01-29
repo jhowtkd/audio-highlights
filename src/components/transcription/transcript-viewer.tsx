@@ -15,7 +15,9 @@ import {
   generateFullTranscriptMarkdown
 } from '@/lib/export';
 import type { TranscriptionSegment } from '@/types';
-import { TranscriptSegment } from './transcript-segment';
+import { TranscriptChunk } from './transcript-chunk';
+
+const CHUNK_SIZE = 50;
 
 interface SearchResult {
   segmentId: string;
@@ -222,21 +224,22 @@ export function TranscriptViewer({
     }
 
     // Regular transcript view
-    return segments.map((segment, index) => {
-      const isActive = index === activeSegmentIndex;
-      const isMatch = matchingSegmentIds.has(segment.id);
-
-      return (
-        <TranscriptSegment
-          key={segment.id}
-          ref={isActive ? activeSegmentRef : null}
-          segment={segment}
-          isActive={isActive}
-          isMatch={isMatch}
+    const chunks = [];
+    for (let i = 0; i < segments.length; i += CHUNK_SIZE) {
+      chunks.push(
+        <TranscriptChunk
+          key={i}
+          segments={segments}
+          startIndex={i}
+          endIndex={i + CHUNK_SIZE}
+          activeSegmentIndex={activeSegmentIndex}
+          matchingSegmentIds={matchingSegmentIds}
           onSegmentClick={onSegmentClick}
+          activeSegmentRef={activeSegmentRef}
         />
       );
-    });
+    }
+    return chunks;
   }, [
     showSearchResults,
     searchResults,
