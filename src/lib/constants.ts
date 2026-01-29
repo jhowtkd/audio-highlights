@@ -43,6 +43,12 @@ export const MAX_HIGHLIGHT_QUANTITY = 20;
 export const DEFAULT_TARGET_DURATION = 60; // seconds
 export const CUT_PADDING_SECONDS = 0.5; // seconds (padding start/end to avoid clipping words)
 
+// Input length limits (Security/DoS prevention)
+export const MAX_EPISODE_TITLE_LENGTH = 200;
+export const MAX_NARRATIVE_CONTEXT_LENGTH = 1000;
+export const MAX_TOPIC_LENGTH = 50;
+export const MAX_TOPICS_COUNT = 10;
+
 // Platform Templates - preconfigured settings for different social platforms
 export const PLATFORM_TEMPLATES = {
   tiktok: {
