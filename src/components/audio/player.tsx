@@ -132,6 +132,7 @@ export function AudioPlayer({
           step={0.1}
           onValueChange={handleSeek}
           className="w-full"
+          aria-label="Controle de reprodução"
         />
         <div className="flex justify-between text-xs text-slate-500 mt-1">
           <span>{formatTime(currentTime)}</span>
