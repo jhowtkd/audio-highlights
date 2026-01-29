@@ -20,7 +20,6 @@ import { formatDuration } from '@/lib/format-utils';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import { CostEstimator } from '@/components/upload/cost-estimator';
-import { processLargeAudioWithFFmpeg } from '@/lib/audio-chunking';
 import { downloadFile } from '@/lib/export';
 import type { Transcription, GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
 
@@ -46,15 +45,15 @@ export default function Home() {
   const [transcriptionProgress, setTranscriptionProgress] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('transcription');
-  const [statusMessage, setStatusMessage] = useState<string>('');
+  const [statusMessage] = useState<string>('');
 
   // Timer states
   const [elapsedTime, setElapsedTime] = useState<number>(0);
-  const [estimatedTime, setEstimatedTime] = useState<string>('');
+  const [estimatedTime] = useState<string>('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // FFmpeg hook
-  const { cutVideo, cutMixVideo, splitAudio, convertToMp3, isProcessing: isFFmpegProcessing, progress: ffmpegProgress, message: ffmpegMessage } = useFFmpeg();
+  const { cutVideo, cutMixVideo, isProcessing: isFFmpegProcessing, progress: ffmpegProgress, message: ffmpegMessage } = useFFmpeg();
 
   // Video state
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -118,102 +117,6 @@ export default function Home() {
   const handleCancelCost = useCallback(() => {
     setPendingFile(null);
   }, []);
-
-  const handleFileAcceptedDirect = useCallback(async (file: File, duration: number) => {
-    // Reset states
-    setAudioFile(null);
-    setErrorMessage(null);
-
-    setAudioFile(file);
-    setAudioDuration(duration);
-    setAudioUrl(URL.createObjectURL(file));
-
-    setStep('transcribing');
-
-    // Estimate Time logic based on audio file size
-    const sizeMB = file.size / (1024 * 1024);
-    const estimatedSeconds = Math.max(30, Math.ceil(sizeMB * 10));
-    setEstimatedTime(formatDuration(estimatedSeconds));
-    setTranscriptionProgress(0);
-
-    setStatusMessage('Processando áudio...');
-
-    try {
-      // Convert to MP3 if needed (M4A, AAC, etc. are not always supported by Whisper)
-      let audioToTranscribe = file;
-      const needsConversion = !file.type.includes('mpeg') && !file.name.toLowerCase().endsWith('.mp3');
-
-      if (needsConversion) {
-        setStatusMessage('Convertendo áudio para formato compatível...');
-        audioToTranscribe = await convertToMp3(file);
-        setStatusMessage('Conversão concluída!');
-      }
-
-      let transcriptionResult: Transcription;
-
-      // Use FFmpeg chunking for long audio (>90 seconds) OR large files (>4MB)
-      const CHUNK_THRESHOLD_SECONDS = 90; // 90 seconds (match server constant)
-      const FILE_SIZE_LIMIT = 4 * 1024 * 1024; // 4MB (Vercel limit is 4.5MB)
-
-      if (duration > CHUNK_THRESHOLD_SECONDS || file.size > FILE_SIZE_LIMIT) {
-        // Long audio: use FFmpeg to split and process in chunks
-        transcriptionResult = await processLargeAudioWithFFmpeg(
-          audioToTranscribe,
-          crypto.randomUUID(),
-          duration,
-          splitAudio,
-          (progress, message) => {
-            setTranscriptionProgress(progress);
-            setStatusMessage(message);
-          }
-        );
-      } else {
-        // Short audio: direct API call
-        const formData = new FormData();
-        formData.append('file', audioToTranscribe);
-        formData.append('projectId', crypto.randomUUID());
-
-        setStatusMessage('Transcrevendo áudio...');
-
-        const response = await fetch('/api/transcribe', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error || 'Erro na transcrição');
-        }
-
-        const responseText = await response.text();
-        let data;
-        try {
-          data = JSON.parse(responseText);
-        } catch (parseError) {
-          console.error('Response was not JSON:', responseText.substring(0, 200));
-          throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
-        }
-
-        // Check if API returned a logical error wrapped in JSON
-        if (data.error) {
-          throw new Error(data.error);
-        }
-
-        transcriptionResult = data.transcription;
-      }
-
-      setTranscriptionProgress(100);
-      setTranscription(transcriptionResult);
-      setStep('transcribed');
-      toast.success('Transcrição concluída!');
-    } catch (error) {
-      console.error('Erro:', error);
-      const message = error instanceof Error ? error.message : 'Erro ao transcrever o áudio';
-      setErrorMessage(message);
-      toast.error(message);
-      setStep('error');
-    }
-  }, [convertToMp3, splitAudio]);
 
   const handleDownloadVideo = useCallback(async (highlight: GeneratedHighlight) => {
     if (!videoFile) return;
@@ -318,7 +221,7 @@ export default function Home() {
       toast.error(error instanceof Error ? error.message : 'Erro ao gerar highlights');
       setStep('transcribed');
     }
-  }, [transcription]);
+  }, [transcription, audioFile]);
 
   const handleSegmentClick = useCallback((startTime: number) => {
     setSeekTo(startTime);
@@ -499,7 +402,7 @@ export default function Home() {
                     <span>{formatDuration(elapsedTime)}</span>
                   </div>
                   <p className="mt-2 text-xs">
-                    Isso pode levar alguns minutos (Estimado: ~{estimatedTime})
+                    Isso pode levar alguns minutos {estimatedTime && `(Estimado: ~${estimatedTime})`}
                   </p>
                   <p className="text-xs opacity-70">Não feche esta página</p>
                 </div>
