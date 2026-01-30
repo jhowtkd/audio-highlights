@@ -55,14 +55,17 @@ export async function GET() {
             transcription: response.text
         });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
         console.error('Groq Test Error:', error);
+
+        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+        const apiCode = (error as { status?: number })?.status;
 
         return NextResponse.json({
             success: false,
             error: 'Groq API Test Failed',
-            details: error.message,
-            apiCode: error.status,
+            details: errorMessage,
+            apiCode: apiCode,
         }, { status: 500 });
     }
 }
