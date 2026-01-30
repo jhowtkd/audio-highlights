@@ -39,3 +39,22 @@ React's `useRef`/`useState` + `localStorage` is insufficient for "heavy" client-
 **Resources:**
 - https://github.com/jakearchibald/idb
 - https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+
+## 2025-02-19 - Client-Side Semantic Search
+
+**Research Topic:** Replacing server-side search with in-browser semantic search.
+
+**Finding:**
+Currently, search uses OpenAI API (`gpt-4o`), which is slow, expensive, and non-private.
+Evaluated `@xenova/transformers` with `all-MiniLM-L6-v2`.
+- POC showed ~8s model load (cached) and <100ms search latency.
+- Indexing 1 hour of audio takes ~6 seconds locally.
+
+**Decision:**
+Propose moving search to the client. This aligns with the "Offline First" goal (alongside IndexedDB proposal) and significantly improves UX (instant search).
+
+**Learning:**
+Client-side ML models (WASM/ONNX) are now mature enough to replace cloud APIs for specific tasks like embedding generation, offering superior privacy and zero marginal cost.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js/index
