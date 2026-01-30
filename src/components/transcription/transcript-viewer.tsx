@@ -15,7 +15,7 @@ import {
   generateFullTranscriptMarkdown
 } from '@/lib/export';
 import type { TranscriptionSegment } from '@/types';
-import { TranscriptSegment } from './transcript-segment';
+import { TranscriptChunk } from './transcript-chunk';
 
 interface SearchResult {
   segmentId: string;
@@ -186,6 +186,16 @@ export function TranscriptViewer({
   // Export handlers
   const [showExportMenu, setShowExportMenu] = useState(false);
 
+  const CHUNK_SIZE = 50;
+
+  const chunks = useMemo(() => {
+    const result = [];
+    for (let i = 0; i < segments.length; i += CHUNK_SIZE) {
+      result.push(segments.slice(i, i + CHUNK_SIZE));
+    }
+    return result;
+  }, [segments]);
+
   // Memoize the transcript content to prevent unnecessary re-renders during playback
   // Performance: Avoids O(N) map and React Element creation on every time update (4-30Hz)
   const transcriptContent = useMemo(() => {
@@ -221,26 +231,22 @@ export function TranscriptViewer({
       );
     }
 
-    // Regular transcript view
-    return segments.map((segment, index) => {
-      const isActive = index === activeSegmentIndex;
-      const isMatch = matchingSegmentIds.has(segment.id);
-
-      return (
-        <TranscriptSegment
-          key={segment.id}
-          ref={isActive ? activeSegmentRef : null}
-          segment={segment}
-          isActive={isActive}
-          isMatch={isMatch}
-          onSegmentClick={onSegmentClick}
-        />
-      );
-    });
+    // Regular transcript view (Optimized with chunks)
+    return chunks.map((chunkSegments, chunkIndex) => (
+      <TranscriptChunk
+        key={chunkIndex}
+        segments={chunkSegments}
+        startIndex={chunkIndex * CHUNK_SIZE}
+        activeSegmentIndex={activeSegmentIndex}
+        activeSegmentRef={activeSegmentRef}
+        matchingSegmentIds={matchingSegmentIds}
+        onSegmentClick={onSegmentClick}
+      />
+    ));
   }, [
     showSearchResults,
     searchResults,
-    segments,
+    chunks,
     activeSegmentIndex,
     matchingSegmentIds,
     onSegmentClick,
