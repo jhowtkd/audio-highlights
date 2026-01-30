@@ -302,6 +302,7 @@ export function TranscriptViewer({
               type="button"
               onClick={clearSearch}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              aria-label="Limpar busca"
             >
               <X className="h-4 w-4" />
             </button>
@@ -385,7 +386,10 @@ export function TranscriptViewer({
 
       {/* Search Results Banner */}
       {showSearchResults && (
-        <div className="flex items-center justify-between mb-3 p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+        <div
+          role="status"
+          className="flex items-center justify-between mb-3 p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg"
+        >
           <span className="text-sm text-blue-700 dark:text-blue-400">
             {isSearching ? (
               'Buscando...'
