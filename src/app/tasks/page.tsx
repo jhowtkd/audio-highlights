@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Mic, Plus, Trash2, ArrowLeft, CheckCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
+import { Mic, Plus, Trash2, CheckCircle, Clock, AlertCircle, Loader2 } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -124,10 +124,10 @@ export default function TasksPage() {
                             <Mic className="h-8 w-8 text-slate-400" />
                         </div>
                         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                            Nenhuma task ainda
+                            Nenhum áudio enviado
                         </h2>
                         <p className="text-slate-600 dark:text-slate-400 mb-6">
-                            Faça upload de um arquivo de áudio para começar!
+                            Envie seu primeiro arquivo para gerar highlights automaticamente.
                         </p>
                         <Button onClick={() => setUploadDialogOpen(true)}>
                             <Plus className="h-4 w-4 mr-2" />
