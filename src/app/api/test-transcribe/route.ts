@@ -55,7 +55,7 @@ export async function GET() {
             transcription: response.text
         });
 
-    } catch (error) {
+    } catch (error: unknown) {
         console.error('Groq Test Error:', error);
 
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
