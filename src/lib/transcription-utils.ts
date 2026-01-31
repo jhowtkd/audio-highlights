@@ -56,3 +56,33 @@ export function alignWordsToSegments(
     };
   });
 }
+
+/**
+ * Binary search to find the active segment index efficiently.
+ *
+ * @param segments List of segments sorted by start time
+ * @param currentTime Current playback time in seconds
+ * @returns Index of the active segment or -1 if none found
+ */
+export function findActiveSegmentIndex(
+  segments: { start: number; end: number }[],
+  currentTime: number
+): number {
+  let low = 0;
+  let high = segments.length - 1;
+
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
+    const segment = segments[mid];
+
+    if (currentTime >= segment.start && currentTime < segment.end) {
+      return mid;
+    } else if (currentTime < segment.start) {
+      high = mid - 1;
+    } else {
+      low = mid + 1;
+    }
+  }
+
+  return -1;
+}

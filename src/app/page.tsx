@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, useRef } from 'react';
+import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { Mic, Sparkles, FileText, AlertCircle, Timer, Film, X, ListTodo, Scissors } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
@@ -22,6 +22,7 @@ import { useTaskQueue } from '@/hooks/use-task-queue';
 import { CostEstimator } from '@/components/upload/cost-estimator';
 import { processLargeAudioWithFFmpeg } from '@/lib/audio-chunking';
 import { downloadFile } from '@/lib/export';
+import { findActiveSegmentIndex } from '@/lib/transcription-utils';
 import type { Transcription, GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
 
 type AppStep = 'upload' | 'transcribing' | 'transcribed' | 'generating' | 'completed' | 'error';
@@ -58,6 +59,11 @@ export default function Home() {
 
   // Video state
   const [videoFile, setVideoFile] = useState<File | null>(null);
+
+  const activeSegmentIndex = useMemo(() => {
+    if (!transcription?.segments) return -1;
+    return findActiveSegmentIndex(transcription.segments, currentTime);
+  }, [transcription?.segments, currentTime]);
 
   // Muda para a tab de highlights quando são gerados
   useEffect(() => {
@@ -581,7 +587,7 @@ export default function Home() {
                       {transcription && (
                         <TranscriptViewer
                           segments={transcription.segments}
-                          currentTime={currentTime}
+                          activeSegmentIndex={activeSegmentIndex}
                           onSegmentClick={handleSegmentClick}
                           className="h-[500px]"
                         />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, memo } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertCircle, Download, Play, RefreshCw, Scissors } from 'lucide-react';
@@ -13,7 +13,7 @@ interface DecupagemViewProps {
     projectId: string; // Passed for potential future persistence
 }
 
-export function DecupagemView({ segments, projectId }: DecupagemViewProps) {
+export const DecupagemView = memo(function DecupagemView({ segments, projectId }: DecupagemViewProps) {
     const [isAnalyzing, setIsAnalyzing] = useState(false);
     const [result, setResult] = useState<DecupageResult | null>(null);
 
@@ -183,4 +183,4 @@ export function DecupagemView({ segments, projectId }: DecupagemViewProps) {
             </ScrollArea>
         </div>
     );
-}
+});

@@ -1,6 +1,6 @@
 
 import { describe, it, expect } from 'vitest';
-import { alignWordsToSegments } from './transcription-utils';
+import { alignWordsToSegments, findActiveSegmentIndex } from './transcription-utils';
 import type { WhisperSegment, WhisperWord } from '@/types/api';
 
 describe('alignWordsToSegments', () => {
@@ -69,4 +69,34 @@ describe('alignWordsToSegments', () => {
       expect(result).toHaveLength(count);
       expect(end - start).toBeLessThan(100); // Should be very fast
   });
+});
+
+describe('findActiveSegmentIndex', () => {
+    const segments = [
+        { start: 0, end: 5 },
+        { start: 5, end: 10 },
+        { start: 10, end: 15 }
+    ];
+
+    it('should find active segment correctly', () => {
+        expect(findActiveSegmentIndex(segments, 0)).toBe(0);
+        expect(findActiveSegmentIndex(segments, 2.5)).toBe(0);
+        expect(findActiveSegmentIndex(segments, 5)).toBe(1);
+        expect(findActiveSegmentIndex(segments, 10)).toBe(2);
+    });
+
+    it('should return -1 if time is out of range', () => {
+        expect(findActiveSegmentIndex(segments, -1)).toBe(-1);
+        expect(findActiveSegmentIndex(segments, 15)).toBe(-1);
+        expect(findActiveSegmentIndex(segments, 20)).toBe(-1);
+    });
+
+    it('should handle gaps', () => {
+        const gapSegments = [
+            { start: 0, end: 5 },
+            // gap 5-6
+            { start: 6, end: 10 }
+        ];
+        expect(findActiveSegmentIndex(gapSegments, 5.5)).toBe(-1);
+    });
 });
