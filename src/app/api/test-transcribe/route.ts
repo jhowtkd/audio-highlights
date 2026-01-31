@@ -59,13 +59,26 @@ export async function GET() {
         console.error('Groq Test Error:', error);
 
         const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        const errorStatus = error instanceof Error && 'status' in error ? (error as { status: number }).status : 500;
 
-        return NextResponse.json({
-            success: false,
-            error: 'Groq API Test Failed',
-            details: errorMessage,
-            apiCode: errorStatus,
-        }, { status: 500 });
+        // Garante status numérico, com fallback seguro
+        const errorStatus =
+            typeof error === 'object' &&
+            error !== null &&
+            'status' in error &&
+            typeof (error as { status?: unknown }).status === 'number'
+                ? (error as { status: number }).status
+                : 500;
+
+        return NextResponse.json(
+            {
+                success: false,
+                error: 'Groq API Test Failed',
+                details: errorMessage,
+                apiCode: errorStatus,
+            },
+            {
+                status: errorStatus,
+            },
+        );
     }
 }
