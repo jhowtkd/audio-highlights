@@ -58,14 +58,25 @@ export async function GET() {
     } catch (error: unknown) {
         console.error('Groq Test Error:', error);
 
-        const errorMessage = error instanceof Error ? error.message : 'Unknown error';
-        const apiCode = (error as { status?: number })?.status;
+        const errorMessage =
+            error instanceof Error ? error.message : 'Unknown error';
 
-        return NextResponse.json({
-            success: false,
-            error: 'Groq API Test Failed',
-            details: errorMessage,
-            apiCode: apiCode,
-        }, { status: 500 });
+        // tenta extrair status de objetos de erro de libs externas (fetch, axios, etc.)
+        const apiCode =
+            typeof error === 'object' && error !== null && 'status' in error
+                ? Number((error as { status?: number }).status)
+                : undefined;
+
+        return NextResponse.json(
+            {
+                success: false,
+                error: 'Groq API Test Failed',
+                details: errorMessage,
+                apiCode,
+            },
+            {
+                status: 500,
+            },
+        );
     }
 }
