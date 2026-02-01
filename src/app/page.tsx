@@ -16,6 +16,7 @@ import { DecupagemView } from '@/components/decupagem/decupagem-view';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { ERROR_MESSAGES } from '@/lib/constants';
 import { formatDuration } from '@/lib/format-utils';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
 import { useTaskQueue } from '@/hooks/use-task-queue';
@@ -214,7 +215,7 @@ export default function Home() {
       toast.success('Transcrição concluída!');
     } catch (error) {
       console.error('Erro:', error);
-      const message = error instanceof Error ? error.message : 'Erro ao transcrever o áudio';
+      const message = error instanceof Error ? error.message : ERROR_MESSAGES.TRANSCRIPTION_FAILED;
       setErrorMessage(message);
       toast.error(message);
       setStep('error');
@@ -310,7 +311,7 @@ export default function Home() {
 
       if (!response.ok) {
         const error = await response.json();
-        throw new Error(error.error || 'Erro ao gerar highlights');
+        throw new Error(error.error || ERROR_MESSAGES.HIGHLIGHTS_FAILED);
       }
 
       const data = await response.json();
@@ -321,7 +322,7 @@ export default function Home() {
       toast.success(`${data.highlights.length} highlights gerados!`);
     } catch (error) {
       console.error('Erro:', error);
-      toast.error(error instanceof Error ? error.message : 'Erro ao gerar highlights');
+      toast.error(error instanceof Error ? error.message : ERROR_MESSAGES.HIGHLIGHTS_FAILED);
       setStep('transcribed');
     }
   }, [transcription]);
