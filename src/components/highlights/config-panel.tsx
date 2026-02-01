@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, memo } from 'react';
 import { Sparkles, Clock, Hash, Info, Layers, Workflow } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
@@ -25,7 +25,7 @@ const DEFAULT_CONFIG: HighlightConfig = {
   mixDuration: 180, // 3 min default for mix
 };
 
-export function ConfigPanel({ onGenerate, isGenerating, audioDuration }: ConfigPanelProps) {
+export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating, audioDuration }: ConfigPanelProps) {
   const [config, setConfig] = useState<HighlightConfig>(DEFAULT_CONFIG);
 
   const handleMinDurationChange = (value: number[]) => {
@@ -311,4 +311,4 @@ export function ConfigPanel({ onGenerate, isGenerating, audioDuration }: ConfigP
       </CardContent>
     </Card>
   );
-}
+});

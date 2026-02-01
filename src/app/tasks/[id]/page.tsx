@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useCallback, useEffect, use, useRef, ChangeEvent } from 'react';
+import { useState, useCallback, useEffect, use, useRef, ChangeEvent, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -30,6 +30,7 @@ import { useTaskQueue } from '@/hooks/use-task-queue';
 import { useTaskQueueContext } from '@/contexts/task-context';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
 import { downloadFile } from '@/lib/export';
+import { findActiveSegmentIndex } from '@/lib/transcription-utils';
 import type { GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
 
 interface HighlightStats {
@@ -86,6 +87,11 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const [seekTo, setSeekTo] = useState<number | undefined>(undefined);
     const [activeTab, setActiveTab] = useState('transcription');
     const [videoFile, setVideoFile] = useState<File | null>(null);
+
+    const activeSegmentIndex = useMemo(() => {
+        if (!task?.result?.transcription?.segments) return -1;
+        return findActiveSegmentIndex(task.result.transcription.segments, currentTime);
+    }, [task, currentTime]);
 
     // Atualiza task quando o estado muda
     useEffect(() => {
@@ -397,7 +403,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                         {transcription && (
                                             <TranscriptViewer
                                                 segments={transcription.segments}
-                                                currentTime={currentTime}
+                                                activeSegmentIndex={activeSegmentIndex}
                                                 onSegmentClick={handleSegmentClick}
                                                 className="h-[500px]"
                                             />

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { FileText, Tag, Sparkles } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -10,7 +11,7 @@ interface EpisodeSummaryProps {
     className?: string;
 }
 
-export function EpisodeSummary({ analysis, className }: EpisodeSummaryProps) {
+export const EpisodeSummary = memo(function EpisodeSummary({ analysis, className }: EpisodeSummaryProps) {
     if (!analysis.summary && analysis.keyTopics.length === 0) {
         return null;
     }
@@ -69,4 +70,4 @@ export function EpisodeSummary({ analysis, className }: EpisodeSummaryProps) {
             </CardContent>
         </Card>
     );
-}
+});

@@ -1,5 +1,6 @@
 'use client';
 
+import { memo } from 'react';
 import { Download, Clock, Percent, Check } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
@@ -20,7 +21,7 @@ interface HighlightListProps {
   onDownloadVideo?: (highlight: GeneratedHighlight) => void;
 }
 
-export function HighlightList({ highlights, segments, stats, onPlay, onDownloadVideo }: HighlightListProps) {
+export const HighlightList = memo(function HighlightList({ highlights, segments, stats, onPlay, onDownloadVideo }: HighlightListProps) {
   const handleCopy = async (text: string) => {
     try {
       await navigator.clipboard.writeText(text);
@@ -125,4 +126,4 @@ export function HighlightList({ highlights, segments, stats, onPlay, onDownloadV
       </div>
     </div>
   );
-}
+});

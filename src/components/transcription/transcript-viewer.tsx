@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, useCallback, useMemo } from 'react';
+import { useRef, useEffect, useState, useCallback, useMemo, memo } from 'react';
 import { Search, X, Loader2, Sparkles, Download, FileText, FileCode } from 'lucide-react';
 import { toast } from 'sonner';
 import { formatTime } from '@/lib/format-utils';
@@ -28,35 +28,14 @@ interface SearchResult {
 
 interface TranscriptViewerProps {
   segments: TranscriptionSegment[];
-  currentTime: number;
+  activeSegmentIndex: number;
   onSegmentClick: (startTime: number) => void;
   className?: string;
 }
 
-// Binary search to find the active segment index efficiently
-function findActiveSegmentIndex(segments: TranscriptionSegment[], currentTime: number): number {
-  let low = 0;
-  let high = segments.length - 1;
-
-  while (low <= high) {
-    const mid = Math.floor((low + high) / 2);
-    const segment = segments[mid];
-
-    if (currentTime >= segment.start && currentTime < segment.end) {
-      return mid;
-    } else if (currentTime < segment.start) {
-      high = mid - 1;
-    } else {
-      low = mid + 1;
-    }
-  }
-
-  return -1;
-}
-
-export function TranscriptViewer({
+export const TranscriptViewer = memo(function TranscriptViewer({
   segments,
-  currentTime,
+  activeSegmentIndex,
   onSegmentClick,
   className,
 }: TranscriptViewerProps) {
@@ -68,38 +47,6 @@ export function TranscriptViewer({
   const [isSearching, setIsSearching] = useState(false);
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
-
-  // Cache the last active index to optimize for sequential playback
-  const lastActiveIndexRef = useRef<number>(-1);
-
-  // Encontra o segmento ativo baseado no tempo atual
-  // Optimized: Use caching for O(1) sequential access, fallback to binary search O(log N)
-  const activeSegmentIndex = useMemo(() => {
-    const lastIndex = lastActiveIndexRef.current;
-
-    // Check if the last known segment is still active
-    if (lastIndex !== -1 && lastIndex < segments.length) {
-      const segment = segments[lastIndex];
-      if (currentTime >= segment.start && currentTime < segment.end) {
-        return lastIndex;
-      }
-
-      // Check the next segment (common case during playback)
-      const nextIndex = lastIndex + 1;
-      if (nextIndex < segments.length) {
-        const nextSegment = segments[nextIndex];
-        if (currentTime >= nextSegment.start && currentTime < nextSegment.end) {
-          lastActiveIndexRef.current = nextIndex;
-          return nextIndex;
-        }
-      }
-    }
-
-    // Fallback to binary search
-    const index = findActiveSegmentIndex(segments, currentTime);
-    lastActiveIndexRef.current = index;
-    return index;
-  }, [segments, currentTime]);
 
   // Get IDs of matching segments for highlighting
   const matchingSegmentIds = useMemo(() => {
@@ -415,4 +362,4 @@ export function TranscriptViewer({
       </div>
     </div>
   );
-}
+});
