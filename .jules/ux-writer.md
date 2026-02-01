@@ -1,7 +1,13 @@
-## 2026-01-29 - Empty State Improvement
+## 2025-02-18 - Validation Language Consistency
 
-**Copy Type:** Empty State
-**Original:** "Nenhuma task ainda" / "Faça upload de um arquivo de áudio para começar!"
-**Changed To:** "Nenhum áudio enviado" / "Envie seu primeiro arquivo para gerar highlights automaticamente."
-**Learning:** "Task" is internal jargon. Users think in terms of their content ("audio"). "Faça upload" is passive; "Envie" is active. Adding the "why" (benefits) in empty states increases motivation.
-**Rule:** Avoid "task" in user-facing copy unless it refers to a specific workflow item the user created. Use content-first terms (Audio, Video, Project).
+**Copy Type:** Validation Error Messages
+
+**Original:** "File is required" (English in Portuguese app)
+
+**Changed To:** "O arquivo é obrigatório"
+
+**Learning:** This codebase is primarily in Portuguese (UI, constants), but validation schemas were using English defaults.
+This creates a jarring experience for users if they encounter these errors.
+Aligning backend validation messages with the frontend language is crucial for a consistent voice.
+
+**Rule:** Ensure all validation messages match the application's primary language (Portuguese in this case).

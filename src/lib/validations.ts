@@ -18,10 +18,10 @@ import {
 export const transcribeRequestSchema = z.object({
   file: z.custom<File>(
     (val) => val instanceof File,
-    'File is required'
+    'O arquivo é obrigatório'
   ).refine(
     (file) => file.size <= MAX_FILE_SIZE,
-    `File size must be less than ${MAX_FILE_SIZE / (1024 * 1024)}MB`
+    `O tamanho do arquivo deve ser menor que ${MAX_FILE_SIZE / (1024 * 1024)}MB`
   ),
   projectId: z.string().uuid().optional(),
 });
@@ -29,24 +29,28 @@ export const transcribeRequestSchema = z.object({
 // Highlight configuration validation
 export const highlightConfigSchema = z.object({
   minDuration: z.number()
-    .min(MIN_HIGHLIGHT_DURATION, `Minimum duration is ${MIN_HIGHLIGHT_DURATION}s`)
-    .max(MAX_HIGHLIGHT_DURATION, `Maximum duration is ${MAX_HIGHLIGHT_DURATION}s`),
+    .min(MIN_HIGHLIGHT_DURATION, `Duração mínima é ${MIN_HIGHLIGHT_DURATION}s`)
+    .max(MAX_HIGHLIGHT_DURATION, `Duração máxima é ${MAX_HIGHLIGHT_DURATION}s`),
   maxDuration: z.number()
-    .min(MIN_HIGHLIGHT_DURATION, `Minimum duration is ${MIN_HIGHLIGHT_DURATION}s`)
-    .max(MAX_HIGHLIGHT_DURATION, `Maximum duration is ${MAX_HIGHLIGHT_DURATION}s`),
+    .min(MIN_HIGHLIGHT_DURATION, `Duração mínima é ${MIN_HIGHLIGHT_DURATION}s`)
+    .max(MAX_HIGHLIGHT_DURATION, `Duração máxima é ${MAX_HIGHLIGHT_DURATION}s`),
   targetDuration: z.number()
-    .min(MIN_HIGHLIGHT_DURATION, `Minimum duration is ${MIN_HIGHLIGHT_DURATION}s`)
-    .max(MAX_HIGHLIGHT_DURATION, `Maximum duration is ${MAX_HIGHLIGHT_DURATION}s`),
+    .min(MIN_HIGHLIGHT_DURATION, `Duração mínima é ${MIN_HIGHLIGHT_DURATION}s`)
+    .max(MAX_HIGHLIGHT_DURATION, `Duração máxima é ${MAX_HIGHLIGHT_DURATION}s`),
   quantity: z.number()
     .int()
-    .min(MIN_HIGHLIGHT_QUANTITY, `Minimum quantity is ${MIN_HIGHLIGHT_QUANTITY}`)
-    .max(MAX_HIGHLIGHT_QUANTITY, `Maximum quantity is ${MAX_HIGHLIGHT_QUANTITY}`),
-  focusTopics: z.array(z.string().max(MAX_TOPIC_LENGTH)).max(MAX_TOPICS_COUNT).optional(),
-  excludeTopics: z.array(z.string().max(MAX_TOPIC_LENGTH)).max(MAX_TOPICS_COUNT).optional(),
+    .min(MIN_HIGHLIGHT_QUANTITY, `Quantidade mínima é ${MIN_HIGHLIGHT_QUANTITY}`)
+    .max(MAX_HIGHLIGHT_QUANTITY, `Quantidade máxima é ${MAX_HIGHLIGHT_QUANTITY}`),
+  focusTopics: z.array(
+    z.string().max(MAX_TOPIC_LENGTH, `Tópico deve ter no máximo ${MAX_TOPIC_LENGTH} caracteres`)
+  ).max(MAX_TOPICS_COUNT, `Máximo de ${MAX_TOPICS_COUNT} tópicos permitidos`).optional(),
+  excludeTopics: z.array(
+    z.string().max(MAX_TOPIC_LENGTH, `Tópico deve ter no máximo ${MAX_TOPIC_LENGTH} caracteres`)
+  ).max(MAX_TOPICS_COUNT, `Máximo de ${MAX_TOPICS_COUNT} tópicos permitidos`).optional(),
   platform: z.enum(['tiktok', 'youtube_shorts', 'instagram_reels', 'podcast_trailer', 'custom']).optional(),
   isMix: z.boolean().optional(),
   mixDuration: z.number().optional(),
-  episodeTitle: z.string().max(MAX_EPISODE_TITLE_LENGTH).optional(),
+  episodeTitle: z.string().max(MAX_EPISODE_TITLE_LENGTH, `Título deve ter no máximo ${MAX_EPISODE_TITLE_LENGTH} caracteres`).optional(),
 });
 // .refine validations removed as they might conflict with Mix mode logic or need conditional checking. 
 // Basic type checking is sufficient for now, logic will be handled in the API.
@@ -68,7 +72,7 @@ export const transcriptionSegmentSchema = z.object({
 
 // Highlights API request validation
 export const generateHighlightsRequestSchema = z.object({
-  segments: z.array(transcriptionSegmentSchema).min(1, 'At least one segment is required'),
+  segments: z.array(transcriptionSegmentSchema).min(1, 'Pelo menos um segmento é obrigatório'),
   config: highlightConfigSchema,
 });
 
@@ -79,13 +83,13 @@ export const decupageRequestSchema = z.object({
     silenceThreshold: z.number().min(500).max(10000).default(2000),
     detectFillers: z.boolean().default(true),
     detectOffTopic: z.boolean().default(true),
-    narrativeContext: z.string().max(MAX_NARRATIVE_CONTEXT_LENGTH).optional(),
+    narrativeContext: z.string().max(MAX_NARRATIVE_CONTEXT_LENGTH, `O contexto narrativo deve ter no máximo ${MAX_NARRATIVE_CONTEXT_LENGTH} caracteres`).optional(),
   }),
 });
 
 // Environment variables validation
 export const envSchema = z.object({
-  OPENAI_API_KEY: z.string().min(1, 'OPENAI_API_KEY is required'),
+  OPENAI_API_KEY: z.string().min(1, 'A variável OPENAI_API_KEY é obrigatória'),
   OPENAI_ORG_ID: z.string().optional(),
 });
 
