@@ -139,12 +139,78 @@ export function Waveform({
         setDimensions({ width, height });
 
         return () => observer.disconnect();
-    }, []);
+    }, [isLoading]); // Added isLoading to re-bind when container mounts
 
-    // Draw waveform on canvas
+    // Offscreen Canvas Caching Optimization
+    const [baseCanvas, setBaseCanvas] = useState<HTMLCanvasElement | null>(null);
+    const [progressCanvas, setProgressCanvas] = useState<HTMLCanvasElement | null>(null);
+
+    // Generate cached canvases when waveform/dimensions change
+    // Performance: This happens rarely (on load/resize), preventing O(N) draws on every frame
+    useEffect(() => {
+        if (waveformData.length === 0 || dimensions.width === 0 || dimensions.height === 0) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        const width = dimensions.width;
+        const height = dimensions.height;
+        const targetWidth = Math.floor(width * dpr);
+        const targetHeight = Math.floor(height * dpr);
+        const barWidth = width / waveformData.length;
+
+        // Helper to setup canvas
+        const setupCanvas = () => {
+            const c = document.createElement('canvas');
+            c.width = targetWidth;
+            c.height = targetHeight;
+            const ctx = c.getContext('2d');
+            if (ctx) {
+                ctx.scale(dpr, dpr);
+            }
+            return { c, ctx };
+        };
+
+        // 1. Base Canvas (Highlights + Grey Bars)
+        const { c: bCanvas, ctx: bCtx } = setupCanvas();
+        if (bCtx) {
+            // Draw highlight regions
+            highlights.forEach((highlight, index) => {
+                const startX = (highlight.startTime / duration) * width;
+                const endX = (highlight.endTime / duration) * width;
+
+                bCtx.fillStyle = HIGHLIGHT_COLORS[index % HIGHLIGHT_COLORS.length];
+                bCtx.fillRect(startX, 0, endX - startX, height);
+            });
+
+            // Draw grey bars
+            bCtx.fillStyle = '#cbd5e1'; // slate-300
+            waveformData.forEach((value, index) => {
+                const x = index * barWidth;
+                const barHeight = value * (height * 0.8);
+                const y = (height - barHeight) / 2;
+                bCtx.fillRect(x, y, barWidth - 1, barHeight);
+            });
+        }
+        setBaseCanvas(bCanvas);
+
+        // 2. Progress Canvas (Blue Bars only)
+        const { c: pCanvas, ctx: pCtx } = setupCanvas();
+        if (pCtx) {
+            pCtx.fillStyle = '#3b82f6'; // blue-500
+            waveformData.forEach((value, index) => {
+                const x = index * barWidth;
+                const barHeight = value * (height * 0.8);
+                const y = (height - barHeight) / 2;
+                pCtx.fillRect(x, y, barWidth - 1, barHeight);
+            });
+        }
+        setProgressCanvas(pCanvas);
+
+    }, [waveformData, dimensions, highlights, duration]);
+
+    // Draw waveform on main canvas using cached images
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas || waveformData.length === 0 || dimensions.width === 0 || dimensions.height === 0) return;
+        if (!canvas || !baseCanvas || !progressCanvas || dimensions.width === 0 || dimensions.height === 0) return;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
@@ -153,7 +219,7 @@ export function Waveform({
         const targetWidth = Math.floor(dimensions.width * dpr);
         const targetHeight = Math.floor(dimensions.height * dpr);
 
-        // Only resize and scale if dimensions changed (avoids clearing context and layout thrashing)
+        // Only resize and scale if dimensions changed
         if (canvas.width !== targetWidth || canvas.height !== targetHeight) {
             canvas.width = targetWidth;
             canvas.height = targetHeight;
@@ -164,42 +230,30 @@ export function Waveform({
 
         const width = dimensions.width;
         const height = dimensions.height;
-        const barWidth = width / waveformData.length;
         const playedPosition = duration > 0 ? (currentTime / duration) * width : 0;
 
         // Clear canvas
         ctx.clearRect(0, 0, width, height);
 
-        // Draw highlight regions
-        highlights.forEach((highlight, index) => {
-            const startX = (highlight.startTime / duration) * width;
-            const endX = (highlight.endTime / duration) * width;
+        // 1. Draw Base (Grey bars + Highlights)
+        // drawImage with canvas source is highly optimized
+        ctx.drawImage(baseCanvas, 0, 0, width, height);
 
-            ctx.fillStyle = HIGHLIGHT_COLORS[index % HIGHLIGHT_COLORS.length];
-            ctx.fillRect(startX, 0, endX - startX, height);
-        });
-
-        // Draw waveform bars
-        waveformData.forEach((value, index) => {
-            const x = index * barWidth;
-            const barHeight = value * (height * 0.8);
-            const y = (height - barHeight) / 2;
-
-            // Color based on played position
-            if (x < playedPosition) {
-                ctx.fillStyle = '#3b82f6'; // blue-500
-            } else {
-                ctx.fillStyle = '#cbd5e1'; // slate-300
-            }
-
-            ctx.fillRect(x, y, barWidth - 1, barHeight);
-        });
+        // 2. Draw Progress (Blue bars) - Clipped to played position
+        if (playedPosition > 0) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, playedPosition, height);
+            ctx.clip();
+            ctx.drawImage(progressCanvas, 0, 0, width, height);
+            ctx.restore();
+        }
 
         // Draw playhead
         ctx.fillStyle = '#ef4444'; // red-500
         ctx.fillRect(playedPosition - 1, 0, 2, height);
 
-    }, [waveformData, currentTime, duration, highlights, dimensions]);
+    }, [baseCanvas, progressCanvas, currentTime, duration, dimensions]);
 
     // Handle click to seek
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
