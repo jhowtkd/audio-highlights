@@ -39,3 +39,25 @@ React's `useRef`/`useState` + `localStorage` is insufficient for "heavy" client-
 **Resources:**
 - https://github.com/jakearchibald/idb
 - https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
+
+## 2025-02-18 - Client-Side Semantic Search Research
+
+**Research Topic:** Client-Side Vector Search vs API Search
+
+**Finding:**
+Current `api/search` uses OpenAI's API, which is slow (~1-3s), costly, and less private.
+Tested `@xenova/transformers` with `Xenova/all-MiniLM-L6-v2` (quantized) in a local POC.
+- **Inference time:** <10ms per query.
+- **Model load:** ~2s.
+- **Accuracy:** Excellent semantic matching (e.g., "money" -> "economic impact").
+
+**Decision:**
+Propose replacing server-side search with client-side embedding generation using Transformers.js.
+Benefits: Zero marginal cost, instant search-as-you-type, privacy-first, offline capable.
+
+**Learning:**
+WebAssembly-powered ML models are now mature enough for real-time text features in the browser, offering a superior UX compared to round-trip API calls for this use case.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js
+- research/2025-02-18-client-side-semantic-search.md
