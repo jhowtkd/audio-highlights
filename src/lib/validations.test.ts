@@ -90,11 +90,6 @@ describe('Validation Schemas', () => {
       const longContext = 'a'.repeat(MAX_NARRATIVE_CONTEXT_LENGTH + 1);
       const validContext = 'a'.repeat(MAX_NARRATIVE_CONTEXT_LENGTH);
 
-      const baseRequest = {
-        segments: [], // Empty segments for validation check (might need valid segment structure if array min(1) is enforced elsewhere, but schema says segments is just array)
-        // Actually segments schema might require valid segment structure. Let's provide minimal valid segment.
-      };
-
       const validSegment = {
           id: '1',
           start: 0,
