@@ -102,3 +102,9 @@ export const ERROR_MESSAGES = {
   API_KEY_MISSING: 'Chave da API OpenAI não configurada',
   NETWORK_ERROR: 'Sem conexão com a internet. Verifique sua rede e tente novamente.',
 } as const;
+
+// Input length limits (DoS prevention)
+export const MAX_EPISODE_TITLE_LENGTH = 200;
+export const MAX_TOPIC_LENGTH = 100;
+export const MAX_TOPICS_COUNT = 20;
+export const MAX_NARRATIVE_CONTEXT_LENGTH = 1000;
