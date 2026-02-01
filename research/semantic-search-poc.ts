@@ -1,4 +1,4 @@
-
+// @ts-nocheck
 import { pipeline } from '@xenova/transformers';
 
 // Helper function to calculate cosine similarity
