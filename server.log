@@ -1,0 +1,36 @@
+
+> audio-highlights@0.1.0 dev
+> next dev
+
+▲ Next.js 16.1.2 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.0.2:3000
+
+✓ Starting...
+⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
+✓ Ready in 1422ms
+ GET /verification-mock 200 in 3.6s (compile: 3.2s, proxy.ts: 98ms, render: 257ms)
+2026-02-02T22:28:49.453Z [Search API] AppError: Missing environment variable: OPENAI_API_KEY
+AppError: Missing environment variable: OPENAI_API_KEY
+    at requireEnvVar (/app/.next/dev/server/chunks/[root-of-the-server]__b97297fc._.js:303:15)
+    at POST (/app/.next/dev/server/chunks/[root-of-the-server]__b97297fc._.js:450:164)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:80:14)
+    at AppRouteRouteModule.do (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37945)
+    at /app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:47941
+    at /app/node_modules/next/dist/server/lib/trace/tracer.js:185:36
+    at NoopContextManager.with (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854)
+    at /app/node_modules/next/dist/server/lib/trace/tracer.js:154:103
+    at NoopContextManager.with (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NextTracerImpl.trace (/app/node_modules/next/dist/server/lib/trace/tracer.js:154:28)
+    at /app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:47780
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at /app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45275
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at /app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45232
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at AppRouteRouteModule.handle (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45186)
+[?25h
