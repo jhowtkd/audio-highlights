@@ -34,6 +34,10 @@ export function Waveform({
 }: WaveformProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    // Offscreen canvases for performance
+    const baseCanvasRef = useRef<HTMLCanvasElement | null>(null);
+    const progressCanvasRef = useRef<HTMLCanvasElement | null>(null);
+
     const [waveformData, setWaveformData] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [hoveredHighlight, setHoveredHighlight] = useState<GeneratedHighlight | null>(null);
@@ -141,10 +145,77 @@ export function Waveform({
         return () => observer.disconnect();
     }, []);
 
-    // Draw waveform on canvas
+    // Prepare static layers (Offscreen Canvas Pattern)
+    // Performance: Renders static waveform states to detached canvases to avoid O(N) redraws on every frame
+    useEffect(() => {
+        if (waveformData.length === 0 || dimensions.width === 0 || dimensions.height === 0) return;
+
+        // Initialize detached canvases if needed
+        if (!baseCanvasRef.current) baseCanvasRef.current = document.createElement('canvas');
+        if (!progressCanvasRef.current) progressCanvasRef.current = document.createElement('canvas');
+
+        const baseCtx = baseCanvasRef.current.getContext('2d');
+        const progressCtx = progressCanvasRef.current.getContext('2d');
+        if (!baseCtx || !progressCtx) return;
+
+        const dpr = window.devicePixelRatio || 1;
+        const targetWidth = Math.floor(dimensions.width * dpr);
+        const targetHeight = Math.floor(dimensions.height * dpr);
+
+        // Resize detached canvases
+        [baseCanvasRef.current, progressCanvasRef.current].forEach(canvas => {
+            if (canvas) {
+                canvas.width = targetWidth;
+                canvas.height = targetHeight;
+                // No style needed as they are not in DOM
+            }
+        });
+
+        // Scale contexts
+        baseCtx.scale(dpr, dpr);
+        progressCtx.scale(dpr, dpr);
+
+        const width = dimensions.width;
+        const height = dimensions.height;
+        const barWidth = width / waveformData.length;
+
+        // 1. Draw Base Layer (Highlights + Gray Bars)
+        baseCtx.clearRect(0, 0, width, height);
+
+        // Draw highlight regions
+        highlights.forEach((highlight, index) => {
+            const startX = (highlight.startTime / duration) * width;
+            const endX = (highlight.endTime / duration) * width;
+
+            baseCtx.fillStyle = HIGHLIGHT_COLORS[index % HIGHLIGHT_COLORS.length];
+            baseCtx.fillRect(startX, 0, endX - startX, height);
+        });
+
+        // Draw Gray Bars
+        baseCtx.fillStyle = '#cbd5e1'; // slate-300
+        waveformData.forEach((value, index) => {
+            const x = index * barWidth;
+            const barHeight = value * (height * 0.8);
+            const y = (height - barHeight) / 2;
+            baseCtx.fillRect(x, y, barWidth - 1, barHeight);
+        });
+
+        // 2. Draw Progress Layer (Blue Bars Only)
+        progressCtx.clearRect(0, 0, width, height);
+        progressCtx.fillStyle = '#3b82f6'; // blue-500
+        waveformData.forEach((value, index) => {
+            const x = index * barWidth;
+            const barHeight = value * (height * 0.8);
+            const y = (height - barHeight) / 2;
+            progressCtx.fillRect(x, y, barWidth - 1, barHeight);
+        });
+
+    }, [waveformData, duration, highlights, dimensions]);
+
+    // Draw waveform on canvas (Compositing)
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas || waveformData.length === 0 || dimensions.width === 0 || dimensions.height === 0) return;
+        if (!canvas || dimensions.width === 0 || dimensions.height === 0) return;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
@@ -164,42 +235,31 @@ export function Waveform({
 
         const width = dimensions.width;
         const height = dimensions.height;
-        const barWidth = width / waveformData.length;
         const playedPosition = duration > 0 ? (currentTime / duration) * width : 0;
 
-        // Clear canvas
+        // Clear
         ctx.clearRect(0, 0, width, height);
 
-        // Draw highlight regions
-        highlights.forEach((highlight, index) => {
-            const startX = (highlight.startTime / duration) * width;
-            const endX = (highlight.endTime / duration) * width;
+        // 1. Draw Base Layer
+        if (baseCanvasRef.current) {
+             ctx.drawImage(baseCanvasRef.current, 0, 0, width, height);
+        }
 
-            ctx.fillStyle = HIGHLIGHT_COLORS[index % HIGHLIGHT_COLORS.length];
-            ctx.fillRect(startX, 0, endX - startX, height);
-        });
+        // 2. Draw Progress Layer (Clipped)
+        if (progressCanvasRef.current) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, playedPosition, height);
+            ctx.clip();
+            ctx.drawImage(progressCanvasRef.current, 0, 0, width, height);
+            ctx.restore();
+        }
 
-        // Draw waveform bars
-        waveformData.forEach((value, index) => {
-            const x = index * barWidth;
-            const barHeight = value * (height * 0.8);
-            const y = (height - barHeight) / 2;
-
-            // Color based on played position
-            if (x < playedPosition) {
-                ctx.fillStyle = '#3b82f6'; // blue-500
-            } else {
-                ctx.fillStyle = '#cbd5e1'; // slate-300
-            }
-
-            ctx.fillRect(x, y, barWidth - 1, barHeight);
-        });
-
-        // Draw playhead
+        // 3. Draw playhead
         ctx.fillStyle = '#ef4444'; // red-500
         ctx.fillRect(playedPosition - 1, 0, 2, height);
 
-    }, [waveformData, currentTime, duration, highlights, dimensions]);
+    }, [currentTime, duration, dimensions, waveformData, highlights]);
 
     // Handle click to seek
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
