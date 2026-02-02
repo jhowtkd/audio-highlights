@@ -9,7 +9,7 @@ on:
 jobs:
   lint-and-typecheck:
     name: Lint and Type Check
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
 
     steps:
       - name: Checkout code
@@ -32,7 +32,7 @@ jobs:
 
   build:
     name: Build Application
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-22.04
     needs: lint-and-typecheck
 
     steps:
