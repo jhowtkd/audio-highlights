@@ -27,6 +27,24 @@ export function middleware(_request: NextRequest) {
     'max-age=31536000; includeSubDomains'
   );
 
+  // Content Security Policy
+  const ffmpegServiceUrl = process.env.NEXT_PUBLIC_FFMPEG_SERVICE_URL;
+  const connectSrc = ['\'self\'', 'https://unpkg.com', ffmpegServiceUrl].filter(Boolean).join(' ');
+
+  const csp = [
+    "default-src 'self'",
+    "script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com",
+    "style-src 'self' 'unsafe-inline'",
+    "img-src 'self' blob: data:",
+    "font-src 'self'",
+    "worker-src 'self' blob:",
+    `connect-src ${connectSrc}`,
+    "object-src 'none'",
+    "base-uri 'self'",
+  ].join('; ');
+
+  response.headers.set('Content-Security-Policy', csp);
+
   return response;
 }
 
