@@ -1,4 +1,4 @@
-
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 // @ts-ignore - Research POC using external dependency not in package.json
 import { pipeline } from '@xenova/transformers';
 
