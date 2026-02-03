@@ -78,11 +78,20 @@ export async function convertToMp3(file: File): Promise<File> {
 }
 
 /**
- * Get file extension from filename
+ * Get safe file extension from filename
+ * Returns empty string if extension contains non-alphanumeric characters
  */
 function getExtension(fileName: string): string {
     const lastDot = fileName.lastIndexOf('.');
-    return lastDot !== -1 ? fileName.substring(lastDot) : '';
+    if (lastDot === -1) return '';
+
+    const ext = fileName.substring(lastDot);
+    // Sanitize: allow only alphanumeric characters in extension (e.g. .mp3, .wav)
+    // This prevents path traversal (.mp3/../../evil) and shell injection (.mp3;rm -rf /)
+    if (/^\.[a-zA-Z0-9]+$/.test(ext)) {
+        return ext;
+    }
+    return '';
 }
 
 /**
