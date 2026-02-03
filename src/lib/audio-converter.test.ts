@@ -19,6 +19,7 @@ vi.mock('fluent-ffmpeg', () => {
     audioChannels: vi.fn().mockReturnThis(),
     audioFrequency: vi.fn().mockReturnThis(),
     format: vi.fn().mockReturnThis(),
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     on: vi.fn().mockImplementation(function(this: any, event, cb) {
       if (event === 'end') {
         setTimeout(cb, 0);
