@@ -1,4 +1,5 @@
 
+// @ts-ignore - Research POC using external dependency not in package.json
 import { pipeline } from '@xenova/transformers';
 
 // Helper function to calculate cosine similarity
@@ -43,7 +44,7 @@ async function runPOC() {
     const segmentEmbeddings = [];
     for (const segment of segments) {
         const output = await extractor(segment.text, { pooling: 'mean', normalize: true });
-        // @ts-expect-error - output.data is Float32Array
+        // @ts-ignore - output.data is Float32Array
         segmentEmbeddings.push({ ...segment, embedding: Array.from(output.data) });
     }
 
@@ -55,7 +56,7 @@ async function runPOC() {
         const queryStart = performance.now();
 
         const output = await extractor(query, { pooling: 'mean', normalize: true });
-        // @ts-expect-error - output.data is Float32Array
+        // @ts-ignore - output.data is Float32Array
         const queryEmbedding = Array.from(output.data);
 
         const results = segmentEmbeddings.map(segment => ({
