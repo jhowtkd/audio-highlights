@@ -61,3 +61,24 @@ WebAssembly-powered ML models are now mature enough for real-time text features 
 **Resources:**
 - https://huggingface.co/docs/transformers.js
 - research/2025-02-18-client-side-semantic-search.md
+
+## 2026-02-20 - Virtualized List Rendering Research
+
+**Research Topic:** Optimization of large transcript rendering using virtualization.
+
+**Finding:** Evaluated `react-virtuoso` for rendering transcript segments.
+-   POC confirmed massive DOM reduction (3000 -> 20 nodes for 1000 items).
+-   `react-virtuoso` handles variable heights and "stick to bottom" behavior out of the box, which is critical for the "auto-scroll during playback" feature.
+-   Native `Ctrl+F` breaks because items are unmounted.
+
+**Decision:** Proposed `react-virtuoso`.
+-   Performance gains (60fps scrolling) outweigh the `Ctrl+F` limitation (which can be mitigated by our custom search).
+-   Complexity of manual "chunking" code can be removed.
+
+**Learning:** When creating POCs that require dependencies not yet in the project:
+1.  Isolate code in `research/pocs/`.
+2.  Add `research` to `tsconfig.json` exclude list to prevent build errors when dependency is removed.
+3.  Include screenshots in `public/research/` to document the POC state after code is "cleaned".
+
+**Resources:**
+-   https://virtuoso.dev/
