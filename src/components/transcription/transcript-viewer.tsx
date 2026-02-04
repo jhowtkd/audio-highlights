@@ -40,7 +40,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
   className,
 }: TranscriptViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const activeSegmentRef = useRef<HTMLDivElement>(null);
+  const activeSegmentRef = useRef<HTMLButtonElement>(null);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');

@@ -36,3 +36,15 @@
 **Pattern:** For Sliders:
 1. Always provide `aria-label` identifying the control.
 2. If the value has units (seconds, percent), provide `aria-valuetext`.
+
+## 2025-02-28 - HTML Validity in Interactive Lists
+
+**UX Problem:** Converting interactive `div`s to `<button>`s introduced invalid HTML by nesting `<div>` and `<p>` tags inside `<button>`.
+
+**Learning:** While browsers tolerate it, it violates spec and can cause issues in some parsers or strict environments.
+
+**Solution:** Replaced inner `div` with `span className="flex..."` and `p` with `span className="block..."`.
+
+**Pattern:** When refactoring for accessibility (div -> button):
+1. Replace inner block elements (`div`, `p`, `h3`) with `span`.
+2. Apply `display: block` or `display: flex` classes to these spans to maintain layout.

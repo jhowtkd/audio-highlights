@@ -11,7 +11,7 @@ interface TranscriptChunkProps {
   activeSegmentIndex: number;
   matchingSegmentIds: Set<string>;
   onSegmentClick: (startTime: number) => void;
-  activeSegmentRef: RefObject<HTMLDivElement | null>;
+  activeSegmentRef: RefObject<HTMLButtonElement | null>;
 }
 
 export const TranscriptChunk = memo(
