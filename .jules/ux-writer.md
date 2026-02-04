@@ -16,3 +16,14 @@
 1. State the limit clearly.
 2. Provide an actionable solution (e.g., "Split the file").
 3. Use active voice.
+
+## 2026-02-04 - Invalid File Format Error Tone
+
+**Copy Type:** Error message for invalid file type
+**Original:** "Formato inválido. Aceitamos: MP3, WAV, M4A, OGG, FLAC, WebM."
+**Changed To:** "Formato não suportado. Por favor, use MP3, WAV, M4A, OGG, FLAC ou WebM."
+**Learning:** "Inválido" puts blame on the user/input. "Não suportado" is a system limitation statement, which is more neutral. "Aceitamos" (We accept) is corporate-centric; "Por favor, use" focuses on user action.
+**Rule:**
+1. Avoid "Invalid" when referring to user input if a neutral term ("Unsupported", "Unknown") exists.
+2. Use polite instructions ("Por favor, use...") to guide users to the correct format.
+3. Replace corporate "We accept" with user-focused instructions.
