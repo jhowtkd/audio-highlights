@@ -462,7 +462,7 @@ export async function POST(request: NextRequest) {
       console.log('[Highlights API] Clean content preview:', cleanContent.substring(0, 200));
 
       parsedResponse = JSON.parse(cleanContent);
-    } catch (_parseError) {
+    } catch {
       console.error('[Highlights API] Failed to parse JSON. Content:', content.substring(0, 500));
       throw new AppError(
         'Invalid JSON response from GPT',

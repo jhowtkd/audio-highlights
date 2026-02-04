@@ -5,6 +5,28 @@ import type { NextRequest } from 'next/server';
 export function middleware(_request: NextRequest) {
   const response = NextResponse.next();
 
+  // Content Security Policy
+  // script-src: 'unsafe-eval' 'unsafe-inline' needed for Next.js and some libs.
+  // unpkg.com for ffmpeg, blob: for workers/media.
+  const csp = `
+    default-src 'self';
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com blob:;
+    worker-src 'self' blob: https://unpkg.com;
+    style-src 'self' 'unsafe-inline';
+    img-src 'self' blob: data:;
+    media-src 'self' blob: data:;
+    connect-src 'self' https://unpkg.com;
+    font-src 'self';
+    object-src 'none';
+    base-uri 'self';
+    form-action 'self';
+    frame-ancestors 'none';
+    block-all-mixed-content;
+    upgrade-insecure-requests;
+  `.replace(/\s{2,}/g, ' ').trim();
+
+  response.headers.set('Content-Security-Policy', csp);
+
   // Security Headers
   // Prevents the site from being embedded in an iframe (clickjacking protection)
   response.headers.set('X-Frame-Options', 'DENY');
