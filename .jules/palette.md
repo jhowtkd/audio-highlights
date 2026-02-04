@@ -24,3 +24,15 @@
 2. Use `w-full text-left` to mimic list item appearance.
 3. Ensure focus styles (`focus-visible`) are present.
 4. Avoid `div` with `onClick` unless implementing a custom widget with full ARIA roles (which is usually overkill).
+
+## 2025-02-26 - Audio Player Sliders Accessibility
+
+**UX Problem:** The Radix UI Slider (via shadcn/ui) has accessibility props (`aria-label`, `aria-valuetext`) on the Root element, but they are often forgotten when wrapping it, leaving screen reader users with just a "slider" role and a raw number (e.g., "50") without context (Volume? Progress? Seconds? Percent?).
+
+**Learning:** `aria-valuetext` is crucial for sliders representing non-integer or unit-based values (time, percentage).
+
+**Solution:** Added `aria-label` and `aria-valuetext` with formatted strings (`formatDuration`).
+
+**Pattern:** For Sliders:
+1. Always provide `aria-label` identifying the control.
+2. If the value has units (seconds, percent), provide `aria-valuetext`.

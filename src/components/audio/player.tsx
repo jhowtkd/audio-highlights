@@ -4,7 +4,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
-import { formatTime } from '@/lib/format-utils';
+import { formatTime, formatDuration } from '@/lib/format-utils';
 import { cn } from '@/lib/utils';
 
 interface AudioPlayerProps {
@@ -132,6 +132,8 @@ export function AudioPlayer({
           step={0.1}
           onValueChange={handleSeek}
           className="w-full"
+          aria-label="Controle de reprodução"
+          aria-valuetext={formatDuration(currentTime)}
         />
         <div className="flex justify-between text-xs text-slate-500 mt-1">
           <span>{formatTime(currentTime)}</span>
@@ -199,6 +201,7 @@ export function AudioPlayer({
             onValueChange={handleVolumeChange}
             className="w-24"
             aria-label="Controle de volume"
+            aria-valuetext={`${Math.round((isMuted ? 0 : volume) * 100)}%`}
           />
         </div>
       </div>
