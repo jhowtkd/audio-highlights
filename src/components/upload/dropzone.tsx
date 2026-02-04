@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useState } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useDropzone, type FileRejection } from 'react-dropzone';
 import { Upload, FileAudio, X, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -63,8 +63,13 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
     });
   };
 
-  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+  const onDrop = useCallback(async (acceptedFiles: File[], fileRejections: FileRejection[]) => {
     setError(null);
+
+    if (fileRejections.length > 0) {
+      setError(ERROR_MESSAGES.INVALID_AUDIO_FILE);
+      return;
+    }
 
     if (acceptedFiles.length === 0) {
       return;
