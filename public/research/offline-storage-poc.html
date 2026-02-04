@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Offline Storage POC</title>
+    <script src="https://unpkg.com/idb@8.0.0/build/umd.js"></script>
+</head>
+<body>
+    <h1>Offline Storage POC</h1>
+    <div id="status">Ready</div>
+    <button id="save">Save Data</button>
+    <button id="load">Load Data</button>
+    <button id="clear">Clear Data</button>
+
+    <script>
+        const DB_NAME = 'poc-db';
+        const STORE_NAME = 'files';
+
+        async function getDB() {
+            return idb.openDB(DB_NAME, 1, {
+                upgrade(db) {
+                    db.createObjectStore(STORE_NAME);
+                },
+            });
+        }
+
+        async function saveData() {
+            try {
+                const db = await getDB();
+                const blob = new Blob(['Hello World ' + Date.now()], { type: 'text/plain' });
+                await db.put(STORE_NAME, blob, 'test-file');
+                document.getElementById('status').textContent = 'Saved';
+                console.log('Data saved');
+            } catch (e) {
+                console.error(e);
+                document.getElementById('status').textContent = 'Error saving';
+            }
+        }
+
+        async function loadData() {
+            try {
+                const db = await getDB();
+                const blob = await db.get(STORE_NAME, 'test-file');
+                if (blob) {
+                    document.getElementById('status').textContent = `Loaded ${blob.size} bytes`;
+                    console.log('Data loaded');
+                } else {
+                    document.getElementById('status').textContent = 'No data found';
+                    console.log('No data found');
+                }
+            } catch (e) {
+                console.error(e);
+                document.getElementById('status').textContent = 'Error loading';
+            }
+        }
+
+        async function clearData() {
+             const db = await getDB();
+             await db.delete(STORE_NAME, 'test-file');
+             document.getElementById('status').textContent = 'Cleared';
+        }
+
+        // Check on load
+        (async () => {
+             try {
+                 const db = await getDB();
+                 const blob = await db.get(STORE_NAME, 'test-file');
+                 if (blob) {
+                     document.getElementById('status').textContent = 'Found existing data';
+                 }
+             } catch (e) {
+                 console.error('Error checking initial data', e);
+             }
+        })();
+
+        document.getElementById('save').onclick = saveData;
+        document.getElementById('load').onclick = loadData;
+        document.getElementById('clear').onclick = clearData;
+    </script>
+</body>
+</html>
