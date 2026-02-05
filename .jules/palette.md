@@ -36,3 +36,13 @@
 **Pattern:** For Sliders:
 1. Always provide `aria-label` identifying the control.
 2. If the value has units (seconds, percent), provide `aria-valuetext`.
+
+## 2025-02-21 - Transcript Accessibility
+
+**UX Problem:** Transcript segments were `div` elements with `onClick`, making them inaccessible to keyboard users (tabbing impossible).
+
+**Learning:** Interactive list items like transcript segments must be focusable.
+
+**Solution:** Converted `div` to `button` with `text-left` and `w-full` to maintain list-like appearance. Used `span` instead of `p` inside button for valid HTML.
+
+**Pattern:** For interactive lists, use `<button className="w-full text-left ...">` instead of `div`.

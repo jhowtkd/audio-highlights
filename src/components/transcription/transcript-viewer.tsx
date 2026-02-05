@@ -40,7 +40,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
   className,
 }: TranscriptViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const activeSegmentRef = useRef<HTMLDivElement>(null);
+  const activeSegmentRef = useRef<HTMLButtonElement>(null);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -342,7 +342,11 @@ export const TranscriptViewer = memo(function TranscriptViewer({
 
       {/* Search Results Banner */}
       {showSearchResults && (
-        <div className="flex items-center justify-between mb-3 p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+        <div
+          className="flex items-center justify-between mb-3 p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg"
+          role="status"
+          aria-live="polite"
+        >
           <span className="text-sm text-blue-700 dark:text-blue-400">
             {isSearching ? (
               'Buscando...'
