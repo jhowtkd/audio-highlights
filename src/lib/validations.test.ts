@@ -1,10 +1,11 @@
 import { describe, it, expect } from 'vitest';
-import { highlightConfigSchema, decupageRequestSchema } from './validations';
+import { highlightConfigSchema, decupageRequestSchema, searchRequestSchema } from './validations';
 import {
   MAX_EPISODE_TITLE_LENGTH,
   MAX_TOPIC_LENGTH,
   MAX_TOPICS_COUNT,
   MAX_NARRATIVE_CONTEXT_LENGTH,
+  MAX_SEGMENTS_COUNT,
 } from './constants';
 
 describe('Validation Schemas', () => {
@@ -90,11 +91,6 @@ describe('Validation Schemas', () => {
       const longContext = 'a'.repeat(MAX_NARRATIVE_CONTEXT_LENGTH + 1);
       const validContext = 'a'.repeat(MAX_NARRATIVE_CONTEXT_LENGTH);
 
-      const baseRequest = {
-        segments: [], // Empty segments for validation check (might need valid segment structure if array min(1) is enforced elsewhere, but schema says segments is just array)
-        // Actually segments schema might require valid segment structure. Let's provide minimal valid segment.
-      };
-
       const validSegment = {
           id: '1',
           start: 0,
@@ -126,6 +122,32 @@ describe('Validation Schemas', () => {
       // decupageRequestSchema parses the WHOLE object, so we need to match structure
       expect(() => decupageRequestSchema.parse(validRequest)).not.toThrow();
       expect(() => decupageRequestSchema.parse(invalidRequest)).toThrow();
+    });
+  });
+
+  describe('searchRequestSchema', () => {
+    it('should validate max segments count', () => {
+      const validSegment = {
+        id: '1',
+        start: 0,
+        end: 1,
+        text: 'test',
+      };
+
+      const validRequest = {
+        query: 'test',
+        segments: [validSegment],
+      };
+
+      // We create a large array but fill it with the same reference to be memory efficient
+      // Note: This might still consume memory but it's the standard way to test array length validation
+      const invalidRequest = {
+        query: 'test',
+        segments: Array(MAX_SEGMENTS_COUNT + 1).fill(validSegment),
+      };
+
+      expect(() => searchRequestSchema.parse(validRequest)).not.toThrow();
+      expect(() => searchRequestSchema.parse(invalidRequest)).toThrow(/excede o limite máximo/);
     });
   });
 });

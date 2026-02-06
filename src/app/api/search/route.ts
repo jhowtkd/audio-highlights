@@ -3,19 +3,8 @@ import OpenAI from 'openai';
 import { GPT_MODEL } from '@/lib/constants';
 import { createErrorResponse, requireEnvVar } from '@/lib/errors';
 import { groupSegmentsByTokenCount } from '@/lib/search-chunking';
-import { z } from 'zod';
-
-// Validation schema
-const searchRequestSchema = z.object({
-    query: z.string().min(1).max(500),
-    segments: z.array(z.object({
-        id: z.string(),
-        start: z.number(),
-        end: z.number(),
-        text: z.string(),
-    })),
-    maxResults: z.number().min(1).max(20).default(5),
-});
+import type { SearchSegment } from '@/lib/search-chunking';
+import { searchRequestSchema } from '@/lib/validations';
 
 interface SearchResult {
     segmentId: string;
@@ -26,16 +15,9 @@ interface SearchResult {
     matchReason: string;
 }
 
-interface Segment {
-    id: string;
-    start: number;
-    end: number;
-    text: string;
-}
-
 async function processChunk(
     openai: OpenAI,
-    chunkSegments: Segment[],
+    chunkSegments: SearchSegment[],
     chunkOffset: number,
     query: string,
     maxResults: number

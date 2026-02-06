@@ -12,6 +12,7 @@ import {
   MAX_TOPIC_LENGTH,
   MAX_TOPICS_COUNT,
   MAX_NARRATIVE_CONTEXT_LENGTH,
+  MAX_SEGMENTS_COUNT,
 } from './constants';
 
 // Transcription API validation
@@ -68,13 +69,24 @@ export const transcriptionSegmentSchema = z.object({
 
 // Highlights API request validation
 export const generateHighlightsRequestSchema = z.object({
-  segments: z.array(transcriptionSegmentSchema).min(1, 'At least one segment is required'),
+  segments: z.array(transcriptionSegmentSchema)
+    .min(1, 'At least one segment is required')
+    .max(MAX_SEGMENTS_COUNT, `O número de segmentos excede o limite máximo de ${MAX_SEGMENTS_COUNT}`),
   config: highlightConfigSchema,
+});
+
+// Search API validation
+export const searchRequestSchema = z.object({
+  query: z.string().min(1).max(500),
+  segments: z.array(transcriptionSegmentSchema)
+    .max(MAX_SEGMENTS_COUNT, `O número de segmentos excede o limite máximo de ${MAX_SEGMENTS_COUNT}`),
+  maxResults: z.number().min(1).max(20).default(5),
 });
 
 // Decupagem API request validation
 export const decupageRequestSchema = z.object({
-  segments: z.array(transcriptionSegmentSchema),
+  segments: z.array(transcriptionSegmentSchema)
+    .max(MAX_SEGMENTS_COUNT, `O número de segmentos excede o limite máximo de ${MAX_SEGMENTS_COUNT}`),
   config: z.object({
     silenceThreshold: z.number().min(500).max(10000).default(2000),
     detectFillers: z.boolean().default(true),

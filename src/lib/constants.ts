@@ -45,6 +45,7 @@ export const MAX_EPISODE_TITLE_LENGTH = 200;
 export const MAX_TOPIC_LENGTH = 50;
 export const MAX_TOPICS_COUNT = 10;
 export const MAX_NARRATIVE_CONTEXT_LENGTH = 1000;
+export const MAX_SEGMENTS_COUNT = 20000; // Limit to prevent DoS
 
 export const DEFAULT_TARGET_DURATION = 60; // seconds
 export const CUT_PADDING_SECONDS = 0.5; // seconds (padding start/end to avoid clipping words)
