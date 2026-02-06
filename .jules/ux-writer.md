@@ -16,3 +16,11 @@
 1. State the limit clearly.
 2. Provide an actionable solution (e.g., "Split the file").
 3. Use active voice.
+
+## 2026-02-26 - Short Audio Warning Improvement
+
+**Copy Type:** Warning message
+**Original:** "Você pode continuar, mas a geração de highlights funciona melhor com áudios acima de 1 minuto."
+**Changed To:** "Recomendamos áudios acima de 1 minuto para highlights melhores."
+**Learning:** Reassuring permissions ("Você pode continuar") are redundant when the UI state is non-blocking (warning color vs error color). Users prefer concise, actionable advice over wordy clarifications.
+**Rule:** For non-blocking warnings, skip the "You can continue" preamble and state the recommendation directly.
