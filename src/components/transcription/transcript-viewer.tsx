@@ -3,6 +3,7 @@
 import { useRef, useEffect, useState, useCallback, useMemo, memo } from 'react';
 import { Search, X, Loader2, Sparkles, Download, FileText, FileCode } from 'lucide-react';
 import { toast } from 'sonner';
+import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
 import { formatTime } from '@/lib/format-utils';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -15,7 +16,7 @@ import {
   generateFullTranscriptMarkdown
 } from '@/lib/export';
 import type { TranscriptionSegment } from '@/types';
-import { TranscriptChunk } from './transcript-chunk';
+import { TranscriptSegment } from './transcript-segment';
 
 interface SearchResult {
   segmentId: string;
@@ -39,8 +40,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
   onSegmentClick,
   className,
 }: TranscriptViewerProps) {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const activeSegmentRef = useRef<HTMLDivElement>(null);
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
@@ -57,25 +57,14 @@ export const TranscriptViewer = memo(function TranscriptViewer({
     return ids;
   }, [searchResults]);
 
-  // Auto-scroll para o segmento ativo
+  // Auto-scroll para o segmento ativo (Virtualized)
   useEffect(() => {
-    if (activeSegmentRef.current && containerRef.current && !showSearchResults) {
-      const container = containerRef.current;
-      const activeElement = activeSegmentRef.current;
-
-      const containerRect = container.getBoundingClientRect();
-      const activeRect = activeElement.getBoundingClientRect();
-
-      const isVisible =
-        activeRect.top >= containerRect.top &&
-        activeRect.bottom <= containerRect.bottom;
-
-      if (!isVisible) {
-        activeElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'center',
-        });
-      }
+    if (virtuosoRef.current && activeSegmentIndex >= 0 && !showSearchResults) {
+      virtuosoRef.current.scrollToIndex({
+        index: activeSegmentIndex,
+        align: 'center',
+        behavior: 'smooth',
+      });
     }
   }, [activeSegmentIndex, showSearchResults]);
 
@@ -132,75 +121,6 @@ export const TranscriptViewer = memo(function TranscriptViewer({
 
   // Export handlers
   const [showExportMenu, setShowExportMenu] = useState(false);
-
-  // Memoize the transcript content to prevent unnecessary re-renders during playback
-  // Performance: Avoids O(N) map and React Element creation on every time update (4-30Hz)
-  // Optimization: Uses Chunked Rendering to avoid full list reconciliation on active segment change
-  const transcriptContent = useMemo(() => {
-    // If showing search results, display them first
-    if (showSearchResults && searchResults.length > 0) {
-      return (
-        <div className="space-y-2">
-          {searchResults.map((result) => (
-            <button
-              type="button"
-              key={result.segmentId}
-              onClick={() => {
-                onSegmentClick(result.startTime);
-                clearSearch();
-              }}
-              className="w-full text-left p-3 rounded-lg cursor-pointer transition-all duration-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 hover:border-blue-400 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
-            >
-              <div className="flex items-start gap-3">
-                <span className="text-xs font-mono px-2 py-1 rounded shrink-0 bg-blue-500 text-white">
-                  {formatTime(result.startTime)}
-                </span>
-                <div className="flex-1">
-                  <p className="text-sm leading-relaxed text-slate-900 dark:text-slate-100">
-                    {result.text}
-                  </p>
-                  <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
-                    {result.matchReason} • Score: {result.relevanceScore}
-                  </p>
-                </div>
-              </div>
-            </button>
-          ))}
-        </div>
-      );
-    }
-
-    // Regular transcript view - Optimized with Chunks
-    const CHUNK_SIZE = 50;
-    const totalChunks = Math.ceil(segments.length / CHUNK_SIZE);
-    const chunkIndices = Array.from({ length: totalChunks }, (_, i) => i);
-
-    return chunkIndices.map((chunkIndex) => {
-      const startIndex = chunkIndex * CHUNK_SIZE;
-      const endIndex = Math.min(startIndex + CHUNK_SIZE, segments.length);
-
-      return (
-        <TranscriptChunk
-          key={`chunk-${chunkIndex}`}
-          segments={segments}
-          startIndex={startIndex}
-          endIndex={endIndex}
-          activeSegmentIndex={activeSegmentIndex}
-          matchingSegmentIds={matchingSegmentIds}
-          onSegmentClick={onSegmentClick}
-          activeSegmentRef={activeSegmentRef}
-        />
-      );
-    });
-  }, [
-    showSearchResults,
-    searchResults,
-    segments,
-    activeSegmentIndex,
-    matchingSegmentIds,
-    onSegmentClick,
-    clearSearch
-  ]);
 
   const handleExportTranscript = useCallback((format: 'txt' | 'txt-timestamps' | 'srt' | 'md') => {
     let content: string;
@@ -361,15 +281,61 @@ export const TranscriptViewer = memo(function TranscriptViewer({
       )}
 
       {/* Transcript */}
-      <div
-        ref={containerRef}
-        className={cn(
-          'flex-1 overflow-y-auto space-y-2 pr-2 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700',
-          className
-        )}
-      >
-        {transcriptContent}
-      </div>
+      {showSearchResults && searchResults.length > 0 ? (
+        <div
+          className={cn(
+            'flex-1 overflow-y-auto space-y-2 pr-2 scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700',
+            className
+          )}
+        >
+          <div className="space-y-2">
+            {searchResults.map((result) => (
+              <button
+                type="button"
+                key={result.segmentId}
+                onClick={() => {
+                  onSegmentClick(result.startTime);
+                  clearSearch();
+                }}
+                className="w-full text-left p-3 rounded-lg cursor-pointer transition-all duration-200 bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-950/30 dark:to-indigo-950/30 border border-blue-200 dark:border-blue-800 hover:border-blue-400 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none"
+              >
+                <div className="flex items-start gap-3">
+                  <span className="text-xs font-mono px-2 py-1 rounded shrink-0 bg-blue-500 text-white">
+                    {formatTime(result.startTime)}
+                  </span>
+                  <div className="flex-1">
+                    <p className="text-sm leading-relaxed text-slate-900 dark:text-slate-100">
+                      {result.text}
+                    </p>
+                    <p className="text-xs text-blue-600 dark:text-blue-400 mt-1">
+                      {result.matchReason} • Score: {result.relevanceScore}
+                    </p>
+                  </div>
+                </div>
+              </button>
+            ))}
+          </div>
+        </div>
+      ) : (
+        <div className={cn('flex-1 h-full min-h-0', className)}>
+          <Virtuoso
+            ref={virtuosoRef}
+            className="scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700"
+            style={{ height: '100%' }}
+            data={segments}
+            itemContent={(index, segment) => (
+              <div className="pb-2 pr-2">
+                <TranscriptSegment
+                  segment={segment}
+                  isActive={index === activeSegmentIndex}
+                  isMatch={matchingSegmentIds.has(segment.id)}
+                  onSegmentClick={onSegmentClick}
+                />
+              </div>
+            )}
+          />
+        </div>
+      )}
     </div>
   );
 });

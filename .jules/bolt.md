@@ -18,3 +18,18 @@ const activeSegmentIndex = useMemo(() => {
 // Child only updates when index changes
 <TranscriptViewer activeSegmentIndex={activeSegmentIndex} ... />
 ```
+
+## 2026-02-05 - Replaced Manual Chunking with Virtualization
+
+**Bottleneck:** `TranscriptViewer` used a "manual chunking" strategy (rendering chunks of 50 segments) which still resulted in O(N) DOM nodes, causing heavy initial rendering and memory usage for long transcripts.
+**Learning:** Manual chunking reduces reconciliation cost slightly but does not solve DOM weight issues. Virtualization is required for scalability.
+**Action:** Replaced `TranscriptChunk` manual logic with `react-virtuoso`.
+**Code:**
+```typescript
+// Removed: chunkIndices.map(...) -> <TranscriptChunk />
+// Added:
+<Virtuoso
+  data={segments}
+  itemContent={(index, segment) => <TranscriptSegment ... />}
+/>
+```
