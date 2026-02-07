@@ -78,11 +78,22 @@ export async function convertToMp3(file: File): Promise<File> {
 }
 
 /**
- * Get file extension from filename
+ * Get file extension from filename with strict validation to prevent path traversal
  */
 function getExtension(fileName: string): string {
     const lastDot = fileName.lastIndexOf('.');
-    return lastDot !== -1 ? fileName.substring(lastDot) : '';
+    if (lastDot === -1) return '';
+
+    const ext = fileName.substring(lastDot);
+
+    // Only allow alphanumeric characters after the dot (e.g. .mp3, .wav)
+    // This prevents path traversal (e.g. /../etc/passwd) and other injections
+    if (/^\.[a-zA-Z0-9]+$/.test(ext)) {
+        return ext;
+    }
+
+    // Return safe default if invalid
+    return '.bin';
 }
 
 /**
