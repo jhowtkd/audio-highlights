@@ -151,7 +151,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 className="py-4"
               />
               <p className="text-xs text-slate-500">
-                O vídeo final terá aproximadamente esta duração
+                Tempo total estimado do vídeo
               </p>
             </div>
           </div>
@@ -177,7 +177,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 onValueChange={handleMinDurationChange}
               />
               <p className="text-xs text-slate-500">
-                Nenhum highlight será menor que isso
+                Evita cortes muito curtos que perdem o contexto
               </p>
             </div>
 
@@ -200,7 +200,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 onValueChange={handleTargetDurationChange}
               />
               <p className="text-xs text-slate-500">
-                Duração ideal de cada highlight
+                A IA buscará manter os cortes próximos deste tempo
               </p>
             </div>
 
@@ -223,7 +223,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 onValueChange={handleMaxDurationChange}
               />
               <p className="text-xs text-slate-500">
-                Nenhum highlight será maior que isso
+                Impede que os cortes fiquem longos demais
               </p>
             </div>
 
@@ -245,7 +245,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 className="w-full"
               />
               <p className="text-xs text-slate-500">
-                Entre 1 e 20 highlights independentes
+                Número máximo de cortes a serem gerados
               </p>
             </div>
           </div>
