@@ -32,6 +32,9 @@ app.use(cors({
     credentials: true,
 }));
 
+// Security: Disable X-Powered-By header to prevent information disclosure
+app.disable('x-powered-by');
+
 app.use(express.json());
 
 // Configure multer for file uploads
@@ -193,6 +196,23 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         }
     } catch {
         res.status(400).json({ error: 'Invalid segments format. Expected JSON array of {start, end} objects.' });
+        return;
+    }
+
+    // Security: Strict validation of segment data structure
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const isValidSegment = (seg: any) =>
+        typeof seg === 'object' &&
+        seg !== null &&
+        typeof seg.start === 'number' &&
+        typeof seg.end === 'number' &&
+        !isNaN(seg.start) &&
+        !isNaN(seg.end) &&
+        seg.start >= 0 &&
+        seg.end > seg.start;
+
+    if (!parsedSegments.every(isValidSegment)) {
+        res.status(400).json({ error: 'Invalid segment data: Each segment must have valid start and end numbers, with end > start.' });
         return;
     }
 

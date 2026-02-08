@@ -16,3 +16,16 @@ episodeTitle: z.string().optional()
 // Secure:
 episodeTitle: z.string().max(MAX_EPISODE_TITLE_LENGTH).optional()
 ```
+
+## 2025-02-25 - Security Gaps in Microservices
+
+**Vulnerability:** The `ffmpeg-service` microservice lacked standard security headers (like `X-Powered-By` suppression) and input validation for critical JSON payloads (`segments`), unlike the main Next.js application which is protected by `middleware.ts`.
+
+**Root Cause:** The microservice is a standalone Express application in a subdirectory with its own configuration, completely bypassing the main application's security middleware and linting rules (it was ignored in `eslint.config.mjs`).
+
+**Learning:** Security controls implemented in the main application (Next.js middleware) do not propagate to auxiliary microservices. Each microservice requires its own independent security hardening (headers, validation, auth).
+
+**Prevention:**
+- Audit all microservices (`ffmpeg-service`, etc.) for security headers and input validation.
+- Consider creating a shared security configuration or middleware for Express-based microservices.
+- Ensure linting/security scanning covers all subdirectories, not just the main `src`.
