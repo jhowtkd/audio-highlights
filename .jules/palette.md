@@ -36,3 +36,22 @@
 **Pattern:** For Sliders:
 1. Always provide `aria-label` identifying the control.
 2. If the value has units (seconds, percent), provide `aria-valuetext`.
+
+## 2025-02-25 - Transcript Segment Keyboard Inaccessibility
+
+**UX Problem:** Transcript segments were rendered as `div` elements with `onClick` handlers.
+Keyboard users (Tab/Enter) could not navigate or select segments, violating WCAG 2.1 (Keyboard Accessible).
+
+**Learning:** Interactive list items must be semantic `<button>` elements, not `div`s.
+Developers often use `div` to avoid default button styling, but this breaks accessibility.
+
+**Solution:** Refactored `TranscriptSegment` to use `<button type="button">`.
+Added `appearance-none`, `text-left`, and `w-full` to reset styles.
+Replaced inner block elements (`p`) with `span` (plus display classes) to ensure valid HTML.
+Added `aria-current="time"` for the active segment.
+
+**Pattern:** For interactive list items:
+1. Use `<button type="button">` as the container.
+2. Reset styles (`appearance-none text-left w-full`).
+3. Use `focus-visible` for focus indicators.
+4. Ensure valid HTML content (no block elements inside button).

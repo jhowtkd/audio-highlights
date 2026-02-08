@@ -12,13 +12,16 @@ interface TranscriptSegmentProps {
   onSegmentClick: (startTime: number) => void;
 }
 
-export const TranscriptSegment = memo(forwardRef<HTMLDivElement, TranscriptSegmentProps>(
+export const TranscriptSegment = memo(forwardRef<HTMLButtonElement, TranscriptSegmentProps>(
   ({ segment, isActive, isMatch, onSegmentClick }, ref) => {
     return (
-      <div
+      <button
         ref={ref}
+        type="button"
         onClick={() => onSegmentClick(segment.start)}
+        aria-current={isActive ? 'time' : undefined}
         className={cn(
+          'w-full text-left appearance-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none',
           'p-3 rounded-lg cursor-pointer transition-all duration-200',
           isActive
             ? 'bg-blue-100 dark:bg-blue-900/50 border-l-4 border-blue-500'
@@ -27,7 +30,7 @@ export const TranscriptSegment = memo(forwardRef<HTMLDivElement, TranscriptSegme
               : 'hover:bg-slate-100 dark:hover:bg-slate-800 border-l-4 border-transparent'
         )}
       >
-        <div className="flex items-start gap-3">
+        <span className="flex items-start gap-3">
           <span
             className={cn(
               'text-xs font-mono px-2 py-1 rounded shrink-0',
@@ -39,18 +42,18 @@ export const TranscriptSegment = memo(forwardRef<HTMLDivElement, TranscriptSegme
             {formatTime(segment.start)}
           </span>
 
-          <p
+          <span
             className={cn(
-              'text-sm leading-relaxed',
+              'block text-sm leading-relaxed',
               isActive
                 ? 'text-slate-900 dark:text-slate-100 font-medium'
                 : 'text-slate-700 dark:text-slate-300'
             )}
           >
             {segment.text}
-          </p>
-        </div>
-      </div>
+          </span>
+        </span>
+      </button>
     );
   }
 ));
