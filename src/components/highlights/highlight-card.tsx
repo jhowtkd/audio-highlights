@@ -222,6 +222,7 @@ export function HighlightCard({
                       variant="ghost"
                       className="h-6 w-6 p-0 shrink-0"
                       onClick={() => onCopy(quote)}
+                      aria-label="Copiar frase"
                     >
                       <Copy className="h-3 w-3" />
                     </Button>
