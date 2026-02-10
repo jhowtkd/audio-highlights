@@ -15,7 +15,7 @@ export function middleware(_request: NextRequest) {
     style-src 'self' 'unsafe-inline';
     img-src 'self' blob: data:;
     media-src 'self' blob: data:;
-    connect-src 'self' https://unpkg.com;
+    connect-src 'self' https://unpkg.com blob:;
     font-src 'self';
     object-src 'none';
     base-uri 'self';
