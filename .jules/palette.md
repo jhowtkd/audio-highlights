@@ -36,3 +36,16 @@
 **Pattern:** For Sliders:
 1. Always provide `aria-label` identifying the control.
 2. If the value has units (seconds, percent), provide `aria-valuetext`.
+
+## 2026-02-10 - Virtualized Transcript Segment Accessibility
+
+**UX Problem:** `TranscriptSegment` components were `div` elements, making the main transcript content inaccessible to keyboard users and screen readers.
+
+**Learning:** Virtualized lists often encourage `div` usage for performance/simplicity, but this breaks core navigation. Using `button` with `aria-current="time"` provides semantic context for media synchronization.
+
+**Solution:** Refactored `TranscriptSegment` to `<button type="button">`, replaced internal `<p>` with `<span>` (block) for validity, and added `aria-current="time"` to the active segment.
+
+**Pattern:** For synchronized media transcripts:
+1. Use `<button type="button">` for segments.
+2. Use `aria-current="time"` for the currently playing segment.
+3. Ensure internal text is `<span>` (block) to avoid HTML nesting issues in buttons.
