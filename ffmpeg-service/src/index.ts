@@ -5,9 +5,19 @@ import { spawn } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Trust the first proxy (e.g. Vercel / load balancer) to ensure correct IP detection
+app.set('trust proxy', 1);
+
+// Security headers
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" },
+}));
 
 // CORS configuration - allow requests from your Vercel domain
 const allowedOrigins = [
@@ -31,6 +41,18 @@ app.use(cors({
     },
     credentials: true,
 }));
+
+// Rate limiting
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    limit: 100, // Limit each IP to 100 requests per windowMs
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    message: 'Too many requests from this IP, please try again later',
+});
+
+// Apply rate limiting to all requests
+app.use(limiter);
 
 app.use(express.json());
 
