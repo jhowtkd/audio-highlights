@@ -15,6 +15,9 @@ export default function WavesurferPOCPage() {
   useEffect(() => {
     if (!containerRef.current || !timelineRef.current) return;
 
+    // Initialize Plugins
+    const regions = RegionsPlugin.create();
+
     // Initialize WaveSurfer
     const wavesurfer = WaveSurfer.create({
       container: containerRef.current,
@@ -22,7 +25,7 @@ export default function WavesurferPOCPage() {
       progressColor: 'rgb(100, 0, 100)',
       minPxPerSec: 100,
       plugins: [
-        RegionsPlugin.create(),
+        regions,
         TimelinePlugin.create({ container: timelineRef.current }),
       ],
     });
@@ -85,10 +88,7 @@ export default function WavesurferPOCPage() {
 
     wavesurfer.on('ready', () => {
       // Add a sample region
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const wsRegions = wavesurfer.plugins[0] as unknown as { addRegion: (options: any) => void };
-
-      wsRegions.addRegion({
+      regions.addRegion({
         start: 2,
         end: 5,
         content: 'Highlight Example',
