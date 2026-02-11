@@ -36,3 +36,15 @@
 **Pattern:** For Sliders:
 1. Always provide `aria-label` identifying the control.
 2. If the value has units (seconds, percent), provide `aria-valuetext`.
+
+## 2026-02-11 - UI Component Prop Swallowing (Slider)
+
+**UX Problem:** The reusable `Slider` component was spreading all props to the wrapper `div` (Radix Root) instead of the interactive `Thumb`. As a result, `aria-label` and `aria-valuetext` passed by developers were being applied to the container, making them ineffective for screen readers focusing the thumb.
+
+**Learning:** When wrapping Radix UI primitives, one must be careful to forward accessibility props to the *interactive* element (usually the Primitive, not the wrapper/root).
+
+**Solution:** Modified `src/components/ui/slider.tsx` to destructure `aria-*` props and pass them explicitly to `SliderPrimitive.Thumb`.
+
+**Pattern:** When creating/modifying UI wrappers for Radix primitives:
+1. Identify the focusable element (e.g., Thumb, Trigger, Input).
+2. Ensure `aria-label`, `aria-labelledby`, and `aria-describedby` are forwarded to THAT element, not just the root container.
