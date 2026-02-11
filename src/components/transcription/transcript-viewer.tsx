@@ -34,6 +34,25 @@ interface TranscriptViewerProps {
   className?: string;
 }
 
+interface TranscriptViewerContext {
+  activeSegmentIndex: number;
+  matchingSegmentIds: Set<string>;
+  onSegmentClick: (startTime: number) => void;
+}
+
+// Optimization: Define itemContent outside the component to keep the reference stable.
+// This prevents Virtuoso from re-rendering the entire list structure when only the context changes.
+const itemContent = (index: number, segment: TranscriptionSegment, context: TranscriptViewerContext) => (
+  <div className="pb-2 pr-2">
+    <TranscriptSegment
+      segment={segment}
+      isActive={index === context.activeSegmentIndex}
+      isMatch={context.matchingSegmentIds.has(segment.id)}
+      onSegmentClick={context.onSegmentClick}
+    />
+  </div>
+);
+
 export const TranscriptViewer = memo(function TranscriptViewer({
   segments,
   activeSegmentIndex,
@@ -56,6 +75,12 @@ export const TranscriptViewer = memo(function TranscriptViewer({
     }
     return ids;
   }, [searchResults]);
+
+  const context = useMemo(() => ({
+    activeSegmentIndex,
+    matchingSegmentIds,
+    onSegmentClick
+  }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
 
   // Auto-scroll para o segmento ativo (Virtualized)
   useEffect(() => {
@@ -318,21 +343,13 @@ export const TranscriptViewer = memo(function TranscriptViewer({
         </div>
       ) : (
         <div className={cn('flex-1 h-full min-h-0', className)}>
-          <Virtuoso
+          <Virtuoso<TranscriptionSegment, TranscriptViewerContext>
             ref={virtuosoRef}
             className="scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700"
             style={{ height: '100%' }}
             data={segments}
-            itemContent={(index, segment) => (
-              <div className="pb-2 pr-2">
-                <TranscriptSegment
-                  segment={segment}
-                  isActive={index === activeSegmentIndex}
-                  isMatch={matchingSegmentIds.has(segment.id)}
-                  onSegmentClick={onSegmentClick}
-                />
-              </div>
-            )}
+            context={context}
+            itemContent={itemContent}
           />
         </div>
       )}
