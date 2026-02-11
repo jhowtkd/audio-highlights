@@ -177,7 +177,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 onValueChange={handleMinDurationChange}
               />
               <p className="text-xs text-slate-500">
-                Nenhum highlight será menor que isso
+                Evita cortes muito curtos e sem contexto
               </p>
             </div>
 
@@ -200,7 +200,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 onValueChange={handleTargetDurationChange}
               />
               <p className="text-xs text-slate-500">
-                Duração ideal de cada highlight
+                Define o ritmo desejado para os vídeos
               </p>
             </div>
 
@@ -223,7 +223,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 onValueChange={handleMaxDurationChange}
               />
               <p className="text-xs text-slate-500">
-                Nenhum highlight será maior que isso
+                Mantém o conteúdo dinâmico e focado
               </p>
             </div>
 
