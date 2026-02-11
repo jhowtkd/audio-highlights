@@ -24,3 +24,19 @@
 **Changed To:** "Recomendamos áudios acima de 1 minuto para highlights melhores."
 **Learning:** Reassuring permissions ("Você pode continuar") are redundant when the UI state is non-blocking (warning color vs error color). Users prefer concise, actionable advice over wordy clarifications.
 **Rule:** For non-blocking warnings, skip the "You can continue" preamble and state the recommendation directly.
+
+## 2026-02-27 - Benefit-Driven Config Helpers
+
+**Copy Type:** Helper text for configuration sliders
+**Original:**
+- "Nenhum highlight será menor que isso"
+- "Nenhum highlight será maior que isso"
+- "Duração ideal de cada highlight"
+
+**Changed To:**
+- "Evita cortes muito curtos e sem contexto"
+- "Mantém o conteúdo dinâmico e focado"
+- "Define o ritmo desejado para os vídeos"
+
+**Learning:** Negative constraints ("Nenhum X será Y") feel restrictive and robotic. Users are configuring *outcomes*, not just *inputs*. Explaining the *benefit* of the setting (e.g., "Avoids context loss") is more helpful than restating the math.
+**Rule:** For configuration settings, helper text should describe the functional outcome or benefit, rather than simply restating the numeric constraint.
