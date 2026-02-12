@@ -12,14 +12,16 @@ interface TranscriptSegmentProps {
   onSegmentClick: (startTime: number) => void;
 }
 
-export const TranscriptSegment = memo(forwardRef<HTMLDivElement, TranscriptSegmentProps>(
+export const TranscriptSegment = memo(forwardRef<HTMLButtonElement, TranscriptSegmentProps>(
   ({ segment, isActive, isMatch, onSegmentClick }, ref) => {
     return (
-      <div
+      <button
         ref={ref}
+        type="button"
         onClick={() => onSegmentClick(segment.start)}
+        aria-current={isActive ? 'time' : undefined}
         className={cn(
-          'p-3 rounded-lg cursor-pointer transition-all duration-200',
+          'w-full text-left p-3 rounded-lg cursor-pointer transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
           isActive
             ? 'bg-blue-100 dark:bg-blue-900/50 border-l-4 border-blue-500'
             : isMatch
@@ -50,7 +52,7 @@ export const TranscriptSegment = memo(forwardRef<HTMLDivElement, TranscriptSegme
             {segment.text}
           </p>
         </div>
-      </div>
+      </button>
     );
   }
 ));
