@@ -36,3 +36,17 @@
 **Pattern:** For Sliders:
 1. Always provide `aria-label` identifying the control.
 2. If the value has units (seconds, percent), provide `aria-valuetext`.
+
+## 2026-02-14 - Transcript List Accessibility
+
+**UX Problem:** Transcript segments were implemented as `div` elements with `onClick`. Keyboard users could not navigate or interact with individual segments to play from that point.
+
+**Learning:** Core content navigation (like transcripts) must be keyboard accessible.
+
+**Solution:** Converted segments to `<button type="button">` with `w-full text-left`. Added `aria-current="time"` to semantically indicate the active playing segment.
+
+**Pattern:** For interactive lists of content:
+1. Use `<button type="button">`.
+2. Use `w-full text-left` to maintain list appearance.
+3. Use `aria-current` to indicate active state (e.g., `aria-current="time"`, `aria-current="step"`, `aria-current="page"`).
+4. Ensure visible focus styles (`focus-visible`).
