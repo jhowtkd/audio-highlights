@@ -196,6 +196,34 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         return;
     }
 
+    // Security: Validate segments count
+    const MAX_SEGMENTS = 100;
+    if (parsedSegments.length > MAX_SEGMENTS) {
+        res.status(400).json({ error: `Too many segments. Maximum allowed is ${MAX_SEGMENTS}.` });
+        return;
+    }
+
+    // Security: Validate each segment
+    for (const [index, seg] of parsedSegments.entries()) {
+        const start = Number(seg.start);
+        const end = Number(seg.end);
+
+        if (isNaN(start) || isNaN(end)) {
+            res.status(400).json({ error: `Segment ${index} has invalid numeric values.` });
+            return;
+        }
+
+        if (start < 0) {
+            res.status(400).json({ error: `Segment ${index} has negative start time.` });
+            return;
+        }
+
+        if (end <= start) {
+            res.status(400).json({ error: `Segment ${index} has invalid duration (end <= start).` });
+            return;
+        }
+    }
+
     const sessionId = uuidv4();
     const tempDir = path.join('/tmp', sessionId);
     fs.mkdirSync(tempDir, { recursive: true });
