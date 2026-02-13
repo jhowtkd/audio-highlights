@@ -111,7 +111,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
             className={`gap-2 ${config.isMix ? 'bg-indigo-600 hover:bg-indigo-700' : ''}`}
           >
             {config.isMix ? <Workflow className="h-4 w-4" /> : <Layers className="h-4 w-4" />}
-            {config.isMix ? 'Modo Storytelling (Mix)' : 'Modo Padrão'}
+            {config.isMix ? 'Modo Storytelling' : 'Modo Padrão'}
           </Button>
         </div>
       </CardHeader>
@@ -127,8 +127,8 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 O que é o Modo Storytelling?
               </h4>
               <p className="text-sm text-indigo-700 dark:text-indigo-300">
-                Neste modo, a IA analisa todo o conteúdo e cria <strong>um único vídeo longo</strong> (Mix)
-                que conta uma história coesa conectando os melhores momentos em uma narrativa fluida.
+                Neste modo, a IA conecta os melhores momentos para criar uma <strong>narrativa única</strong>,
+                contando uma história coesa com início, meio e fim.
               </p>
             </div>
 
@@ -136,7 +136,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
               <div className="flex items-center justify-between">
                 <Label className="flex items-center gap-2">
                   <Clock className="h-4 w-4 text-slate-500" />
-                  Duração Total do Mix
+                  Duração da Narrativa
                 </Label>
                 <span className="text-sm font-medium text-indigo-600 dark:text-indigo-400">
                   {formatDuration(config.mixDuration || 180)}
@@ -260,7 +260,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
           <div className="text-sm text-slate-600 dark:text-slate-400 space-y-1">
             {config.isMix ? (
               <p>
-                Gerar <span className="font-medium text-indigo-600">1 Mix Storytelling</span> de aproximadamente{' '}
+                Gerar <span className="font-medium text-indigo-600">1 narrativa completa</span> de aproximadamente{' '}
                 <span className="font-medium">{formatDuration(config.mixDuration || 180)}</span>.
               </p>
             ) : (
@@ -299,12 +299,12 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
           {isGenerating ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-              {config.isMix ? 'Criando Storytelling...' : 'Gerando Highlights...'}
+              {config.isMix ? 'Criando Narrativa...' : 'Gerando Highlights...'}
             </>
           ) : (
             <>
               {config.isMix ? <Workflow className="h-4 w-4 mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-              {config.isMix ? 'Gerar Mix Storytelling' : 'Gerar Highlights'}
+              {config.isMix ? 'Gerar Narrativa' : 'Gerar Highlights'}
             </>
           )}
         </Button>

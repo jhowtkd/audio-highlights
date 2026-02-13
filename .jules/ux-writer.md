@@ -24,3 +24,11 @@
 **Changed To:** "Recomendamos áudios acima de 1 minuto para highlights melhores."
 **Learning:** Reassuring permissions ("Você pode continuar") are redundant when the UI state is non-blocking (warning color vs error color). Users prefer concise, actionable advice over wordy clarifications.
 **Rule:** For non-blocking warnings, skip the "You can continue" preamble and state the recommendation directly.
+
+## 2026-02-27 - Storytelling Mode Copy Update
+
+**Copy Type:** Configuration Panel & Button Labels
+**Original:** "Modo Storytelling (Mix)", "1 Mix Storytelling"
+**Changed To:** "Modo Storytelling", "1 narrativa completa"
+**Learning:** Internal terms like "Mix" confuse users who care about the output (a narrative story) rather than the method (concatenation). The copy should focus on the "beginning, middle, and end" structure.
+**Rule:** Avoid "Mix" or "Concatenation" in user-facing text. Use "Narrativa", "História", or "Vídeo Completo".
