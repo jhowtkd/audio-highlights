@@ -82,3 +82,24 @@ WebAssembly-powered ML models are now mature enough for real-time text features 
 
 **Resources:**
 -   https://virtuoso.dev/
+
+## 2026-03-03 - Automated Silence Removal
+
+**Research Topic:** Automated Silence Removal using FFmpeg
+
+**Finding:**
+-   `ffmpeg-static` provides a reliable binary for server-side processing.
+-   `silencedetect` filter works efficiently (stream scan) to identify silence intervals.
+-   `fluent-ffmpeg` capability checks can be flaky in restricted environments, but direct `child_process.spawn` works reliably.
+-   Logic to invert "silence" to "keep" segments is trivial and effective.
+
+**Decision:**
+Propose "Smart Silence Removal" feature.
+-   High value for users (time saving, better content).
+-   Low complexity (uses existing `ffmpeg-service` patterns).
+
+**Learning:**
+For Node.js based media processing in restricted environments (like CI or Docker containers), prefer direct `spawn` of static binaries over wrapper libraries that rely on system installations or complex capability checks.
+
+**Resources:**
+-   https://ffmpeg.org/ffmpeg-filters.html#silencedetect
