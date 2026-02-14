@@ -140,7 +140,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
 
         if (code !== 0) {
             console.error('[FFmpeg] Error:', stderr);
-            res.status(500).json({ error: 'FFmpeg processing failed', details: stderr.slice(-500) });
+            res.status(500).json({ error: 'FFmpeg processing failed. Please check server logs.' });
             return;
         }
 
@@ -171,7 +171,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     ffmpeg.on('error', (err: Error) => {
         console.error('[FFmpeg] Spawn error:', err);
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Failed to start FFmpeg', details: err.message });
+        res.status(500).json({ error: 'Failed to start FFmpeg. Please check server logs.' });
     });
 });
 
@@ -190,6 +190,23 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         parsedSegments = typeof segments === 'string' ? JSON.parse(segments) : segments;
         if (!Array.isArray(parsedSegments) || parsedSegments.length === 0) {
             throw new Error('Invalid segments array');
+        }
+
+        // Limit the number of segments to prevent DoS
+        const MAX_SEGMENTS = 100;
+        if (parsedSegments.length > MAX_SEGMENTS) {
+            res.status(400).json({ error: `Too many segments. Maximum allowed is ${MAX_SEGMENTS}.` });
+            return;
+        }
+
+        // Validate each segment
+        for (const seg of parsedSegments) {
+            if (typeof seg.start !== 'number' || typeof seg.end !== 'number' ||
+                isNaN(seg.start) || isNaN(seg.end) ||
+                seg.start < 0 || seg.end <= seg.start) {
+                res.status(400).json({ error: 'Invalid segment data. Start/end must be valid numbers, non-negative, and end > start.' });
+                return;
+            }
         }
     } catch {
         res.status(400).json({ error: 'Invalid segments format. Expected JSON array of {start, end} objects.' });
@@ -309,7 +326,7 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         console.error('[FFmpeg Concat] Error:', err);
         fs.rm(tempDir, { recursive: true, force: true }, () => { });
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Concat processing failed', details: String(err) });
+        res.status(500).json({ error: 'Concat processing failed. Please check server logs.' });
     }
 });
 
