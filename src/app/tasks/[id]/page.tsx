@@ -245,7 +245,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                 <Toaster position="top-right" richColors />
                 <div className="text-center">
                     <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-blue-500" />
-                    <p className="text-slate-600 dark:text-slate-400">Carregando task...</p>
+                    <p className="text-slate-600 dark:text-slate-400">Carregando projeto...</p>
                 </div>
             </div>
         );
@@ -305,16 +305,16 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                             <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
                         </div>
                         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                            Task não disponível
+                            Projeto não disponível
                         </h2>
                         <p className="text-slate-600 dark:text-slate-400 mb-6">
                             {task.status === 'error'
                                 ? `Erro: ${task.error}`
-                                : 'Esta task ainda não foi processada ou não existe.'}
+                                : 'Este projeto ainda não foi processado ou não existe.'}
                         </p>
                         <Button onClick={() => router.push('/tasks')}>
                             <ArrowLeft className="h-4 w-4 mr-2" />
-                            Voltar para Tasks
+                            Voltar para Projetos
                         </Button>
                     </div>
                 </main>
