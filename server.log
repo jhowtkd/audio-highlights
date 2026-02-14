@@ -2,7 +2,7 @@
 > audio-highlights@0.1.0 dev
 > next dev
 
-▲ Next.js 16.1.2 (Turbopack)
+▲ Next.js 16.1.6 (Turbopack)
 - Local:         http://localhost:3000
 - Network:       http://192.168.0.2:3000
 
@@ -13,7 +13,9 @@ You can learn more, including how to opt-out if you'd not like to participate in
 https://nextjs.org/telemetry
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1577ms
-○ Compiling /test-viewer ...
- GET /test-viewer 200 in 5.9s (compile: 5.3s, proxy.ts: 135ms, render: 423ms)
- GET /test-viewer 200 in 1047ms (compile: 671ms, proxy.ts: 70ms, render: 305ms)
+✓ Ready in 1549ms
+○ Compiling /research-poc/wavesurfer ...
+ GET /research-poc/wavesurfer 200 in 6.2s (compile: 5.8s, proxy.ts: 103ms, render: 361ms)
+ GET /research-poc/wavesurfer 200 in 95ms (compile: 11ms, proxy.ts: 5ms, render: 79ms)
+✓ Compiled in 77ms
+ GET /research-poc/wavesurfer 200 in 256ms (compile: 15ms, proxy.ts: 52ms, render: 190ms)

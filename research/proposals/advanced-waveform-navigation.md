@@ -1,87 +1,84 @@
 ## 🔬 Researcher: Advanced Waveform Navigation with Wavesurfer.js
 
 ### 🎯 Executive Summary
-I propose upgrading the current `Waveform` component to use **wavesurfer.js**. While the current implementation provides a high-level overview, it lacks **zoom capabilities** and **segment selection interactions** required for precise editing. Switching to `wavesurfer.js` enables professional-grade audio navigation, including drag-to-select regions for highlight creation and seamless zooming.
+I propose upgrading the current `Waveform` component to use **wavesurfer.js** v7. While the current implementation provides a high-level overview, it lacks **zoom capabilities** and **segment selection interactions** required for precise editing. Switching to `wavesurfer.js` enables professional-grade audio navigation, including drag-to-select regions for highlight creation and seamless zooming, while maintaining performance via MediaElement backend or pre-generated peaks.
 
 ### 💡 Problem Statement
 **Current situation:**
 The existing `src/components/audio/waveform.tsx` uses a custom Canvas implementation that:
-1.  **Low Resolution:** Downsamples the entire audio to a fixed 200 bars. This makes it impossible to distinguish between a 1-second pause and a 5-second silence in a 1-hour podcast.
-2.  **Performance Risk:** It uses `AudioContext.decodeAudioData` on the full file at once. For a 2-hour podcast, this decodes to ~1.2GB of PCM data in RAM, likely causing browser crashes on low-end devices.
+1.  **Low Resolution:** Downsamples the entire audio to a fixed 200 bars.
+2.  **Performance Risk:** It uses `AudioContext.decodeAudioData` on the full file at once, which can cause OOM crashes for large files.
 3.  **No Zoom:** Users cannot "zoom in" to find precise cut points.
+4.  **Limited Interaction:** No support for dragging to create or resize highlights.
 
 **User impact:**
-Users cannot perform fine-grained editing (e.g., "start highlight exactly when he says 'Hello'"). They are limited to rough approximations.
+Users cannot perform fine-grained editing. They are limited to rough approximations when defining highlight boundaries.
 
 ### 🚀 Proposed Solution
 **What:**
-Refactor `Waveform` to use `wavesurfer.js` (v7) with the `RegionsPlugin` and `ZoomPlugin`.
+Refactor `Waveform` to use `wavesurfer.js` (v7) with the `RegionsPlugin` and `ZoomPlugin` (built-in via `minPxPerSec`).
 
 **How it works:**
-- **Zooming:** `wavesurfer.js` handles scrollable canvases natively.
-- **Regions:** Use `RegionsPlugin` to visualize Highlights as interactive, draggable overlays instead of static colored rectangles.
-- **Performance:** `wavesurfer.js` supports decoding in chunks (MediaElement backend) or using pre-generated JSON peaks (server-side), avoiding the OOM crash.
+- **Zooming:** `wavesurfer.js` handles scrollable canvases natively using `minPxPerSec`.
+- **Regions:** Use `RegionsPlugin` to visualize Highlights as interactive, draggable overlays.
+- **Performance:** Utilize `MediaElement` backend (streaming) or fetch pre-generated `.json` peaks to avoid full client-side decoding.
+- **Security:** Update CSP to allow `blob:` in `connect-src` (verified requirement).
 
 **Why this approach:**
-- **Standardization:** Stop maintaining custom low-level canvas code.
-- **Features:** Zoom, Regions, Timeline are built-in.
-- **Performance:** Better handling of large files.
+- **Standardization:** Leverages a battle-tested library instead of maintaining custom canvas code.
+- **Features:** Zoom, Regions, Timeline, and Virtualization are supported.
+- **Ecotsystem:** v7 is modular and TypeScript-friendly.
 
 ### 📊 Research Findings
 
-**Comparison:**
+**Technology Analysis:**
+- **Library:** `wavesurfer.js` (v7.12.1)
+- **Maturity:** Stable (v7 is a major rewrite for performance and TS).
+- **Adoption:** Industry standard for web audio visualization.
+- **License:** BSD-3-Clause (Compatible).
+- **Bundle size:** ~30KB (Gzipped).
 
-| Feature | Current Custom Component | Wavesurfer.js |
-|---------|--------------------------|---------------|
-| **Resolution** | Fixed (200 bars) | Infinite (Zoomable) |
-| **Editing** | Static (View only) | Interactive (Drag regions) |
-| **Memory** | High (Full decode) | Flexible (Peaks/MediaElement) |
-| **Maintenance**| High (Custom Canvas) | Low (Library) |
-
-**Library Analysis:**
-- **Library:** `wavesurfer.js`
-- **Plugins:** `RegionsPlugin` (for highlights), `TimelinePlugin` (for time axis).
-- **Bundle Impact:** ~30KB (worth it for the core feature of the app).
+**Technical Constraints & Fixes:**
+1.  **CSP Requirement:** The application's strict Content Security Policy blocked `blob:` URLs for audio workers. I verified that adding `blob:` to `connect-src` in `src/middleware.ts` resolves this.
+2.  **Plugin Imports:** v7 plugins are ES modules. Verified import path: `wavesurfer.js/dist/plugins/[plugin].esm.js`.
+3.  **React 19 Compatibility:** Verified compatible with React 19 and Next.js 16 (App Router) using `dynamic` import with `{ ssr: false }`.
 
 ### 🧪 Proof of Concept
 
-I verified that `wavesurfer.js` can be initialized in a Next.js environment.
+I have implemented a functional POC at `src/app/research-poc/wavesurfer/page.tsx`.
 
-**Proposed Implementation Strategy:**
+**Features Verified:**
+- ✅ Rendering waveform from a dynamically generated WAV Blob (Client-side synthesis).
+- ✅ Zooming via `minPxPerSec` parameter.
+- ✅ `RegionsPlugin` for creating and dragging highlight regions.
+- ✅ `TimelinePlugin` for time axis.
+- ✅ Play/Pause integration.
 
+**Implementation:**
 ```tsx
-// src/components/audio/waveform.tsx (Refactored)
+// src/app/research-poc/wavesurfer/components/wavesurfer-poc.tsx
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
 
-// Initialize with plugins
+// ... inside useEffect
 const ws = WaveSurfer.create({
   container: containerRef.current,
   url: audioUrl,
-  plugins: [
-    RegionsPlugin.create(), // Enable draggable regions
-  ]
+  minPxPerSec: zoom, // Controls zoom level
 });
 
-// Add Highlights as Regions
-highlights.forEach(h => {
-  ws.plugins.regions.add({
-    start: h.startTime,
-    end: h.endTime,
-    content: h.title,
-    color: getHighlightColor(h.id),
-    drag: false, // Set to true to allow editing
-    resize: false
-  });
-});
+const wsRegions = ws.registerPlugin(RegionsPlugin.create());
 ```
+
+**Demo:**
+Screenshot available at `verification/wavesurfer_poc.png`.
 
 ### 📈 Value Proposition
 
 **Benefits:**
-- ✅ **Precision Editing:** Zoom in to seeing individual words/breaths.
-- ✅ **Interactive Highlights:** Users could drag highlight boundaries to adjust them (new feature possibility).
-- ✅ **Stability:** Prevent browser crashes on long files by switching to MediaElement backend or Peaks.
+- ✅ **Precision Editing:** Zoom in to see individual phonemes/pauses.
+- ✅ **Interactive Highlights:** Users can drag highlight boundaries to adjust them intuitively.
+- ✅ **Stability:** Prevent browser crashes on long files by switching to streaming backends.
 
 **User stories:**
 - As a **Creator**, I want to **zoom in** on the waveform so I can cut out a specific cough or pause.
@@ -95,27 +92,35 @@ highlights.forEach(h => {
 
 **Cons:**
 - ❌ **Migration Effort:** Need to rewrite the component.
-- ❌ **Dependencies:** Adds a dependency.
+- ❌ **Dependencies:** Adds `wavesurfer.js` dependency (~30KB).
 
 ### 🛠️ Implementation Plan
 
-**Phase 1: Replacement** (estimated: 2 days)
-- [ ] Install `wavesurfer.js`.
-- [ ] Re-implement `Waveform` component using `wavesurfer.js`.
-- [ ] Map existing `highlights` prop to `RegionsPlugin`.
+**Phase 1: Foundation (POC & Setup)** (Completed)
+- [x] Verify `wavesurfer.js` in Next.js environment.
+- [x] Identify CSP requirements.
+- [x] Create POC with Regions and Zoom.
 
-**Phase 2: Interaction** (estimated: 2 days)
-- [ ] Add Zoom slider/scroll wheel support.
-- [ ] Implement "Click to seek" (native in library).
+**Phase 2: Core Component Replacement** (estimated: 3 days)
+- [ ] Create `WavesurferPlayer` component to replace `src/components/audio/player.tsx` and `waveform.tsx`.
+- [ ] Implement `RegionsPlugin` to render existing `highlights`.
+- [ ] Sync playback state with global player context.
 
-**Phase 3: Performance (Server-side)** (estimated: 3 days)
-- [ ] Update backend to generate `.json` peaks using `audiowaveform`.
-- [ ] Update frontend to fetch peaks instead of decoding audio.
+**Phase 3: Advanced Features** (estimated: 2 days)
+- [ ] Implement "Drag to Create Highlight" interaction.
+- [ ] Add Zoom slider to UI.
+- [ ] Optimize for large files (Server-side peaks generation or MediaElement backend).
 
 **Total estimated effort:** 1 week
+
+### 📚 Resources
+
+**Documentation:**
+- [Wavesurfer.js v7 Docs](https://wavesurfer.xyz/)
+- [Regions Plugin](https://wavesurfer.xyz/plugins/regions)
 
 ### 🎬 Next Steps
 
 **If approved:**
-1.  Approve dependency `wavesurfer.js`.
-2.  Begin Phase 1 (Component Replacement).
+1.  Merge the `wavesurfer.js` dependency.
+2.  Begin Phase 2 (Component Replacement).
