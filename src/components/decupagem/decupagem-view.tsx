@@ -43,7 +43,7 @@ export const DecupagemView = memo(function DecupagemView({ segments, projectId }
                 toast.success('Análise de decupagem concluída!');
             }
         } catch (error) {
-            toast.error('Erro ao analisar decupagem');
+            toast.error('Não foi possível analisar o áudio. Tente novamente.');
             console.error(error);
         } finally {
             setIsAnalyzing(false);
@@ -98,7 +98,7 @@ export const DecupagemView = memo(function DecupagemView({ segments, projectId }
 
             toast.success(`Exportado como ${format.toUpperCase()}`);
         } catch {
-            toast.error('Erro ao exportar');
+            toast.error('Não foi possível exportar o arquivo. Tente novamente.');
         }
     };
 
