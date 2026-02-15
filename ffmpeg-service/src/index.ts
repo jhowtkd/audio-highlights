@@ -9,6 +9,11 @@ import path from 'path';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+// Security: Disable x-powered-by header
+app.disable('x-powered-by');
+
+const MAX_SEGMENTS = 100;
+
 // CORS configuration - allow requests from your Vercel domain
 const allowedOrigins = [
     'http://localhost:3000',
@@ -194,6 +199,21 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
     } catch {
         res.status(400).json({ error: 'Invalid segments format. Expected JSON array of {start, end} objects.' });
         return;
+    }
+
+    // Security: Validate segments count and data
+    if (parsedSegments.length > MAX_SEGMENTS) {
+        res.status(400).json({ error: `Too many segments. Max allowed is ${MAX_SEGMENTS}.` });
+        return;
+    }
+
+    for (const seg of parsedSegments) {
+        if (typeof seg.start !== 'number' || typeof seg.end !== 'number' ||
+            isNaN(seg.start) || isNaN(seg.end) ||
+            seg.start < 0 || seg.end <= seg.start) {
+            res.status(400).json({ error: 'Invalid segment data. Start and end must be non-negative numbers with end > start.' });
+            return;
+        }
     }
 
     const sessionId = uuidv4();
