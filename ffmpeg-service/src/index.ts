@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import multer from 'multer';
 import { spawn } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
@@ -32,6 +33,7 @@ app.use(cors({
     credentials: true,
 }));
 
+app.use(helmet());
 app.use(express.json());
 
 // Configure multer for file uploads
@@ -140,7 +142,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
 
         if (code !== 0) {
             console.error('[FFmpeg] Error:', stderr);
-            res.status(500).json({ error: 'FFmpeg processing failed', details: stderr.slice(-500) });
+            res.status(500).json({ error: 'FFmpeg processing failed. Please check server logs for details.' });
             return;
         }
 
@@ -171,7 +173,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     ffmpeg.on('error', (err: Error) => {
         console.error('[FFmpeg] Spawn error:', err);
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Failed to start FFmpeg', details: err.message });
+        res.status(500).json({ error: 'Failed to start FFmpeg. Please check server logs for details.' });
     });
 });
 
@@ -234,7 +236,7 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
                 ffmpeg.on('close', (code: number) => {
                     if (code !== 0) {
                         console.error(`[FFmpeg Concat] Segment ${i + 1} failed:`, stderr.slice(-500));
-                        reject(new Error(`Segment extraction failed: ${stderr.slice(-300)}`));
+                        reject(new Error(`Segment extraction failed. Check logs.`));
                     } else {
                         console.log(`[FFmpeg Concat] Segment ${i + 1} extracted successfully`);
                         resolve();
@@ -271,7 +273,8 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
             ffmpeg.on('close', (code: number) => {
                 if (code !== 0) {
                     console.error('[FFmpeg Concat] Failed with code', code);
-                    reject(new Error(`Concat failed (code ${code}): ${stderr.slice(-500)}`));
+                    console.error('[FFmpeg Concat] Stderr:', stderr);
+                    reject(new Error(`Concat failed. Check logs.`));
                 } else {
                     console.log('[FFmpeg Concat] Success!');
                     resolve();
@@ -309,14 +312,14 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         console.error('[FFmpeg Concat] Error:', err);
         fs.rm(tempDir, { recursive: true, force: true }, () => { });
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Concat processing failed', details: String(err) });
+        res.status(500).json({ error: 'Concat processing failed. Please check server logs for details.' });
     }
 });
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error('[Error]', err);
-    res.status(500).json({ error: err.message || 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(PORT, () => {
