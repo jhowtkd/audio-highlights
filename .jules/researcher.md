@@ -82,3 +82,23 @@ WebAssembly-powered ML models are now mature enough for real-time text features 
 
 **Resources:**
 -   https://virtuoso.dev/
+
+## 2026-02-24 - Smart Silence Removal Research
+
+**Research Topic:** Server-side silence detection and removal using FFmpeg
+
+**Finding:**
+FFmpeg's `silencedetect` filter works reliably for identifying silence intervals based on decibel threshold, superior to transcript-based gaps.
+Combining `silencedetect` output (parsed from stderr) with `atrim` and `concat` filters allows for seamless automated editing.
+POC confirmed this works robustly with generated test audio.
+
+**Decision:**
+Propose implementing `/detect-silence` and `/remove-silence` endpoints in `ffmpeg-service`.
+This offloads processing from the client and ensures A/V sync.
+
+**Learning:**
+Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliable than trying to map silence from text timestamps, especially for non-speech segments.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#silencedetect
+- research/proposals/2026-02-24-smart-silence-removal.md
