@@ -27,6 +27,12 @@ interface SearchResult {
   matchReason: string;
 }
 
+interface TranscriptViewerContext {
+  activeSegmentIndex: number;
+  matchingSegmentIds: Set<string>;
+  onSegmentClick: (startTime: number) => void;
+}
+
 interface TranscriptViewerProps {
   segments: TranscriptionSegment[];
   activeSegmentIndex: number;
@@ -149,6 +155,25 @@ export const TranscriptViewer = memo(function TranscriptViewer({
     toast.success(`Transcrição baixada: ${filename}`);
     setShowExportMenu(false);
   }, [segments]);
+
+  // Memoize context for Virtuoso to prevent re-creation of itemContent
+  const context = useMemo(() => ({
+    activeSegmentIndex,
+    matchingSegmentIds,
+    onSegmentClick
+  }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
+
+  // Stable itemContent function
+  const itemContent = useCallback((index: number, segment: TranscriptionSegment, context: TranscriptViewerContext) => (
+    <div className="pb-2 pr-2">
+      <TranscriptSegment
+        segment={segment}
+        isActive={index === context.activeSegmentIndex}
+        isMatch={context.matchingSegmentIds.has(segment.id)}
+        onSegmentClick={context.onSegmentClick}
+      />
+    </div>
+  ), []);
 
   if (segments.length === 0) {
     return (
@@ -323,16 +348,8 @@ export const TranscriptViewer = memo(function TranscriptViewer({
             className="scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700"
             style={{ height: '100%' }}
             data={segments}
-            itemContent={(index, segment) => (
-              <div className="pb-2 pr-2">
-                <TranscriptSegment
-                  segment={segment}
-                  isActive={index === activeSegmentIndex}
-                  isMatch={matchingSegmentIds.has(segment.id)}
-                  onSegmentClick={onSegmentClick}
-                />
-              </div>
-            )}
+            context={context}
+            itemContent={itemContent}
           />
         </div>
       )}
