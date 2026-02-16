@@ -36,3 +36,13 @@
 **Pattern:** For Sliders:
 1. Always provide `aria-label` identifying the control.
 2. If the value has units (seconds, percent), provide `aria-valuetext`.
+
+## 2026-02-16 - Radix UI Slider Component Fix
+
+**UX Problem:** Passing `aria-label` to the `Slider` component (wrapping Radix UI) resulted in the label being applied to the wrapper `div`, not the interactive `Thumb`, leaving screen reader users without a label on focus.
+
+**Learning:** `shadcn/ui` style `Slider` components often spread props to the Root but miss forwarding ARIA props to the `Thumb`.
+
+**Solution:** Destructured `aria-label`, `aria-labelledby`, and `aria-valuetext` in `Slider.tsx` and passed them explicitly to `SliderPrimitive.Thumb`.
+
+**Pattern:** When wrapping accessible primitives (Radix, Headless UI), verify that ARIA props reach the *interactive* element (button, input, thumb), not just the container.
