@@ -82,3 +82,26 @@ WebAssembly-powered ML models are now mature enough for real-time text features 
 
 **Resources:**
 -   https://virtuoso.dev/
+
+## 2026-03-01 - Client-Side Audiogram Generator
+
+**Research Topic:** Browser-based video generation for audio highlights.
+
+**Finding:**
+Investigated using `@ffmpeg/ffmpeg` (WASM) to generate "Audiograms" (video with waveform).
+Verified that `ffmpeg` supports the necessary filters (`showwaves`, `overlay`, `lavfi` inputs) via a Node.js POC script (`research/pocs/audiogram-poc.ts`).
+Confirmed that client-side generation is feasible using the existing stack without new heavy dependencies.
+
+**Decision:**
+Propose **Client-Side Audiogram Generator**.
+- Leverage existing `ffmpeg-wasm` integration.
+- Avoid server-side rendering costs.
+- Focus on viral sharing use cases (TikTok/Reels).
+
+**Learning:**
+`fluent-ffmpeg` is deprecated and has issues with static binary paths in some environments. Direct `child_process.spawn` or using the WASM API directly is more reliable for this specific project structure.
+
+**Resources:**
+- [FFmpeg WASM](https://github.com/ffmpegwasm/ffmpeg.wasm)
+- POC: `research/pocs/audiogram-poc.ts`
+- Proposal: `research/proposals/2026-03-01-audiogram-generator.md`
