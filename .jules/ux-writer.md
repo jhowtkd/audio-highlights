@@ -24,3 +24,17 @@
 **Changed To:** "Recomendamos áudios acima de 1 minuto para highlights melhores."
 **Learning:** Reassuring permissions ("Você pode continuar") are redundant when the UI state is non-blocking (warning color vs error color). Users prefer concise, actionable advice over wordy clarifications.
 **Rule:** For non-blocking warnings, skip the "You can continue" preamble and state the recommendation directly.
+
+## 2025-02-17 - Project vs Task Terminology
+
+**Copy Type:** Empty State & Navigation
+
+**Original:** "Tasks", "Novo Upload", "Nenhum áudio enviado"
+
+**Changed To:** "Meus Projetos", "Novo Projeto", "Comece seu primeiro projeto"
+
+**Learning:** "Tasks" is a technical implementation detail. Users think in terms of "Projects" or "Content".
+Changing the empty state from a negative statement ("No audio") to an invitation ("Start your first project") makes the app feel more welcoming and actionable.
+
+**Rule:** Use "Projeto" (Project) instead of "Task" or "Upload" for the main unit of work.
+Avoid negative empty states; use them to guide the user to the first action.
