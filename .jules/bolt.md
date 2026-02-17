@@ -33,3 +33,18 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-02-17 - Stabilized Virtualized List Context
+
+**Bottleneck:** `TranscriptViewer` recreated the `itemContent` function on every render (e.g., when `activeSegmentIndex` changed), causing `react-virtuoso` to invalidate its internal cache and potentially re-render items unnecessarily.
+**Learning:** `react-virtuoso`'s `context` prop allows passing dynamic data (like active state or search results) while keeping the `itemContent` render function referentially stable.
+**Action:** Lifted dynamic dependencies into a memoized `context` object and used `useCallback` for `itemContent`.
+**Code:**
+```typescript
+const context = useMemo(() => ({ activeSegmentIndex, ... }), [activeSegmentIndex, ...]);
+const itemContent = useCallback((index, item, context) => (
+  <TranscriptSegment isActive={index === context.activeSegmentIndex} ... />
+), []);
+// Use stable itemContent and context
+<Virtuoso context={context} itemContent={itemContent} ... />
+```
