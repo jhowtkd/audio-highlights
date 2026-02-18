@@ -385,7 +385,7 @@ export default function Home() {
               <Mic className="h-16 w-16 mx-auto text-blue-500" />
             </div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-3">
-              Transcrevendo seu áudio...
+              Transcrevendo áudio...
             </h2>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
               {audioFile?.name}
@@ -409,9 +409,9 @@ export default function Home() {
                     <span>{formatDuration(elapsedTime)}</span>
                   </div>
                   <p className="mt-2 text-xs">
-                    Isso pode levar alguns minutos (Estimado: ~{estimatedTime})
+                    Aguarde, isso pode levar alguns minutos. Tempo estimado: ~{estimatedTime}
                   </p>
-                  <p className="text-xs opacity-70">Não feche esta página</p>
+                  <p className="text-xs opacity-70">Mantenha esta aba aberta enquanto finalizamos.</p>
                 </div>
               </>
             )}
@@ -427,10 +427,10 @@ export default function Home() {
               </div>
             </div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-3">
-              Ops! Algo deu errado
+              Não foi possível processar
             </h2>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
-              {errorMessage || 'Ocorreu um erro inesperado'}
+              {errorMessage || 'Tivemos um problema técnico. Tente novamente.'}
             </p>
             <div className="flex gap-3 justify-center">
               <Button onClick={handleRetry} variant="default">
@@ -507,12 +507,12 @@ export default function Home() {
                           <Film className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                           <div>
                             <p className="font-medium text-slate-900 dark:text-slate-100">
-                              {videoFile ? videoFile.name : 'Quer gerar clipes de vídeo?'}
+                              {videoFile ? videoFile.name : 'Deseja baixar os cortes em vídeo?'}
                             </p>
                             <p className="text-xs text-slate-500">
                               {videoFile
                                 ? `${(videoFile.size / (1024 * 1024)).toFixed(1)} MB`
-                                : 'Anexe o vídeo correspondente a este áudio para baixar os cortes'}
+                                : 'Adicione o arquivo de vídeo original para gerar os clipes.'}
                             </p>
                           </div>
                         </div>
