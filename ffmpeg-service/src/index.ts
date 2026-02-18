@@ -196,6 +196,30 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         return;
     }
 
+    // Security: Limit number of segments to prevent DoS
+    const MAX_SEGMENTS = 100;
+    if (parsedSegments.length > MAX_SEGMENTS) {
+        res.status(400).json({ error: `Too many segments. Maximum is ${MAX_SEGMENTS}` });
+        return;
+    }
+
+    // Security: Validate segment data types and values
+    for (const seg of parsedSegments) {
+        if (!seg || typeof seg !== 'object') {
+            res.status(400).json({ error: 'Invalid segment data: each segment must be an object' });
+            return;
+        }
+        if (typeof (seg as any).start !== 'number' || typeof (seg as any).end !== 'number') {
+            res.status(400).json({ error: 'Invalid segment data: start and end must be numbers' });
+            return;
+        }
+        const s = seg as { start: number; end: number };
+        if (s.start < 0 || s.end <= s.start) {
+            res.status(400).json({ error: 'Invalid segment data: start must be >= 0 and end > start' });
+            return;
+        }
+    }
+
     const sessionId = uuidv4();
     const tempDir = path.join('/tmp', sessionId);
     fs.mkdirSync(tempDir, { recursive: true });
