@@ -57,6 +57,27 @@ export const TranscriptViewer = memo(function TranscriptViewer({
     return ids;
   }, [searchResults]);
 
+  // Performance: Memoize context to prevent unnecessary re-renders in Virtuoso
+  const virtuosoContext = useMemo(() => ({
+    activeSegmentIndex,
+    matchingSegmentIds,
+    onSegmentClick
+  }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
+
+  // Performance: Stable itemContent callback
+  const itemContent = useCallback((index: number, segment: TranscriptionSegment, context: typeof virtuosoContext) => {
+    return (
+      <div className="pb-2 pr-2">
+        <TranscriptSegment
+          segment={segment}
+          isActive={index === context.activeSegmentIndex}
+          isMatch={context.matchingSegmentIds.has(segment.id)}
+          onSegmentClick={context.onSegmentClick}
+        />
+      </div>
+    );
+  }, []);
+
   // Auto-scroll para o segmento ativo (Virtualized)
   useEffect(() => {
     if (virtuosoRef.current && activeSegmentIndex >= 0 && !showSearchResults) {
@@ -323,16 +344,8 @@ export const TranscriptViewer = memo(function TranscriptViewer({
             className="scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700"
             style={{ height: '100%' }}
             data={segments}
-            itemContent={(index, segment) => (
-              <div className="pb-2 pr-2">
-                <TranscriptSegment
-                  segment={segment}
-                  isActive={index === activeSegmentIndex}
-                  isMatch={matchingSegmentIds.has(segment.id)}
-                  onSegmentClick={onSegmentClick}
-                />
-              </div>
-            )}
+            context={virtuosoContext}
+            itemContent={itemContent}
           />
         </div>
       )}
