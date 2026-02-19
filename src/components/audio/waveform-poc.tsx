@@ -4,7 +4,6 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
 import TimelinePlugin from 'wavesurfer.js/dist/plugins/timeline.esm.js';
-import ZoomPlugin from 'wavesurfer.js/dist/plugins/zoom.esm.js';
 import { Play, Pause, ZoomIn, ZoomOut, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -15,15 +14,36 @@ interface WaveformPocProps {
   className?: string;
 }
 
+// Minimal interface for Region options to avoid 'any'
+interface RegionOptions {
+    start: number;
+    end: number;
+    content?: string;
+    color?: string;
+    drag?: boolean;
+    resize?: boolean;
+}
+
+interface RegionsPluginType {
+    addRegion: (options: RegionOptions) => void;
+}
+
 export function WaveformPoc({ audioUrl, className }: WaveformPocProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const timelineRef = useRef<HTMLDivElement>(null);
   const wsRef = useRef<WaveSurfer | null>(null);
+  const regionsRef = useRef<RegionsPluginType | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [zoom, setZoom] = useState(10); // pixels per second
   const [isReady, setIsReady] = useState(false);
 
   useEffect(() => {
-    if (!containerRef.current) return;
+    if (!containerRef.current || !timelineRef.current) return;
+
+    const regions = RegionsPlugin.create();
+
+    // Store regions plugin reference directly
+    regionsRef.current = regions as unknown as RegionsPluginType;
 
     const ws = WaveSurfer.create({
       container: containerRef.current,
@@ -35,11 +55,10 @@ export function WaveformPoc({ audioUrl, className }: WaveformPocProps) {
       normalize: true,
       minPxPerSec: 10,
       plugins: [
-        RegionsPlugin.create(),
+        regions,
         TimelinePlugin.create({
-            container: '#timeline',
+            container: timelineRef.current,
         }),
-        ZoomPlugin.create(),
       ],
     });
 
@@ -73,15 +92,9 @@ export function WaveformPoc({ audioUrl, className }: WaveformPocProps) {
   }, [isReady]);
 
   const addRegion = useCallback(() => {
-    if (wsRef.current && isReady) {
-      const regions = wsRef.current.plugins[0] as unknown as { addRegion: (options: any) => void };
-      // Note: In TS we might need to cast plugins correctly or use the plugin instance directly if we stored it.
-      // But accessing via plugins array is easier for POC.
-      // Actually, better to store the plugin instance.
-
-      // Let's rely on the fact that we know it's the first plugin
+    if (wsRef.current && isReady && regionsRef.current) {
       const currentTime = wsRef.current.getCurrentTime();
-      regions.addRegion({
+      regionsRef.current.addRegion({
         start: currentTime,
         end: currentTime + 5,
         content: 'New Highlight',
@@ -119,7 +132,7 @@ export function WaveformPoc({ audioUrl, className }: WaveformPocProps) {
 
       <div className="relative border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-slate-50 dark:bg-slate-950">
         <div ref={containerRef} id="waveform" />
-        <div id="timeline" />
+        <div ref={timelineRef} id="timeline" />
 
         {!isReady && (
             <div className="absolute inset-0 flex items-center justify-center bg-slate-100/50 dark:bg-slate-900/50 backdrop-blur-sm z-10">
