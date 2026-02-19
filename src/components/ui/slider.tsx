@@ -23,6 +23,13 @@ function Slider({
     [value, defaultValue, min, max]
   )
 
+  const {
+    'aria-label': ariaLabel,
+    'aria-labelledby': ariaLabelledBy,
+    'aria-valuetext': ariaValueText,
+    ...rootProps
+  } = props
+
   return (
     <SliderPrimitive.Root
       data-slot="slider"
@@ -34,7 +41,7 @@ function Slider({
         "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
         className
       )}
-      {...props}
+      {...rootProps}
     >
       <SliderPrimitive.Track
         data-slot="slider-track"
@@ -54,6 +61,9 @@ function Slider({
           data-slot="slider-thumb"
           key={index}
           className="border-primary ring-ring/50 block size-4 shrink-0 rounded-full border bg-white shadow-sm transition-[color,box-shadow] hover:ring-4 focus-visible:ring-4 focus-visible:outline-hidden disabled:pointer-events-none disabled:opacity-50"
+          aria-label={ariaLabel}
+          aria-labelledby={ariaLabelledBy}
+          aria-valuetext={ariaValueText}
         />
       ))}
     </SliderPrimitive.Root>

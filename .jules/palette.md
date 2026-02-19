@@ -36,3 +36,15 @@
 **Pattern:** For Sliders:
 1. Always provide `aria-label` identifying the control.
 2. If the value has units (seconds, percent), provide `aria-valuetext`.
+
+## 2026-02-19 - Radix Slider Primitive Prop Propagation
+
+**UX Problem:** Even when `aria-label` was passed to the `Slider` component (the shadcn/ui wrapper), screen readers did not announce it because the prop stayed on the `Root` container, while focus went to the `Thumb`.
+
+**Learning:** Radix UI's `SliderPrimitive.Root` does not automatically forward ARIA labels to the `Thumb`. The `Thumb` is the interactive element `role="slider"` and must receive the label directly.
+
+**Solution:** Updated `src/components/ui/slider.tsx` to destructure `aria-*` props from the root props and pass them explicitly to `SliderPrimitive.Thumb`.
+
+**Pattern:** When wrapping Radix Primitives:
+1. Verify which sub-component receives focus (`Thumb`, `Trigger`, etc.).
+2. Ensure ARIA labels are forwarded to that specific interactive element, not just the root container.
