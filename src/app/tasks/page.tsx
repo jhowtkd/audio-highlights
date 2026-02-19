@@ -37,7 +37,7 @@ export default function TasksPage() {
                             </Link>
                             <span className="text-slate-400">/</span>
                             <span className="text-lg font-medium text-slate-600 dark:text-slate-400">
-                                Tasks
+                                Meus Projetos
                             </span>
                         </div>
 

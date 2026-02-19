@@ -314,7 +314,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                         </p>
                         <Button onClick={() => router.push('/tasks')}>
                             <ArrowLeft className="h-4 w-4 mr-2" />
-                            Voltar para Tasks
+                            Voltar para Meus Projetos
                         </Button>
                     </div>
                 </main>
