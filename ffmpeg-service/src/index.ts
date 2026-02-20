@@ -140,7 +140,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
 
         if (code !== 0) {
             console.error('[FFmpeg] Error:', stderr);
-            res.status(500).json({ error: 'FFmpeg processing failed', details: stderr.slice(-500) });
+            res.status(500).json({ error: 'FFmpeg processing failed' });
             return;
         }
 
@@ -171,7 +171,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     ffmpeg.on('error', (err: Error) => {
         console.error('[FFmpeg] Spawn error:', err);
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Failed to start FFmpeg', details: err.message });
+        res.status(500).json({ error: 'Failed to start FFmpeg' });
     });
 });
 
@@ -185,14 +185,32 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         return;
     }
 
+    const MAX_SEGMENTS = 100;
     let parsedSegments: Array<{ start: number; end: number }>;
     try {
         parsedSegments = typeof segments === 'string' ? JSON.parse(segments) : segments;
         if (!Array.isArray(parsedSegments) || parsedSegments.length === 0) {
             throw new Error('Invalid segments array');
         }
-    } catch {
-        res.status(400).json({ error: 'Invalid segments format. Expected JSON array of {start, end} objects.' });
+
+        if (parsedSegments.length > MAX_SEGMENTS) {
+            throw new Error(`Too many segments. Max is ${MAX_SEGMENTS}`);
+        }
+
+        // Strict validation of each segment
+        for (const seg of parsedSegments) {
+            if (!seg || typeof seg !== 'object') {
+                throw new Error('Invalid segment format');
+            }
+            if (typeof seg.start !== 'number' || typeof seg.end !== 'number') {
+                throw new Error('Segment start and end must be numbers');
+            }
+            if (seg.start < 0 || seg.end <= seg.start) {
+                throw new Error('Invalid segment times');
+            }
+        }
+    } catch (err) {
+        res.status(400).json({ error: err instanceof Error ? err.message : 'Invalid segments format' });
         return;
     }
 
@@ -309,14 +327,14 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         console.error('[FFmpeg Concat] Error:', err);
         fs.rm(tempDir, { recursive: true, force: true }, () => { });
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Concat processing failed', details: String(err) });
+        res.status(500).json({ error: 'Concat processing failed' });
     }
 });
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error('[Error]', err);
-    res.status(500).json({ error: err.message || 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(PORT, () => {
