@@ -34,6 +34,23 @@ interface TranscriptViewerProps {
   className?: string;
 }
 
+interface TranscriptContext {
+  activeSegmentIndex: number;
+  matchingSegmentIds: Set<string>;
+  onSegmentClick: (startTime: number) => void;
+}
+
+const itemContent = (index: number, segment: TranscriptionSegment, context: TranscriptContext) => (
+  <div className="pb-2 pr-2">
+    <TranscriptSegment
+      segment={segment}
+      isActive={index === context.activeSegmentIndex}
+      isMatch={context.matchingSegmentIds.has(segment.id)}
+      onSegmentClick={context.onSegmentClick}
+    />
+  </div>
+);
+
 export const TranscriptViewer = memo(function TranscriptViewer({
   segments,
   activeSegmentIndex,
@@ -149,6 +166,12 @@ export const TranscriptViewer = memo(function TranscriptViewer({
     toast.success(`Transcrição baixada: ${filename}`);
     setShowExportMenu(false);
   }, [segments]);
+
+  const contextValue = useMemo(() => ({
+    activeSegmentIndex,
+    matchingSegmentIds,
+    onSegmentClick
+  }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
 
   if (segments.length === 0) {
     return (
@@ -323,16 +346,8 @@ export const TranscriptViewer = memo(function TranscriptViewer({
             className="scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700"
             style={{ height: '100%' }}
             data={segments}
-            itemContent={(index, segment) => (
-              <div className="pb-2 pr-2">
-                <TranscriptSegment
-                  segment={segment}
-                  isActive={index === activeSegmentIndex}
-                  isMatch={matchingSegmentIds.has(segment.id)}
-                  onSegmentClick={onSegmentClick}
-                />
-              </div>
-            )}
+            context={contextValue}
+            itemContent={itemContent}
           />
         </div>
       )}
