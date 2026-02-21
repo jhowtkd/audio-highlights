@@ -32,6 +32,42 @@ app.use(cors({
     credentials: true,
 }));
 
+// Simple in-memory rate limiter
+const rateLimitMap = new Map<string, number[]>();
+const WINDOW_MS = 15 * 60 * 1000; // 15 minutes
+const MAX_REQUESTS = 100;
+
+// Cleanup old entries every 15 minutes to prevent memory leaks
+setInterval(() => {
+    const now = Date.now();
+    for (const [ip, timestamps] of rateLimitMap.entries()) {
+        const validTimestamps = timestamps.filter(t => now - t < WINDOW_MS);
+        if (validTimestamps.length === 0) {
+            rateLimitMap.delete(ip);
+        } else {
+            rateLimitMap.set(ip, validTimestamps);
+        }
+    }
+}, WINDOW_MS);
+
+const rateLimiter = (req: Request, res: Response, next: NextFunction) => {
+    const ip = req.ip || req.socket.remoteAddress || 'unknown';
+    const now = Date.now();
+    const timestamps = rateLimitMap.get(ip) || [];
+
+    // Filter out old timestamps
+    const validTimestamps = timestamps.filter(t => now - t < WINDOW_MS);
+
+    if (validTimestamps.length >= MAX_REQUESTS) {
+        res.status(429).json({ error: 'Too many requests, please try again later.' });
+        return;
+    }
+
+    validTimestamps.push(now);
+    rateLimitMap.set(ip, validTimestamps);
+    next();
+};
+
 app.use(express.json());
 
 // Configure multer for file uploads
@@ -48,12 +84,17 @@ app.get('/health', (_req: Request, res: Response) => {
 });
 
 // Cut video endpoint
-app.post('/cut-video', upload.single('video'), async (req: Request, res: Response, next: NextFunction) => {
+app.post('/cut-video', rateLimiter, upload.single('video'), async (req: Request, res: Response, next: NextFunction) => {
     const file = req.file;
     const { start, end } = req.body;
 
     if (!file) {
         res.status(400).json({ error: 'No video file provided' });
+        return;
+    }
+
+    if (start === undefined || end === undefined) {
+        res.status(400).json({ error: 'Missing start/end times' });
         return;
     }
 
@@ -129,18 +170,23 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     const ffmpeg = spawn('ffmpeg', ffmpegArgs);
 
     let stderr = '';
+    let responseSent = false;
 
     ffmpeg.stderr.on('data', (data: Buffer) => {
         stderr += data.toString();
     });
 
     ffmpeg.on('close', (code: number) => {
+        if (responseSent) return;
+        responseSent = true;
+
         // Clean up input file
         fs.unlink(file.path, () => { });
 
         if (code !== 0) {
+            // SECURITY: Log full details server-side but do NOT expose them to client
             console.error('[FFmpeg] Error:', stderr);
-            res.status(500).json({ error: 'FFmpeg processing failed', details: stderr.slice(-500) });
+            res.status(500).json({ error: 'FFmpeg processing failed' });
             return;
         }
 
@@ -163,20 +209,24 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
             console.error('[Stream] Error:', err);
             fs.unlink(outputPath, () => { });
             if (!res.headersSent) {
-                res.status(500).json({ error: 'Failed to stream file' });
+                // If headers already sent, we can't send JSON error, just close stream
             }
         });
     });
 
     ffmpeg.on('error', (err: Error) => {
+        if (responseSent) return;
+        responseSent = true;
+
         console.error('[FFmpeg] Spawn error:', err);
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Failed to start FFmpeg', details: err.message });
+        // SECURITY: Don't leak spawn error details
+        res.status(500).json({ error: 'Failed to start FFmpeg' });
     });
 });
 
 // Concatenate multiple segments into one video (for Mix mode)
-app.post('/concat-segments', upload.single('video'), async (req: Request, res: Response, _next: NextFunction) => {
+app.post('/concat-segments', rateLimiter, upload.single('video'), async (req: Request, res: Response, _next: NextFunction) => {
     const file = req.file;
     const { segments } = req.body;
 
@@ -191,6 +241,15 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         if (!Array.isArray(parsedSegments) || parsedSegments.length === 0) {
             throw new Error('Invalid segments array');
         }
+
+        // SECURITY: Validate segments content
+        for (const seg of parsedSegments) {
+            if (typeof seg.start !== 'number' || typeof seg.end !== 'number' ||
+                isNaN(seg.start) || isNaN(seg.end)) {
+                throw new Error('Invalid segment timestamps');
+            }
+        }
+
     } catch {
         res.status(400).json({ error: 'Invalid segments format. Expected JSON array of {start, end} objects.' });
         return;
@@ -234,7 +293,7 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
                 ffmpeg.on('close', (code: number) => {
                     if (code !== 0) {
                         console.error(`[FFmpeg Concat] Segment ${i + 1} failed:`, stderr.slice(-500));
-                        reject(new Error(`Segment extraction failed: ${stderr.slice(-300)}`));
+                        reject(new Error(`Segment extraction failed`)); // Don't expose stderr
                     } else {
                         console.log(`[FFmpeg Concat] Segment ${i + 1} extracted successfully`);
                         resolve();
@@ -271,7 +330,7 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
             ffmpeg.on('close', (code: number) => {
                 if (code !== 0) {
                     console.error('[FFmpeg Concat] Failed with code', code);
-                    reject(new Error(`Concat failed (code ${code}): ${stderr.slice(-500)}`));
+                    reject(new Error(`Concat failed`)); // Don't expose stderr
                 } else {
                     console.log('[FFmpeg Concat] Success!');
                     resolve();
@@ -309,14 +368,17 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         console.error('[FFmpeg Concat] Error:', err);
         fs.rm(tempDir, { recursive: true, force: true }, () => { });
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Concat processing failed', details: String(err) });
+        // SECURITY: Don't expose internal error details
+        res.status(500).json({ error: 'Concat processing failed' });
     }
 });
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error('[Error]', err);
-    res.status(500).json({ error: err.message || 'Internal server error' });
+    // SECURITY: Don't expose err.message to client unless it's a known safe error
+    // For now, assume global errors are internal/unexpected
+    res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(PORT, () => {
