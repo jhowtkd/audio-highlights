@@ -34,6 +34,14 @@ app.use(cors({
 
 app.use(express.json());
 
+// Security headers middleware
+app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains');
+    next();
+});
+
 // Configure multer for file uploads
 const upload = multer({
     dest: '/tmp/uploads/',
@@ -129,6 +137,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     const ffmpeg = spawn('ffmpeg', ffmpegArgs);
 
     let stderr = '';
+    let responseSent = false;
 
     ffmpeg.stderr.on('data', (data: Buffer) => {
         stderr += data.toString();
@@ -140,9 +149,15 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
 
         if (code !== 0) {
             console.error('[FFmpeg] Error:', stderr);
-            res.status(500).json({ error: 'FFmpeg processing failed', details: stderr.slice(-500) });
+            // SECURITY: Do not leak stderr details to client
+            if (!responseSent) {
+                responseSent = true;
+                res.status(500).json({ error: 'FFmpeg processing failed' });
+            }
             return;
         }
+
+        if (responseSent) return;
 
         // Stream the output file back with correct content type
         const contentType = isAudioOnly ? 'audio/mpeg' : 'video/mp4';
@@ -171,7 +186,11 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     ffmpeg.on('error', (err: Error) => {
         console.error('[FFmpeg] Spawn error:', err);
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Failed to start FFmpeg', details: err.message });
+        // SECURITY: Do not leak error details to client
+        if (!responseSent) {
+            responseSent = true;
+            res.status(500).json({ error: 'Failed to start FFmpeg' });
+        }
     });
 });
 
@@ -309,14 +328,16 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         console.error('[FFmpeg Concat] Error:', err);
         fs.rm(tempDir, { recursive: true, force: true }, () => { });
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Concat processing failed', details: String(err) });
+        // SECURITY: Do not leak error details to client
+        res.status(500).json({ error: 'Concat processing failed' });
     }
 });
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error('[Error]', err);
-    res.status(500).json({ error: err.message || 'Internal server error' });
+    // SECURITY: Do not leak error message to client
+    res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(PORT, () => {
