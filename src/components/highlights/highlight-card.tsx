@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Play, Clock, Copy, Download, Star, Film, Quote, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Clock, Copy, Download, Star, Film, Quote, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -58,6 +58,7 @@ export function HighlightCard({
 }: HighlightCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState(highlight.title);
+  const [copiedLineIndex, setCopiedLineIndex] = useState<number | null>(null);
 
   const scoreColor =
     highlight.relevanceScore >= 90
@@ -67,6 +68,12 @@ export function HighlightCard({
         : 'text-slate-600 dark:text-slate-400';
 
   const emotionConfig = highlight.emotionTone ? EMOTION_CONFIG[highlight.emotionTone] : null;
+
+  const handleCopyQuote = (quote: string, i: number) => {
+    onCopy(quote);
+    setCopiedLineIndex(i);
+    setTimeout(() => setCopiedLineIndex(null), 2000);
+  };
 
   return (
     <Card className={cn('border-slate-200 dark:border-slate-800 overflow-hidden', className)}>
@@ -178,12 +185,14 @@ export function HighlightCard({
                 type="button"
                 onClick={() => setShowDetails(!showDetails)}
                 className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                aria-expanded={showDetails}
+                aria-controls={`suggested-titles-list-${index}`}
               >
                 {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                 {showDetails ? 'Ocultar opções' : 'Ver títulos alternativos'}
               </button>
               {showDetails && (
-                <div className="space-y-1">
+                <div id={`suggested-titles-list-${index}`} className="space-y-1">
                   {[highlight.title, ...highlight.suggestedTitles].map((title, i) => (
                     <button
                       key={i}
@@ -195,6 +204,7 @@ export function HighlightCard({
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
                           : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
                       )}
+                      aria-pressed={selectedTitle === title}
                     >
                       {title}
                     </button>
@@ -221,9 +231,14 @@ export function HighlightCard({
                       size="sm"
                       variant="ghost"
                       className="h-6 w-6 p-0 shrink-0"
-                      onClick={() => onCopy(quote)}
+                      onClick={() => handleCopyQuote(quote, i)}
+                      aria-label={copiedLineIndex === i ? "Copiado!" : "Copiar frase"}
                     >
-                      <Copy className="h-3 w-3" />
+                      {copiedLineIndex === i ? (
+                        <Check className="h-3 w-3 text-green-500" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
                     </Button>
                   </div>
                 ))}
@@ -287,6 +302,7 @@ export function HighlightCard({
             size="sm"
             onClick={() => onPlay(highlight.startTime)}
             className="flex-1 sm:flex-none"
+            aria-label="Reproduzir highlight"
           >
             <Play className="h-3.5 w-3.5 mr-1.5" />
             Play
@@ -297,6 +313,7 @@ export function HighlightCard({
             variant="outline"
             onClick={() => onCopy(highlight.transcript)}
             className="flex-1 sm:flex-none"
+            aria-label="Copiar transcrição"
           >
             <Copy className="h-3.5 w-3.5 mr-1.5" />
             Copiar
@@ -307,6 +324,7 @@ export function HighlightCard({
             variant="outline"
             onClick={() => onExport(highlight, 'srt')}
             className="flex-1 sm:flex-none"
+            aria-label="Baixar legenda SRT"
           >
             <Download className="h-3.5 w-3.5 mr-1.5" />
             SRT
@@ -317,6 +335,7 @@ export function HighlightCard({
             variant="outline"
             onClick={() => onExport(highlight, 'txt')}
             className="flex-1 sm:flex-none"
+            aria-label="Baixar transcrição TXT"
           >
             <Download className="h-3.5 w-3.5 mr-1.5" />
             TXT
@@ -328,6 +347,7 @@ export function HighlightCard({
               variant="default"
               className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white"
               onClick={() => onDownloadVideo(highlight)}
+              aria-label="Baixar clipe de vídeo"
             >
               <Film className="h-3.5 w-3.5 mr-1.5" />
               Baixar Clip
