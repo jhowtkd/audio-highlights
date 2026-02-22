@@ -34,6 +34,29 @@ interface TranscriptViewerProps {
   className?: string;
 }
 
+interface TranscriptContext {
+  activeSegmentIndex: number;
+  matchingSegmentIds: Set<string>;
+  onSegmentClick: (startTime: number) => void;
+}
+
+// Optimization: Define itemContent outside the component to keep reference stable.
+// This prevents Virtuoso from re-rendering all items unnecessarily when parent re-renders.
+// We use the `context` prop to access dynamic values.
+const itemContent = (index: number, segment: TranscriptionSegment, context: TranscriptContext) => {
+  const { activeSegmentIndex, matchingSegmentIds, onSegmentClick } = context;
+  return (
+    <div className="pb-2 pr-2">
+      <TranscriptSegment
+        segment={segment}
+        isActive={index === activeSegmentIndex}
+        isMatch={matchingSegmentIds.has(segment.id)}
+        onSegmentClick={onSegmentClick}
+      />
+    </div>
+  );
+};
+
 export const TranscriptViewer = memo(function TranscriptViewer({
   segments,
   activeSegmentIndex,
@@ -323,16 +346,8 @@ export const TranscriptViewer = memo(function TranscriptViewer({
             className="scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700"
             style={{ height: '100%' }}
             data={segments}
-            itemContent={(index, segment) => (
-              <div className="pb-2 pr-2">
-                <TranscriptSegment
-                  segment={segment}
-                  isActive={index === activeSegmentIndex}
-                  isMatch={matchingSegmentIds.has(segment.id)}
-                  onSegmentClick={onSegmentClick}
-                />
-              </div>
-            )}
+            context={{ activeSegmentIndex, matchingSegmentIds, onSegmentClick }}
+            itemContent={itemContent}
           />
         </div>
       )}
