@@ -294,7 +294,7 @@ export default function Home() {
                 className="flex items-center gap-1.5 text-sm text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
               >
                 <ListTodo className="h-4 w-4" />
-                Tasks
+                Meus Projetos
               </Link>
               <ThemeToggle />
               {step !== 'upload' && (
@@ -411,7 +411,7 @@ export default function Home() {
                   <p className="mt-2 text-xs">
                     Isso pode levar alguns minutos (Estimado: ~{estimatedTime})
                   </p>
-                  <p className="text-xs opacity-70">Não feche esta página</p>
+                  <p className="text-xs opacity-70">Mantenha esta aba aberta enquanto processamos</p>
                 </div>
               </>
             )}

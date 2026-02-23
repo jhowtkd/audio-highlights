@@ -37,7 +37,7 @@ export default function TasksPage() {
                             </Link>
                             <span className="text-slate-400">/</span>
                             <span className="text-lg font-medium text-slate-600 dark:text-slate-400">
-                                Tasks
+                                Meus Projetos
                             </span>
                         </div>
 
@@ -45,7 +45,7 @@ export default function TasksPage() {
                             <ThemeToggle />
                             <Button onClick={() => setUploadDialogOpen(true)}>
                                 <Plus className="h-4 w-4 mr-2" />
-                                Novo Upload
+                                Novo Projeto
                             </Button>
                         </div>
                     </div>
@@ -131,7 +131,7 @@ export default function TasksPage() {
                         </p>
                         <Button onClick={() => setUploadDialogOpen(true)}>
                             <Plus className="h-4 w-4 mr-2" />
-                            Novo Upload
+                            Novo Projeto
                         </Button>
                     </div>
                 ) : (

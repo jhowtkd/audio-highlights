@@ -24,3 +24,19 @@
 **Changed To:** "Recomendamos áudios acima de 1 minuto para highlights melhores."
 **Learning:** Reassuring permissions ("Você pode continuar") are redundant when the UI state is non-blocking (warning color vs error color). Users prefer concise, actionable advice over wordy clarifications.
 **Rule:** For non-blocking warnings, skip the "You can continue" preamble and state the recommendation directly.
+
+## 2026-02-28 - Loading State Improvement
+
+**Copy Type:** Loading State
+**Original:** "Não feche esta página"
+**Changed To:** "Mantenha esta aba aberta enquanto processamos"
+**Learning:** Positive instructions reduce anxiety. "Tab" is more accurate than "Page". Adding "while we process" gives context.
+**Rule:** Use positive instructions for wait states ("Keep open" > "Don't close").
+
+## 2026-02-28 - Terminology Update
+
+**Copy Type:** Navigation & Headers
+**Original:** "Tasks" / "Novo Upload" / "Excluir task"
+**Changed To:** "Meus Projetos" / "Novo Projeto" / "Excluir projeto"
+**Learning:** "Task" is technical jargon. Users perceive these as creative "Projects". Consistent terminology builds trust.
+**Rule:** Replace "Task" with "Project" (Projeto) in all user-facing strings. Keep "Task" in code only.
