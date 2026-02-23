@@ -34,9 +34,9 @@ export const WHISPER_MODEL = 'whisper-1';
 // Parallel transcription settings
 // IMPORTANT: Vercel Hobby plan has 10s timeout per function call
 // Groq Whisper typically takes 1-2s per minute of audio
-// So we keep chunks at 60s max to stay well under the 10s limit
+// Using 30s chunks ensures we stay well under the 10s limit even with network latency
 export const PARALLEL_TRANSCRIPTION_LIMIT = 2; // reduced to avoid rate limiting
-export const CHUNK_DURATION_SECONDS = 60; // 60 seconds per chunk to ensure <10s processing time
+export const CHUNK_DURATION_SECONDS = 30; // 30 seconds per chunk - safe for 10s timeout limit
 
 // Highlight configuration limits
 export const MIN_HIGHLIGHT_DURATION = 15; // seconds
