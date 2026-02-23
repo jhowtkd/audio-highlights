@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Play, Clock, Copy, Download, Star, Film, Quote, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useRef } from 'react';
+import { Play, Clock, Copy, Download, Star, Film, Quote, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -58,6 +58,20 @@ export function HighlightCard({
 }: HighlightCardProps) {
   const [showDetails, setShowDetails] = useState(false);
   const [selectedTitle, setSelectedTitle] = useState(highlight.title);
+  const [copiedQuoteIndex, setCopiedQuoteIndex] = useState<number | null>(null);
+  const copyTimeoutRef = useRef<NodeJS.Timeout>(null);
+
+  const handleCopyQuote = (text: string, index: number) => {
+    if (copyTimeoutRef.current) {
+      clearTimeout(copyTimeoutRef.current);
+    }
+    onCopy(text);
+    setCopiedQuoteIndex(index);
+    copyTimeoutRef.current = setTimeout(() => {
+      setCopiedQuoteIndex(null);
+      copyTimeoutRef.current = null;
+    }, 2000);
+  };
 
   const scoreColor =
     highlight.relevanceScore >= 90
@@ -178,17 +192,20 @@ export function HighlightCard({
                 type="button"
                 onClick={() => setShowDetails(!showDetails)}
                 className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                aria-expanded={showDetails}
+                aria-controls={`suggested-titles-${highlight.id}`}
               >
                 {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                 {showDetails ? 'Ocultar opções' : 'Ver títulos alternativos'}
               </button>
               {showDetails && (
-                <div className="space-y-1">
+                <div id={`suggested-titles-${highlight.id}`} className="space-y-1">
                   {[highlight.title, ...highlight.suggestedTitles].map((title, i) => (
                     <button
                       key={i}
                       type="button"
                       onClick={() => setSelectedTitle(title)}
+                      aria-pressed={selectedTitle === title}
                       className={cn(
                         'block w-full text-left text-xs p-2 rounded border transition-all',
                         selectedTitle === title
@@ -221,9 +238,15 @@ export function HighlightCard({
                       size="sm"
                       variant="ghost"
                       className="h-6 w-6 p-0 shrink-0"
-                      onClick={() => onCopy(quote)}
+                      onClick={() => handleCopyQuote(quote, i)}
+                      aria-label={copiedQuoteIndex === i ? "Frase copiada" : "Copiar frase"}
+                      title="Copiar frase"
                     >
-                      <Copy className="h-3 w-3" />
+                      {copiedQuoteIndex === i ? (
+                        <Check className="h-3 w-3 text-green-600 dark:text-green-400" />
+                      ) : (
+                        <Copy className="h-3 w-3" />
+                      )}
                     </Button>
                   </div>
                 ))}
