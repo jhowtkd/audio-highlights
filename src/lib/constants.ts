@@ -32,8 +32,11 @@ export const GPT_MODEL = 'gpt-4o';
 export const WHISPER_MODEL = 'whisper-1';
 
 // Parallel transcription settings
-export const PARALLEL_TRANSCRIPTION_LIMIT = 3; // max simultaneous chunks
-export const CHUNK_DURATION_SECONDS = 90; // 90 seconds per chunk (max ~3.5MB @ 320kbps, safe for 4.5MB Vercel limit)
+// IMPORTANT: Vercel Hobby plan has 10s timeout per function call
+// Groq Whisper typically takes 1-2s per minute of audio
+// So we keep chunks at 60s max to stay well under the 10s limit
+export const PARALLEL_TRANSCRIPTION_LIMIT = 2; // reduced to avoid rate limiting
+export const CHUNK_DURATION_SECONDS = 60; // 60 seconds per chunk to ensure <10s processing time
 
 // Highlight configuration limits
 export const MIN_HIGHLIGHT_DURATION = 15; // seconds
