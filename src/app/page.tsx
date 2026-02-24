@@ -51,7 +51,6 @@ export default function Home() {
 
   // Timer states
   const [elapsedTime, setElapsedTime] = useState<number>(0);
-  const [estimatedTime] = useState<string>('');
   const timerRef = useRef<NodeJS.Timeout | null>(null);
 
   // FFmpeg hook
@@ -409,9 +408,9 @@ export default function Home() {
                     <span>{formatDuration(elapsedTime)}</span>
                   </div>
                   <p className="mt-2 text-xs">
-                    Isso pode levar alguns minutos (Estimado: ~{estimatedTime})
+                    O processamento pode levar alguns minutos.
                   </p>
-                  <p className="text-xs opacity-70">Não feche esta página</p>
+                  <p className="text-xs opacity-70">Mantenha esta aba aberta</p>
                 </div>
               </>
             )}
