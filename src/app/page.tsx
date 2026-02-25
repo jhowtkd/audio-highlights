@@ -411,7 +411,7 @@ export default function Home() {
                   <p className="mt-2 text-xs">
                     Isso pode levar alguns minutos (Estimado: ~{estimatedTime})
                   </p>
-                  <p className="text-xs opacity-70">Não feche esta página</p>
+                  <p className="text-xs opacity-70">Mantenha esta aba aberta</p>
                 </div>
               </>
             )}

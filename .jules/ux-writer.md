@@ -24,3 +24,11 @@
 **Changed To:** "Recomendamos áudios acima de 1 minuto para highlights melhores."
 **Learning:** Reassuring permissions ("Você pode continuar") are redundant when the UI state is non-blocking (warning color vs error color). Users prefer concise, actionable advice over wordy clarifications.
 **Rule:** For non-blocking warnings, skip the "You can continue" preamble and state the recommendation directly.
+
+## 2026-02-28 - Loading State Improvement
+
+**Copy Type:** Loading State
+**Original:** "Não feche esta página"
+**Changed To:** "Mantenha esta aba aberta"
+**Learning:** Positive instructions ("Keep open") are processed faster and reduce user anxiety compared to negative commands ("Do not close").
+**Rule:** Use positive framing for instructions whenever possible. Tell users what to do, not what to avoid.
