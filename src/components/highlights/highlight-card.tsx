@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Play, Clock, Copy, Download, Star, Film, Quote, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Clock, Copy, Download, Star, Film, Quote, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -46,6 +46,41 @@ const ARCHETYPE_CONFIG: Record<ContentArchetype, { icon: string; label: string }
   human_moment: { icon: '💫', label: 'Momento Humano' },
   revelation: { icon: '💡', label: 'Revelação' },
 };
+
+function QuoteRow({ quote, onCopy }: { quote: string; onCopy: (text: string) => void }) {
+  const [isCopied, setIsCopied] = useState(false);
+
+  const handleCopy = () => {
+    onCopy(quote);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  return (
+    <div className="flex items-start gap-2">
+      <p className="flex-1 text-sm text-slate-700 dark:text-slate-300 italic">
+        &ldquo;{quote}&rdquo;
+      </p>
+      <Button
+        size="sm"
+        variant="ghost"
+        className={cn(
+          "h-6 w-6 p-0 shrink-0 transition-all duration-200",
+          isCopied ? "text-green-600 bg-green-50 dark:bg-green-900/20 dark:text-green-400" : ""
+        )}
+        onClick={handleCopy}
+        aria-label={isCopied ? "Copiado" : "Copiar frase"}
+        title={isCopied ? "Copiado" : "Copiar frase"}
+      >
+        {isCopied ? (
+          <Check className="h-3 w-3 animate-in zoom-in spin-in-180 duration-300" />
+        ) : (
+          <Copy className="h-3 w-3" />
+        )}
+      </Button>
+    </div>
+  );
+}
 
 export function HighlightCard({
   highlight,
@@ -177,22 +212,25 @@ export function HighlightCard({
               <button
                 type="button"
                 onClick={() => setShowDetails(!showDetails)}
+                aria-expanded={showDetails}
+                aria-controls={`highlight-titles-${index}`}
                 className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
               >
                 {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                 {showDetails ? 'Ocultar opções' : 'Ver títulos alternativos'}
               </button>
               {showDetails && (
-                <div className="space-y-1">
+                <div id={`highlight-titles-${index}`} className="space-y-1">
                   {[highlight.title, ...highlight.suggestedTitles].map((title, i) => (
                     <button
                       key={i}
                       type="button"
                       onClick={() => setSelectedTitle(title)}
+                      aria-pressed={selectedTitle === title}
                       className={cn(
                         'block w-full text-left text-xs p-2 rounded border transition-all',
                         selectedTitle === title
-                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
+                          ? 'border-blue-500 bg-blue-50 dark:bg-blue-950 ring-1 ring-blue-500/20'
                           : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
                       )}
                     >
@@ -213,19 +251,7 @@ export function HighlightCard({
               </div>
               <div className="space-y-2">
                 {highlight.quotableLines.map((quote, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <p className="flex-1 text-sm text-slate-700 dark:text-slate-300 italic">
-                      &ldquo;{quote}&rdquo;
-                    </p>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 w-6 p-0 shrink-0"
-                      onClick={() => onCopy(quote)}
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                  </div>
+                  <QuoteRow key={i} quote={quote} onCopy={onCopy} />
                 ))}
               </div>
             </div>
