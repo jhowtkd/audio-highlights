@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Play, Clock, Copy, Download, Star, Film, Quote, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Play, Clock, Copy, Check, Download, Star, Film, Quote, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,55 @@ interface HighlightCardProps {
   onCopy: (text: string) => void;
   onDownloadVideo?: (highlight: GeneratedHighlight) => void;
   className?: string;
+}
+
+interface QuoteRowProps {
+  quote: string;
+  onCopy: (text: string) => void;
+}
+
+function QuoteRow({ quote, onCopy }: QuoteRowProps) {
+  const [isCopied, setIsCopied] = useState(false);
+  const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
+  const handleCopy = () => {
+    onCopy(quote);
+    setIsCopied(true);
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
+    timeoutRef.current = setTimeout(() => {
+      setIsCopied(false);
+    }, 2000);
+  };
+
+  return (
+    <div className="flex items-start gap-2">
+      <p className="flex-1 text-sm text-slate-700 dark:text-slate-300 italic">
+        &ldquo;{quote}&rdquo;
+      </p>
+      <Button
+        size="sm"
+        variant="ghost"
+        className={cn(
+          "h-6 w-6 p-0 shrink-0 transition-colors",
+          isCopied ? "text-green-600 hover:text-green-700 hover:bg-green-50" : ""
+        )}
+        onClick={handleCopy}
+        aria-label={isCopied ? "Copiado" : "Copiar frase"}
+      >
+        {isCopied ? <Check className="h-3 w-3" /> : <Copy className="h-3 w-3" />}
+      </Button>
+    </div>
+  );
 }
 
 // Configuração de emoções com ícones e cores
@@ -189,6 +238,7 @@ export function HighlightCard({
                       key={i}
                       type="button"
                       onClick={() => setSelectedTitle(title)}
+                      aria-pressed={selectedTitle === title}
                       className={cn(
                         'block w-full text-left text-xs p-2 rounded border transition-all',
                         selectedTitle === title
@@ -213,19 +263,7 @@ export function HighlightCard({
               </div>
               <div className="space-y-2">
                 {highlight.quotableLines.map((quote, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <p className="flex-1 text-sm text-slate-700 dark:text-slate-300 italic">
-                      &ldquo;{quote}&rdquo;
-                    </p>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 w-6 p-0 shrink-0"
-                      onClick={() => onCopy(quote)}
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                  </div>
+                  <QuoteRow key={i} quote={quote} onCopy={onCopy} />
                 ))}
               </div>
             </div>
