@@ -24,3 +24,11 @@
 **Changed To:** "Recomendamos áudios acima de 1 minuto para highlights melhores."
 **Learning:** Reassuring permissions ("Você pode continuar") are redundant when the UI state is non-blocking (warning color vs error color). Users prefer concise, actionable advice over wordy clarifications.
 **Rule:** For non-blocking warnings, skip the "You can continue" preamble and state the recommendation directly.
+
+## 2026-02-27 - Professional Error State Header
+
+**Copy Type:** Error State Header
+**Original:** "Ops! Algo deu errado"
+**Changed To:** "Não foi possível processar"
+**Learning:** "Ops!" is overly casual for functional failures and can minimize user frustration inappropriately. Factual headers are more professional and respect the user's time.
+**Rule:** Avoid casual interjections ("Ops!", "Whoops!") in error messages. State the failure clearly and professionally.
