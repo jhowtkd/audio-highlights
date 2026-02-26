@@ -16,3 +16,23 @@ episodeTitle: z.string().optional()
 // Secure:
 episodeTitle: z.string().max(MAX_EPISODE_TITLE_LENGTH).optional()
 ```
+
+## 2026-02-21 - Information Disclosure in Error Messages
+
+**Vulnerability:** The `ffmpeg-service` returned full error details (including `stderr` from `ffmpeg` processes and stack traces) in 500 responses to the client. This could expose internal file paths, version information, or environment details to an attacker.
+
+**Root Cause:** The error handling logic explicitly included `details: stderr` or `details: err.message` in the JSON response, prioritizing debugging convenience over security.
+
+**Learning:** Never return internal error details or stack traces to the client in production. Use server-side logging for debugging and return generic, sanitized error messages to the user.
+
+**Prevention:** Sanitize all error responses in API endpoints. Log the full error to the server console (or a logging service) but return a generic "Internal server error" or "Processing failed" message to the client.
+
+**Code:**
+```typescript
+// Vulnerable:
+res.status(500).json({ error: 'FFmpeg failed', details: stderr });
+
+// Secure:
+console.error('[FFmpeg] Error:', stderr);
+res.status(500).json({ error: 'FFmpeg processing failed' });
+```

@@ -140,7 +140,8 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
 
         if (code !== 0) {
             console.error('[FFmpeg] Error:', stderr);
-            res.status(500).json({ error: 'FFmpeg processing failed', details: stderr.slice(-500) });
+            // Sentinel 🛡️: Do not expose internal error details to client
+            res.status(500).json({ error: 'FFmpeg processing failed' });
             return;
         }
 
@@ -171,7 +172,8 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     ffmpeg.on('error', (err: Error) => {
         console.error('[FFmpeg] Spawn error:', err);
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Failed to start FFmpeg', details: err.message });
+        // Sentinel 🛡️: Do not expose internal error details to client
+        res.status(500).json({ error: 'Failed to start FFmpeg' });
     });
 });
 
@@ -309,7 +311,8 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         console.error('[FFmpeg Concat] Error:', err);
         fs.rm(tempDir, { recursive: true, force: true }, () => { });
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Concat processing failed', details: String(err) });
+        // Sentinel 🛡️: Do not expose internal error details to client
+        res.status(500).json({ error: 'Concat processing failed' });
     }
 });
 
