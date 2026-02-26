@@ -10,6 +10,7 @@ import type {
     TaskResult
 } from '@/types/task-types';
 import { STORAGE_KEY } from '@/types/task-types';
+import { saveAudioFile, getAudioFile, deleteAudioFile } from '@/lib/storage';
 
 // Estado inicial
 const initialState: TaskQueueState = {
@@ -190,20 +191,19 @@ function taskReducer(state: TaskQueueState, action: TaskAction): TaskQueueState 
 // Tipos do contexto
 interface TaskQueueContextType {
     state: TaskQueueState;
-    addTask: (file: File, audioDuration?: number) => string;
+    addTask: (file: File, audioDuration?: number) => Promise<string>;
     updateProgress: (taskId: string, progress: Partial<TaskProgress>) => void;
     completeTask: (taskId: string, result: TaskResult) => void;
     updateResult: (taskId: string, result: Partial<TaskResult>) => void;
     failTask: (taskId: string, error: string) => void;
     resetTask: (taskId: string) => void;
-    removeTask: (taskId: string) => void;
+    removeTask: (taskId: string) => Promise<void>;
     clearCompleted: () => void;
     getTask: (taskId: string) => Task | undefined;
     getNextPendingTask: () => Task | undefined;
     startProcessing: (taskId: string) => void;
-    // Files são armazenados separadamente (não serializam bem)
-    getTaskFile: (taskId: string) => File | undefined;
-    setTaskFile: (taskId: string, file: File) => void;
+    getTaskFile: (taskId: string) => Promise<File | undefined>;
+    setTaskFile: (taskId: string, file: File) => Promise<void>;
 }
 
 const TaskQueueContext = createContext<TaskQueueContextType | null>(null);
@@ -250,9 +250,17 @@ export function TaskQueueProvider({ children }: { children: React.ReactNode }) {
     }, [state.tasks]);
 
     // Funções do contexto
-    const addTask = useCallback((file: File, audioDuration?: number): string => {
+    const addTask = useCallback(async (file: File, audioDuration?: number): Promise<string> => {
         const id = uuidv4();
         filesRef.current.set(id, file);
+
+        try {
+            await saveAudioFile(id, file);
+        } catch (error) {
+            console.error('Error saving file to IndexedDB:', error);
+            // Continue even if saving to IDB fails, it will work in memory
+        }
+
         dispatch({
             type: 'ADD_TASK',
             payload: {
@@ -271,7 +279,8 @@ export function TaskQueueProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const completeTask = useCallback((taskId: string, result: TaskResult) => {
-        filesRef.current.delete(taskId);
+        // We keep the file in storage for persistence if user reloads
+        // filesRef.current.delete(taskId);
         dispatch({ type: 'COMPLETE_TASK', payload: { taskId, result } });
     }, []);
 
@@ -280,23 +289,40 @@ export function TaskQueueProvider({ children }: { children: React.ReactNode }) {
     }, []);
 
     const failTask = useCallback((taskId: string, error: string) => {
-        filesRef.current.delete(taskId);
+        // filesRef.current.delete(taskId);
         dispatch({ type: 'FAIL_TASK', payload: { taskId, error } });
     }, []);
 
     const resetTask = useCallback((taskId: string) => {
-        // Não deletamos o arquivo de filesRef pois vamos reutilizá-lo
         dispatch({ type: 'RESET_TASK', payload: { taskId } });
     }, []);
 
-    const removeTask = useCallback((taskId: string) => {
+    const removeTask = useCallback(async (taskId: string) => {
         filesRef.current.delete(taskId);
+        try {
+            await deleteAudioFile(taskId);
+        } catch (error) {
+            console.error('Error deleting file from IndexedDB:', error);
+        }
         dispatch({ type: 'REMOVE_TASK', payload: { taskId } });
     }, []);
 
     const clearCompleted = useCallback(() => {
+        // Also cleanup files for completed tasks?
+        // No, we might want to view them later.
+        // If we clear them from the UI list, we should probably delete the files too.
+
+        state.tasks.filter(task => task.status === 'completed').forEach(async (task) => {
+            filesRef.current.delete(task.id);
+            try {
+                await deleteAudioFile(task.id);
+            } catch (e) {
+                console.error('Error cleaning up file:', e);
+            }
+        });
+
         dispatch({ type: 'CLEAR_COMPLETED' });
-    }, []);
+    }, [state.tasks]);
 
     const getTask = useCallback((taskId: string) => {
         return state.tasks.find(task => task.id === taskId);
@@ -310,12 +336,37 @@ export function TaskQueueProvider({ children }: { children: React.ReactNode }) {
         dispatch({ type: 'START_TASK', payload: { taskId } });
     }, []);
 
-    const getTaskFile = useCallback((taskId: string) => {
-        return filesRef.current.get(taskId);
-    }, []);
+    const getTaskFile = useCallback(async (taskId: string): Promise<File | undefined> => {
+        // Try memory first
+        const memoryFile = filesRef.current.get(taskId);
+        if (memoryFile) return memoryFile;
 
-    const setTaskFile = useCallback((taskId: string, file: File) => {
+        // Try IndexedDB
+        try {
+            const blob = await getAudioFile(taskId);
+            if (blob) {
+                const task = state.tasks.find(t => t.id === taskId);
+                const fileName = task?.filename || 'restored-audio';
+                const file = new File([blob], fileName, { type: blob.type });
+
+                // Hydrate memory cache
+                filesRef.current.set(taskId, file);
+                return file;
+            }
+        } catch (error) {
+            console.error('Error retrieving file from IndexedDB:', error);
+        }
+
+        return undefined;
+    }, [state.tasks]);
+
+    const setTaskFile = useCallback(async (taskId: string, file: File) => {
         filesRef.current.set(taskId, file);
+        try {
+            await saveAudioFile(taskId, file);
+        } catch (error) {
+            console.error('Error updating file in IndexedDB:', error);
+        }
     }, []);
 
     return (

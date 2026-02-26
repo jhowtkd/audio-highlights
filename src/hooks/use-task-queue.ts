@@ -37,10 +37,12 @@ export function useTaskQueue() {
     // Processa uma task individual
     const processTask = useCallback(async (taskId: string) => {
         const task = getTask(taskId);
-        const file = getTaskFile(taskId);
+
+        // Ensure file is loaded (might need to fetch from IndexedDB)
+        const file = await getTaskFile(taskId);
 
         if (!task || !file) {
-            failTask(taskId, 'Arquivo não encontrado');
+            failTask(taskId, 'Arquivo não encontrado (possivelmente limpo do cache)');
             return;
         }
 
@@ -183,17 +185,17 @@ export function useTaskQueue() {
     }, [state.tasks, state.isProcessing, processQueue]);
 
     // Reinicia e processa uma task novamente (ignorando cache)
-    const retryTask = useCallback((taskId: string, newFile?: File) => {
+    const retryTask = useCallback(async (taskId: string, newFile?: File) => {
         const task = state.tasks.find(t => t.id === taskId);
         if (!task) return false;
 
         // Se um novo arquivo foi fornecido, atualiza a referência
         if (newFile) {
-            context.setTaskFile(taskId, newFile);
+            await context.setTaskFile(taskId, newFile);
         }
 
-        // Verifica se o arquivo existe na memória
-        const file = getTaskFile(taskId);
+        // Verifica se o arquivo existe na memória ou storage
+        const file = await getTaskFile(taskId);
 
         if (!file) {
             toast.error('Arquivo original não encontrado para reprocessamento');
@@ -223,8 +225,8 @@ export function useTaskQueue() {
     }, [state.tasks, getTaskFile, context, resetTask, processQueue]);
 
     // Adiciona task e redireciona para dashboard
-    const addTaskAndNavigate = useCallback((file: File, audioDuration?: number) => {
-        const taskId = addTask(file, audioDuration);
+    const addTaskAndNavigate = useCallback(async (file: File, audioDuration?: number) => {
+        const taskId = await addTask(file, audioDuration);
         toast.success(`"${file.name}" adicionado à fila!`);
         router.push('/tasks');
         return taskId;
