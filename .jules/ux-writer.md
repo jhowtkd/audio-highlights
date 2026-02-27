@@ -24,3 +24,11 @@
 **Changed To:** "Recomendamos áudios acima de 1 minuto para highlights melhores."
 **Learning:** Reassuring permissions ("Você pode continuar") are redundant when the UI state is non-blocking (warning color vs error color). Users prefer concise, actionable advice over wordy clarifications.
 **Rule:** For non-blocking warnings, skip the "You can continue" preamble and state the recommendation directly.
+
+## 2026-03-01 - Default Error Message Improvement
+
+**Copy Type:** Error state header and description
+**Original:** "Ops! Algo deu errado" / "Ocorreu um erro inesperado"
+**Changed To:** "Não foi possível processar" / "Ocorreu um erro de conexão ou no processamento. Tente novamente em alguns instantes."
+**Learning:** "Ops!" is too casual and potentially frustrating for errors involving processing failures (where data/time might be lost). The original default description "Ocorreu um erro inesperado" was unhelpful. The new copy provides a professional tone, suggests a possible cause, and offers an actionable next step.
+**Rule:** For general error boundaries and processing failures, use factual, professional phrasing instead of cutesy language (no "Ops!"). Always replace generic "unexpected error" messages with possible causes and clear next steps.
