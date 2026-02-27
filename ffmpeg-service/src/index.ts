@@ -1,5 +1,6 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
+import helmet from 'helmet';
 import multer from 'multer';
 import { spawn } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
@@ -16,6 +17,7 @@ const allowedOrigins = [
     process.env.ALLOWED_ORIGIN, // Allow custom origin via env var
 ].filter(Boolean);
 
+app.use(helmet());
 app.use(cors({
     origin: (origin, callback) => {
         // Allow requests with no origin (like mobile apps or curl requests)
@@ -140,7 +142,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
 
         if (code !== 0) {
             console.error('[FFmpeg] Error:', stderr);
-            res.status(500).json({ error: 'FFmpeg processing failed', details: stderr.slice(-500) });
+            res.status(500).json({ error: 'FFmpeg processing failed' });
             return;
         }
 
@@ -171,7 +173,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     ffmpeg.on('error', (err: Error) => {
         console.error('[FFmpeg] Spawn error:', err);
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Failed to start FFmpeg', details: err.message });
+        res.status(500).json({ error: 'Failed to start FFmpeg' });
     });
 });
 
@@ -309,14 +311,14 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         console.error('[FFmpeg Concat] Error:', err);
         fs.rm(tempDir, { recursive: true, force: true }, () => { });
         fs.unlink(file.path, () => { });
-        res.status(500).json({ error: 'Concat processing failed', details: String(err) });
+        res.status(500).json({ error: 'Concat processing failed' });
     }
 });
 
 // Error handling middleware
 app.use((err: Error, _req: Request, res: Response, _next: NextFunction) => {
     console.error('[Error]', err);
-    res.status(500).json({ error: err.message || 'Internal server error' });
+    res.status(500).json({ error: 'Internal server error' });
 });
 
 app.listen(PORT, () => {
