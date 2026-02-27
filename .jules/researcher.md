@@ -82,3 +82,26 @@ WebAssembly-powered ML models are now mature enough for real-time text features 
 
 **Resources:**
 -   https://virtuoso.dev/
+
+## 2025-02-27 - Multiple Format Export Feature Research
+
+**Research Topic:** Adding multiple export formats (SRT, VTT, Markdown, plain text, JSON) for transcripts and highlights to improve workflow integration.
+
+**Finding:** Looking at standard professional audio editing and social media pipelines (like Premiere, Resolve, Descript, and standard Subtitle editors), users frequently need different formats depending on their next step:
+1. Subtitles for social media / video editors: `.srt`, `.vtt`
+2. Editing scripts / show notes: `.txt`, `.md`
+3. Programmatic integrations: `.json`
+
+Currently the application provides standard `downloadFile` methods in `src/lib/export.ts` which support generating standard format outputs:
+`generateSRT`, `generateVTT`, `generateText`, `generateMarkdown`, `generateJSON`, `generateAllHighlights`, `generateFullTranscriptText`, `generateFullTranscriptWithTimestamps`, `generateFullTranscriptSRT`, `generateFullTranscriptMarkdown`.
+
+The application already has basic export functionality at the component level (`HighlightCard` supports single format export, `TranscriptViewer` supports a single format export, but there's no unified "Export Options" menu allowing selection of format).
+
+We need a unified UI component (`ExportMenu`) that leverages these existing functions to allow exporting both the full transcript and individual highlights in user-selected formats.
+
+**Decision:** The research opportunity is to propose a unified `ExportDropdown` or `ExportMenu` component using Radix UI/Shadcn (already in the project) to expose these existing capabilities.
+
+**Learning:** Leveraging existing library functions (`src/lib/export.ts`) to provide user-facing features is a high-ROI improvement that addresses standard user needs without new dependencies.
+
+**Resources:**
+- Existing functions in `src/lib/export.ts`
