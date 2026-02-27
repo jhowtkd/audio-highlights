@@ -207,6 +207,9 @@ export const TranscriptViewer = memo(function TranscriptViewer({
             variant="outline"
             size="sm"
             className="shrink-0"
+            aria-haspopup="menu"
+            aria-expanded={showExportMenu}
+            aria-controls="export-menu"
           >
             <Download className="h-4 w-4 mr-1" />
             Baixar
@@ -221,9 +224,14 @@ export const TranscriptViewer = memo(function TranscriptViewer({
               />
 
               {/* Dropdown Menu */}
-              <div className="absolute right-0 top-full mt-1 z-20 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 min-w-[180px]">
+              <div
+                id="export-menu"
+                role="menu"
+                className="absolute right-0 top-full mt-1 z-20 bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 py-1 min-w-[180px]"
+              >
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={() => handleExportTranscript('txt')}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                 >
@@ -232,6 +240,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                 </button>
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={() => handleExportTranscript('txt-timestamps')}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                 >
@@ -240,6 +249,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                 </button>
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={() => handleExportTranscript('srt')}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                 >
@@ -248,6 +258,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                 </button>
                 <button
                   type="button"
+                  role="menuitem"
                   onClick={() => handleExportTranscript('md')}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
                 >

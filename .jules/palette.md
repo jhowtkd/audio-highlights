@@ -36,3 +36,9 @@
 **Pattern:** For Sliders:
 1. Always provide `aria-label` identifying the control.
 2. If the value has units (seconds, percent), provide `aria-valuetext`.
+
+## 2026-02-27 - WAI-ARIA disclosure and menu attributes
+**UX Problem:** The toggle button for suggested titles in HighlightCard and the export menu dropdown in TranscriptViewer lacked the appropriate ARIA attributes.
+**Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
+**Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
+**Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
