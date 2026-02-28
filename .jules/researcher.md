@@ -82,3 +82,12 @@ WebAssembly-powered ML models are now mature enough for real-time text features 
 
 **Resources:**
 -   https://virtuoso.dev/
+
+## 2025-02-28 - Automated YouTube Chapters Research
+
+**Research Topic:** Generating YouTube Chapters and Show Notes automatically from existing transcripts.
+**Finding:** Evaluated using the existing OpenAI integration to summarize the transcript into formatted YouTube Chapters (timestamps + titles) and SEO Show Notes. Tested with `gpt-4o-mini`. The model can reliably output a strict JSON array of `{time: "00:00", title: "..."}` when provided with timestamped transcriptions.
+**Decision:** Proposed adding an automated Show Notes generation feature. It requires zero new dependencies, has a very low API cost, and solves a major pain point (manual formatting) for creators who publish full episodes to YouTube or Spotify.
+**Learning:** For YouTube chapters, the platform strictly requires the first chapter to start at exactly `00:00`. It's critical to enforce this rule in the LLM system prompt and validate it on the backend, as the LLM might occasionally start the first chapter at the first spoken word (e.g., `00:05`).
+**Resources:**
+- https://support.google.com/youtube/answer/9884579?hl=en (YouTube Chapter Requirements)
