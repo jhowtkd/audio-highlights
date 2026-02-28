@@ -16,3 +16,21 @@ episodeTitle: z.string().optional()
 // Secure:
 episodeTitle: z.string().max(MAX_EPISODE_TITLE_LENGTH).optional()
 ```
+
+## 2026-02-28 - Missing Security Headers in FFmpeg Microservice
+
+**Vulnerability:** The `ffmpeg-service` lacked fundamental HTTP security headers, leaving it exposed to basic web vulnerabilities like clickjacking, MIME-sniffing, and XSS.
+
+**Root Cause:** The express app was created quickly as a microservice and standard security middlewares were not included during the initial setup.
+
+**Learning:** Every express application, no matter how small or specific its purpose, should include baseline security headers via a package like `helmet`.
+
+**Prevention:** Make adding `helmet` to the middleware stack a standard step when creating any new Express server.
+
+**Code:**
+```typescript
+// Secure pattern to use:
+import helmet from 'helmet';
+const app = express();
+app.use(helmet());
+```

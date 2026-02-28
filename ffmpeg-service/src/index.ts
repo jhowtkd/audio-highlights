@@ -1,12 +1,14 @@
 import express, { Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import multer from 'multer';
+import helmet from 'helmet';
 import { spawn } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
 
 const app = express();
+app.use(helmet());
 const PORT = process.env.PORT || 3001;
 
 // CORS configuration - allow requests from your Vercel domain
