@@ -24,3 +24,22 @@
 **Changed To:** "Recomendamos áudios acima de 1 minuto para highlights melhores."
 **Learning:** Reassuring permissions ("Você pode continuar") are redundant when the UI state is non-blocking (warning color vs error color). Users prefer concise, actionable advice over wordy clarifications.
 **Rule:** For non-blocking warnings, skip the "You can continue" preamble and state the recommendation directly.
+
+## 2024-05-18 - Actionable Error Messages Decision
+
+**Copy Type:** Error message for empty state / missing input
+
+**Original:** "Nenhum arquivo enviado"
+
+**Changed To:** "Por favor, selecione um arquivo de áudio ou vídeo."
+
+**Learning:** Dead-end error messages don't help the user recover. Users need to know exactly what action to take next when something is missing.
+
+**Rule:** For this app, ALWAYS:
+1. Provide an actionable next step in error messages (e.g., "selecione um arquivo").
+2. Be specific about what is expected (e.g., "áudio ou vídeo").
+3. Avoid dead-end statements that simply state the problem without a solution.
+
+**Pattern to follow:**
+- ❌ "[State/Problem]"
+- ✅ "Por favor, [Action] [Object]."
