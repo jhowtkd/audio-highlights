@@ -76,13 +76,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
   const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Get IDs of matching segments for highlighting
-  // Memoize Virtuoso context to prevent unnecessary re-renders of all visible items
-  // Performance: Prevents re-rendering items unless active segment, search matches, or click handler change
-  const virtuosoContext = useMemo<TranscriptVirtuosoContext>(() => ({
-    activeSegmentIndex,
-    matchingSegmentIds,
-    onSegmentClick
-  }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
+
 
   const matchingSegmentIds = useMemo(() => {
     const ids = new Set<string>();
@@ -91,6 +85,14 @@ export const TranscriptViewer = memo(function TranscriptViewer({
     }
     return ids;
   }, [searchResults]);
+
+  // Memoize Virtuoso context to prevent unnecessary re-renders of all visible items
+  // Performance: Prevents re-rendering items unless active segment, search matches, or click handler change
+  const virtuosoContext = useMemo<TranscriptVirtuosoContext>(() => ({
+    activeSegmentIndex,
+    matchingSegmentIds,
+    onSegmentClick
+  }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
 
   // Auto-scroll para o segmento ativo (Virtualized)
   useEffect(() => {
