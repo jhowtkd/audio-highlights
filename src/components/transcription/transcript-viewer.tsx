@@ -18,6 +18,33 @@ import {
 import type { TranscriptionSegment } from '@/types';
 import { TranscriptSegment } from './transcript-segment';
 
+interface TranscriptVirtuosoContext {
+  activeSegmentIndex: number;
+  matchingSegmentIds: Set<string>;
+  onSegmentClick: (startTime: number) => void;
+}
+
+// ✅ Performance Optimization: Extract itemContent outside component
+// Performance: Prevents react-virtuoso from unmounting and remounting items on every render
+// by providing a stable function reference. Dynamic data is passed via context.
+const renderTranscriptSegment = (
+  index: number,
+  segment: TranscriptionSegment,
+  context: TranscriptVirtuosoContext
+) => {
+  return (
+    <div className="pb-2 pr-2">
+      <TranscriptSegment
+        segment={segment}
+        isActive={index === context.activeSegmentIndex}
+        isMatch={context.matchingSegmentIds.has(segment.id)}
+        onSegmentClick={context.onSegmentClick}
+      />
+    </div>
+  );
+};
+
+
 interface SearchResult {
   segmentId: string;
   text: string;
@@ -49,6 +76,14 @@ export const TranscriptViewer = memo(function TranscriptViewer({
   const [showSearchResults, setShowSearchResults] = useState(false);
 
   // Get IDs of matching segments for highlighting
+  // Memoize Virtuoso context to prevent unnecessary re-renders of all visible items
+  // Performance: Prevents re-rendering items unless active segment, search matches, or click handler change
+  const virtuosoContext = useMemo<TranscriptVirtuosoContext>(() => ({
+    activeSegmentIndex,
+    matchingSegmentIds,
+    onSegmentClick
+  }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
+
   const matchingSegmentIds = useMemo(() => {
     const ids = new Set<string>();
     for (const result of searchResults) {
@@ -318,21 +353,13 @@ export const TranscriptViewer = memo(function TranscriptViewer({
         </div>
       ) : (
         <div className={cn('flex-1 h-full min-h-0', className)}>
-          <Virtuoso
+          <Virtuoso<TranscriptionSegment, TranscriptVirtuosoContext>
             ref={virtuosoRef}
             className="scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700"
             style={{ height: '100%' }}
             data={segments}
-            itemContent={(index, segment) => (
-              <div className="pb-2 pr-2">
-                <TranscriptSegment
-                  segment={segment}
-                  isActive={index === activeSegmentIndex}
-                  isMatch={matchingSegmentIds.has(segment.id)}
-                  onSegmentClick={onSegmentClick}
-                />
-              </div>
-            )}
+            context={virtuosoContext}
+            itemContent={renderTranscriptSegment}
           />
         </div>
       )}
