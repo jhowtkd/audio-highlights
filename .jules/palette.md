@@ -36,3 +36,24 @@
 **Pattern:** For Sliders:
 1. Always provide `aria-label` identifying the control.
 2. If the value has units (seconds, percent), provide `aria-valuetext`.
+
+## 2026-03-01 - HighlightCard Accessibility and Feedback Updates
+
+**UX Problem:**
+The alternative titles section lacked clear accessibility semantics for expanding/collapsing and identifying the active title. Additionally, the copy button for individual quotes did not provide temporary visual interaction feedback, making it unclear to users if the copy action succeeded.
+
+**Learning:**
+Accessibility semantics (like `aria-expanded` and `aria-pressed`) are vital for dynamic elements to be perceivable by screen readers. When displaying lists of items that have individual temporary states (like a copy confirmation timer), those items should be isolated into sub-components. Otherwise, updating the copy state for one item causes the entire parent component to re-render, which can be inefficient and complicate state management.
+
+**Solution:**
+- Added `aria-expanded` and `aria-controls` to the "Ver títulos alternativos" toggle button.
+- Added `aria-pressed` to the selectable title buttons.
+- Extracted a `QuoteRow` sub-component to encapsulate the quote and its copy button.
+- Added local `isCopied` state to `QuoteRow` to show a temporary checkmark icon and dynamically update the `aria-label` (e.g., from "Copiar frase" to "Frase copiada").
+
+**Pattern:**
+For lists of interactive elements requiring temporary feedback (like copy actions):
+1. Extract the list item into its own component.
+2. Manage the feedback timer state (`isCopied`) locally within that sub-component using `useRef` and `useEffect` for cleanup.
+3. Use `aria-pressed` for selection buttons and `aria-expanded` for toggles.
+4. Dynamically update `aria-label` when the icon changes to ensure screen reader users receive the feedback.

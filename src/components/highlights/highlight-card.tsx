@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { Play, Clock, Copy, Download, Star, Film, Quote, ChevronDown, ChevronUp } from 'lucide-react';
+import { useState, useRef, useEffect } from 'react';
+import { Play, Clock, Copy, Download, Star, Film, Quote, ChevronDown, ChevronUp, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -17,6 +17,45 @@ interface HighlightCardProps {
   onCopy: (text: string) => void;
   onDownloadVideo?: (highlight: GeneratedHighlight) => void;
   className?: string;
+}
+
+function QuoteRow({ quote, onCopy }: { quote: string; onCopy: (text: string) => void }) {
+  const [isCopied, setIsCopied] = useState(false);
+  const timerRef = useRef<NodeJS.Timeout>(undefined);
+
+  const handleCopy = () => {
+    onCopy(quote);
+    setIsCopied(true);
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setIsCopied(false), 2000);
+  };
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+    };
+  }, []);
+
+  return (
+    <div className="flex items-start gap-2">
+      <p className="flex-1 text-sm text-slate-700 dark:text-slate-300 italic">
+        &ldquo;{quote}&rdquo;
+      </p>
+      <Button
+        size="sm"
+        variant="ghost"
+        className="h-6 w-6 p-0 shrink-0"
+        onClick={handleCopy}
+        aria-label={isCopied ? "Frase copiada" : "Copiar frase"}
+      >
+        {isCopied ? (
+          <Check className="h-3 w-3 text-green-500" aria-hidden="true" />
+        ) : (
+          <Copy className="h-3 w-3" aria-hidden="true" />
+        )}
+      </Button>
+    </div>
+  );
 }
 
 // Configuração de emoções com ícones e cores
@@ -177,18 +216,21 @@ export function HighlightCard({
               <button
                 type="button"
                 onClick={() => setShowDetails(!showDetails)}
+                aria-expanded={showDetails}
+                aria-controls={`alternative-titles-${highlight.id}`}
                 className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
               >
-                {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
+                {showDetails ? <ChevronUp className="h-3 w-3" aria-hidden="true" /> : <ChevronDown className="h-3 w-3" aria-hidden="true" />}
                 {showDetails ? 'Ocultar opções' : 'Ver títulos alternativos'}
               </button>
               {showDetails && (
-                <div className="space-y-1">
+                <div id={`alternative-titles-${highlight.id}`} className="space-y-1">
                   {[highlight.title, ...highlight.suggestedTitles].map((title, i) => (
                     <button
                       key={i}
                       type="button"
                       onClick={() => setSelectedTitle(title)}
+                      aria-pressed={selectedTitle === title}
                       className={cn(
                         'block w-full text-left text-xs p-2 rounded border transition-all',
                         selectedTitle === title
@@ -213,19 +255,7 @@ export function HighlightCard({
               </div>
               <div className="space-y-2">
                 {highlight.quotableLines.map((quote, i) => (
-                  <div key={i} className="flex items-start gap-2">
-                    <p className="flex-1 text-sm text-slate-700 dark:text-slate-300 italic">
-                      &ldquo;{quote}&rdquo;
-                    </p>
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      className="h-6 w-6 p-0 shrink-0"
-                      onClick={() => onCopy(quote)}
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
-                  </div>
+                  <QuoteRow key={i} quote={quote} onCopy={onCopy} />
                 ))}
               </div>
             </div>
