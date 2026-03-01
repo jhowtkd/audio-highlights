@@ -196,7 +196,7 @@ export function useTaskQueue() {
         const file = getTaskFile(taskId);
 
         if (!file) {
-            toast.error('Arquivo original não encontrado para reprocessamento');
+            toast.info('Selecione o arquivo novamente para continuar.');
             return false;
         }
 

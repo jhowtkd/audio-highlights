@@ -127,8 +127,8 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 O que é o Modo Storytelling?
               </h4>
               <p className="text-sm text-indigo-700 dark:text-indigo-300">
-                Neste modo, a IA analisa todo o conteúdo e cria <strong>um único vídeo longo</strong> (Mix)
-                que conta uma história coesa conectando os melhores momentos em uma narrativa fluida.
+                Cria uma narrativa única conectando os melhores momentos do episódio.
+                Perfeito para resumos e trailers com início, meio e fim.
               </p>
             </div>
 
@@ -177,7 +177,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 onValueChange={handleMinDurationChange}
               />
               <p className="text-xs text-slate-500">
-                Nenhum highlight será menor que isso
+                Evita cortes muito curtos e sem contexto
               </p>
             </div>
 
