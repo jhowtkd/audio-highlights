@@ -221,9 +221,14 @@ export function Waveform({
         onSeek(Math.max(0, Math.min(seekTime, duration)));
     }, [onSeek, duration]);
 
+    // Ensure highlights are sorted by startTime for binary search
+    const sortedHighlights = useMemo(() => {
+        return [...highlights].sort((a, b) => a.startTime - b.startTime);
+    }, [highlights]);
+
     // Handle mouse move to show highlight tooltip
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        if (!containerRef.current || duration === 0 || highlights.length === 0) {
+        if (!containerRef.current || duration === 0 || sortedHighlights.length === 0) {
             setHoveredHighlight(null);
             return;
         }
@@ -232,12 +237,31 @@ export function Waveform({
         const x = e.clientX - rect.left;
         const hoverTime = (x / rect.width) * duration;
 
-        const found = highlights.find(
-            h => hoverTime >= h.startTime && hoverTime <= h.endTime
-        );
+        // Binary search for the hovered highlight
+        let found: GeneratedHighlight | null = null;
+        let left = 0;
+        let right = sortedHighlights.length - 1;
 
-        setHoveredHighlight(found || null);
-    }, [duration, highlights]);
+        while (left <= right) {
+            const mid = (left + right) >> 1;
+            const h = sortedHighlights[mid];
+
+            if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
+                found = h;
+                break;
+            }
+
+            if (hoverTime < h.startTime) {
+                right = mid - 1;
+            } else {
+                // If we are past the start time but not within the highlight,
+                // the target must be further to the right.
+                left = mid + 1;
+            }
+        }
+
+        setHoveredHighlight(found);
+    }, [duration, sortedHighlights]);
 
     // Handle keyboard navigation
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
