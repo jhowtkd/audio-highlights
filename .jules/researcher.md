@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2026-03-01 - Remotion Video Export Research
+
+**Research Topic:** Rich video export capabilities
+
+**Finding:** Remotion offers a React-based programmatic video generation framework that solves the limitation of basic FFmpeg cuts.
+
+**Decision:** Propose Remotion integration for advanced video exporting.
+
+**Learning:** Moving complex visual tasks from FFmpeg graphs to React/HTML components significantly improves DX and enables rapid template iteration.
+
+**Resources:**
+- https://www.remotion.dev/
+- research/proposals/2026-03-01-remotion-video-export.md
