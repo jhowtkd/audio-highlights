@@ -1,8 +1,9 @@
 'use client';
 
 import { useState } from 'react';
-import { Play, Clock, Copy, Download, Star, Film, Quote, ChevronDown, ChevronUp } from 'lucide-react';
+import { Play, Clock, Download, Star, Film, Quote, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { CopyButton } from '@/components/ui/copy-button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { formatTime, formatDuration } from '@/lib/format-utils';
@@ -217,14 +218,14 @@ export function HighlightCard({
                     <p className="flex-1 text-sm text-slate-700 dark:text-slate-300 italic">
                       &ldquo;{quote}&rdquo;
                     </p>
-                    <Button
+                    <CopyButton
                       size="sm"
                       variant="ghost"
                       className="h-6 w-6 p-0 shrink-0"
-                      onClick={() => onCopy(quote)}
-                    >
-                      <Copy className="h-3 w-3" />
-                    </Button>
+                      value={quote}
+                      onCopy={() => onCopy(quote)}
+                      aria-label="Copiar frase"
+                    />
                   </div>
                 ))}
               </div>
@@ -287,26 +288,28 @@ export function HighlightCard({
             size="sm"
             onClick={() => onPlay(highlight.startTime)}
             className="flex-1 sm:flex-none"
+            aria-label={`Reproduzir highlight ${index + 1}`}
           >
             <Play className="h-3.5 w-3.5 mr-1.5" />
             Play
           </Button>
 
-          <Button
+          <CopyButton
             size="sm"
             variant="outline"
-            onClick={() => onCopy(highlight.transcript)}
+            value={highlight.transcript}
+            onCopy={() => onCopy(highlight.transcript)}
             className="flex-1 sm:flex-none"
           >
-            <Copy className="h-3.5 w-3.5 mr-1.5" />
             Copiar
-          </Button>
+          </CopyButton>
 
           <Button
             size="sm"
             variant="outline"
             onClick={() => onExport(highlight, 'srt')}
             className="flex-1 sm:flex-none"
+            aria-label={`Baixar legenda SRT do highlight ${index + 1}`}
           >
             <Download className="h-3.5 w-3.5 mr-1.5" />
             SRT
@@ -317,6 +320,7 @@ export function HighlightCard({
             variant="outline"
             onClick={() => onExport(highlight, 'txt')}
             className="flex-1 sm:flex-none"
+            aria-label={`Baixar texto do highlight ${index + 1}`}
           >
             <Download className="h-3.5 w-3.5 mr-1.5" />
             TXT
@@ -328,6 +332,7 @@ export function HighlightCard({
               variant="default"
               className="flex-1 sm:flex-none bg-purple-600 hover:bg-purple-700 text-white"
               onClick={() => onDownloadVideo(highlight)}
+              aria-label={`Baixar vídeo clip do highlight ${index + 1}`}
             >
               <Film className="h-3.5 w-3.5 mr-1.5" />
               Baixar Clip
