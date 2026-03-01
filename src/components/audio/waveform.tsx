@@ -2,6 +2,7 @@
 
 import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
+import { formatDuration } from '@/lib/format-utils';
 import type { GeneratedHighlight, TranscriptionSegment } from '@/types';
 
 interface WaveformProps {
@@ -23,12 +24,15 @@ const HIGHLIGHT_COLORS = [
     'rgba(249, 115, 22, 0.3)',   // orange
 ];
 
+const DEFAULT_HIGHLIGHTS: GeneratedHighlight[] = [];
+const DEFAULT_SEGMENTS: TranscriptionSegment[] = [];
+
 export function Waveform({
     audioUrl,
     duration,
     currentTime,
-    highlights = [],
-    segments = [],
+    highlights = DEFAULT_HIGHLIGHTS,
+    segments = DEFAULT_SEGMENTS,
     onSeek,
     className,
 }: WaveformProps) {
@@ -231,6 +235,30 @@ export function Waveform({
         setHoveredHighlight(found || null);
     }, [duration, highlights]);
 
+    // Handle keyboard navigation
+    const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
+        if (!onSeek || duration === 0) return;
+
+        switch (e.key) {
+            case 'ArrowLeft':
+                e.preventDefault();
+                onSeek(Math.max(0, currentTime - 5));
+                break;
+            case 'ArrowRight':
+                e.preventDefault();
+                onSeek(Math.min(duration, currentTime + 5));
+                break;
+            case 'Home':
+                e.preventDefault();
+                onSeek(0);
+                break;
+            case 'End':
+                e.preventDefault();
+                onSeek(duration);
+                break;
+        }
+    }, [onSeek, duration, currentTime]);
+
     // Highlight markers for legend
     const highlightMarkers = useMemo(() => {
         return highlights.map((h, i) => ({
@@ -256,10 +284,18 @@ export function Waveform({
             {/* Waveform Canvas */}
             <div
                 ref={containerRef}
-                className="relative h-16 bg-slate-50 dark:bg-slate-900 rounded-lg cursor-pointer overflow-hidden"
+                className="relative h-16 bg-slate-50 dark:bg-slate-900 rounded-lg cursor-pointer overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
                 onClick={handleClick}
+                onKeyDown={handleKeyDown}
                 onMouseMove={handleMouseMove}
                 onMouseLeave={() => setHoveredHighlight(null)}
+                tabIndex={0}
+                role="slider"
+                aria-label="Audio waveform"
+                aria-valuemin={0}
+                aria-valuemax={duration}
+                aria-valuenow={currentTime}
+                aria-valuetext={formatDuration(currentTime)}
             >
                 <canvas ref={canvasRef} className="w-full h-full" />
 
