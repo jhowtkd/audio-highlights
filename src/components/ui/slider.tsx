@@ -15,7 +15,11 @@ function Slider({
   "aria-labelledby": ariaLabelledBy,
   "aria-valuetext": ariaValueText,
   ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root>) {
+}: React.ComponentProps<typeof SliderPrimitive.Root> & {
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
+  "aria-valuetext"?: string;
+}) {
   const _values = React.useMemo(
     () =>
       Array.isArray(value)

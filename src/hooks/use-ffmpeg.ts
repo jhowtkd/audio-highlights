@@ -341,7 +341,7 @@ export function useFFmpeg() {
             setMessage('Mix concluído!');
             return blob;
 
-        } catch (concatError) {
+        } catch {
             console.warn('[FFmpeg Mix] Concat failed, using simple cut fallback');
 
             // Fallback: use simple cut from first segment start to last segment end
