@@ -460,6 +460,7 @@ export default function Home() {
                   duration={audioDuration}
                   currentTime={currentTime}
                   highlights={highlights}
+                  segments={transcription?.segments}
                   onSeek={(time) => setSeekTo(time)}
                 />
               </div>

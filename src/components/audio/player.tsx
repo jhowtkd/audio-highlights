@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useRef, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback, memo } from 'react';
 import { Play, Pause, SkipBack, SkipForward, Volume2, VolumeX } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Slider } from '@/components/ui/slider';
@@ -15,7 +15,7 @@ interface AudioPlayerProps {
   seekTo?: number;
 }
 
-export function AudioPlayer({
+export const AudioPlayer = memo(function AudioPlayer({
   src,
   onTimeUpdate,
   onDurationChange,
@@ -207,4 +207,4 @@ export function AudioPlayer({
       </div>
     </div>
   );
-}
+});
