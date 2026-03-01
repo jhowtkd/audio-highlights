@@ -75,7 +75,6 @@ export function TaskCard({ task }: TaskCardProps) {
     const isProcessing = ['converting', 'transcribing', 'generating'].includes(task.status);
 
     const handleViewResult = () => {
-        // TODO: Navegar para página de resultado com a task
         router.push(`/tasks/${task.id}`);
     };
 
