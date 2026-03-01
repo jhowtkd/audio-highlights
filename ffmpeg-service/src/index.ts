@@ -85,7 +85,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
 
     // Check if file exists and has content
     try {
-        const stats = fs.statSync(file.path);
+        const stats = await fs.promises.stat(file.path);
         console.log(`[FFmpeg] File exists, size on disk: ${stats.size} bytes`);
     } catch (err) {
         console.error(`[FFmpeg] File not found: ${file.path}`);
@@ -198,7 +198,7 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
 
     const sessionId = uuidv4();
     const tempDir = path.join('/tmp', sessionId);
-    fs.mkdirSync(tempDir, { recursive: true });
+    await fs.promises.mkdir(tempDir, { recursive: true });
 
     const segmentFiles: string[] = [];
     const concatListPath = path.join(tempDir, 'concat_list.txt');
@@ -246,7 +246,7 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
 
         // Step 2: Create concat list file
         const concatContent = segmentFiles.map(f => `file '${f}'`).join('\n');
-        fs.writeFileSync(concatListPath, concatContent);
+        await fs.promises.writeFile(concatListPath, concatContent);
         console.log('[FFmpeg Concat] Concat list:', concatContent);
 
         // Step 3: Concatenate all segments using stream copy (faster, no re-encoding)
