@@ -74,8 +74,14 @@ export function Waveform({
                     });
 
                     // Normalize
+                    // Performance: Extract static scalar calculation (1.5 / max) outside the loop
+                    // and replace Math.min function call with conditional operator to remove overhead
                     const max = Math.max(...data, 1);
-                    const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
+                    const scale = 1.5 / max; // 1.5x gain for visibility
+                    const normalizedData = data.map(v => {
+                        const val = v * scale;
+                        return val > 1 ? 1 : val;
+                    });
 
                     setWaveformData(normalizedData);
                     setIsLoading(false);
