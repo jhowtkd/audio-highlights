@@ -5,9 +5,17 @@ import { spawn } from 'child_process';
 import { v4 as uuidv4 } from 'uuid';
 import fs from 'fs';
 import path from 'path';
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Security headers with Helmet - Apply early to ensure headers on all responses
+// Allow cross-origin resource policy so frontend can load video/audio
+app.use(helmet({
+    crossOriginResourcePolicy: { policy: "cross-origin" }
+}));
 
 // CORS configuration - allow requests from your Vercel domain
 const allowedOrigins = [
@@ -31,6 +39,16 @@ app.use(cors({
     },
     credentials: true,
 }));
+
+// Rate limiting to prevent abuse - Apply after CORS so rate-limited responses have CORS headers
+const limiter = rateLimit({
+    windowMs: 15 * 60 * 1000, // 15 minutes
+    max: 100, // Limit each IP to 100 requests per windowMs
+    standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
+    legacyHeaders: false, // Disable the `X-RateLimit-*` headers
+    message: { error: 'Too many requests, please try again later.' }
+});
+app.use(limiter);
 
 app.use(express.json());
 
