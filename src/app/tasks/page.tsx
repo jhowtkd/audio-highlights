@@ -45,7 +45,7 @@ export default function TasksPage() {
                             <ThemeToggle />
                             <Button onClick={() => setUploadDialogOpen(true)}>
                                 <Plus className="h-4 w-4 mr-2" />
-                                Novo Upload
+                                Novo projeto
                             </Button>
                         </div>
                     </div>
@@ -124,14 +124,14 @@ export default function TasksPage() {
                             <Mic className="h-8 w-8 text-slate-400" />
                         </div>
                         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                            Nenhum áudio enviado
+                            Comece seu primeiro projeto
                         </h2>
                         <p className="text-slate-600 dark:text-slate-400 mb-6">
-                            Envie seu primeiro arquivo para gerar highlights automaticamente.
+                            Envie um arquivo de áudio ou vídeo para transcrever e gerar cortes virais automaticamente.
                         </p>
                         <Button onClick={() => setUploadDialogOpen(true)}>
                             <Plus className="h-4 w-4 mr-2" />
-                            Novo Upload
+                            Criar novo projeto
                         </Button>
                     </div>
                 ) : (
