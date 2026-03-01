@@ -665,6 +665,4 @@ def main():
 
 
 if __name__ == "__main__":
-    # Fix missing import
-    import re
     main()
