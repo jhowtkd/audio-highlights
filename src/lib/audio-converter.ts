@@ -20,7 +20,7 @@ const FORMATS_NEEDING_CONVERSION = ['.m4a', '.aac', '.wma', '.amr'];
  * Check if a file needs conversion based on its extension
  */
 export function needsConversion(fileName: string): boolean {
-    const ext = fileName.toLowerCase().substring(fileName.lastIndexOf('.'));
+    const ext = getExtension(fileName).toLowerCase();
     return FORMATS_NEEDING_CONVERSION.includes(ext);
 }
 
@@ -80,9 +80,15 @@ export async function convertToMp3(file: File): Promise<File> {
 /**
  * Get file extension from filename
  */
-function getExtension(fileName: string): string {
+export function getExtension(fileName: string): string {
     const lastDot = fileName.lastIndexOf('.');
-    return lastDot !== -1 ? fileName.substring(lastDot) : '';
+    if (lastDot === -1) return '';
+    const ext = fileName.substring(lastDot);
+    // Validate: only alphanumeric chars after dot
+    if (!/^\.[a-zA-Z0-9]+$/.test(ext)) {
+        return '';
+    }
+    return ext;
 }
 
 /**
