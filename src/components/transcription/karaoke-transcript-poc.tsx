@@ -3,7 +3,7 @@
 import { forwardRef, memo, useMemo } from 'react';
 import { cn } from '@/lib/utils';
 import { formatTime } from '@/lib/format-utils';
-import type { TranscriptionSegment, WordTimestamp } from '@/types';
+import type { TranscriptionSegment } from '@/types';
 
 interface KaraokeTranscriptPOCProps {
   segment: TranscriptionSegment;

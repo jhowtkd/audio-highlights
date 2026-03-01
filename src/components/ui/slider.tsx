@@ -15,7 +15,11 @@ function Slider({
   "aria-labelledby": ariaLabelledBy,
   "aria-valuetext": ariaValueText,
   ...props
-}: React.ComponentProps<typeof SliderPrimitive.Root>) {
+}: React.ComponentProps<typeof SliderPrimitive.Root> & {
+  "aria-label"?: string;
+  "aria-labelledby"?: string;
+  "aria-valuetext"?: string;
+}) {
   const _values = React.useMemo(
     () =>
       Array.isArray(value)
@@ -25,15 +29,6 @@ function Slider({
           : [min, max],
     [value, defaultValue, min, max]
   )
-
-  // Extract aria attributes to pass directly to the Thumb for better accessibility
-  // Screen readers focus on the thumb, so it needs the label and value text
-  const {
-    "aria-label": ariaLabel,
-    "aria-labelledby": ariaLabelledBy,
-    "aria-valuetext": ariaValueText,
-    ...rootProps
-  } = props;
 
   return (
     <SliderPrimitive.Root
@@ -46,7 +41,7 @@ function Slider({
         "relative flex w-full touch-none items-center select-none data-[disabled]:opacity-50 data-[orientation=vertical]:h-full data-[orientation=vertical]:min-h-44 data-[orientation=vertical]:w-auto data-[orientation=vertical]:flex-col",
         className
       )}
-      {...rootProps}
+      {...props}
     >
       <SliderPrimitive.Track
         data-slot="slider-track"
