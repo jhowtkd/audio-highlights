@@ -149,6 +149,8 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 step={15}
                 onValueChange={handleMixDurationChange}
                 className="py-4"
+                aria-label="Duração Total do Mix"
+                aria-valuetext={formatDuration(config.mixDuration || 180)}
               />
               <p className="text-xs text-slate-500">
                 O vídeo final terá aproximadamente esta duração
@@ -175,6 +177,8 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 max={300}
                 step={5}
                 onValueChange={handleMinDurationChange}
+                aria-label="Duração Mínima"
+                aria-valuetext={formatDuration(config.minDuration)}
               />
               <p className="text-xs text-slate-500">
                 Evita cortes muito curtos e sem contexto
@@ -198,6 +202,8 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 max={config.maxDuration}
                 step={5}
                 onValueChange={handleTargetDurationChange}
+                aria-label="Duração Média"
+                aria-valuetext={formatDuration(config.targetDuration)}
               />
               <p className="text-xs text-slate-500">
                 Duração ideal de cada highlight
@@ -221,6 +227,8 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 max={600}
                 step={10}
                 onValueChange={handleMaxDurationChange}
+                aria-label="Duração Máxima"
+                aria-valuetext={formatDuration(config.maxDuration)}
               />
               <p className="text-xs text-slate-500">
                 Nenhum highlight será maior que isso
