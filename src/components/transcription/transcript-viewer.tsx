@@ -34,7 +34,7 @@ interface TranscriptViewerProps {
   className?: string;
 }
 
-interface TranscriptViewerContext {
+interface TranscriptContext {
   activeSegmentIndex: number;
   matchingSegmentIds: Set<string>;
   onSegmentClick: (startTime: number) => void;
@@ -157,14 +157,14 @@ export const TranscriptViewer = memo(function TranscriptViewer({
   }, [segments]);
 
   // Memoize context for Virtuoso to prevent unnecessary re-renders of list items
-  const context = useMemo<TranscriptViewerContext>(() => ({
+  const context = useMemo<TranscriptContext>(() => ({
     activeSegmentIndex,
     matchingSegmentIds,
     onSegmentClick
   }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
 
   // Stable itemContent callback that uses context
-  const itemContent = useCallback((index: number, segment: TranscriptionSegment, context: TranscriptViewerContext) => (
+  const itemContent = useCallback((index: number, segment: TranscriptionSegment, context: TranscriptContext) => (
     <div className="pb-2 pr-2">
       <TranscriptSegment
         segment={segment}
@@ -343,7 +343,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
         </div>
       ) : (
         <div className={cn('flex-1 h-full min-h-0', className)}>
-          <Virtuoso<TranscriptionSegment, TranscriptViewerContext>
+          <Virtuoso<TranscriptionSegment, TranscriptContext>
             ref={virtuosoRef}
             className="scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700"
             style={{ height: '100%' }}
