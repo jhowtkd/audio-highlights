@@ -178,13 +178,15 @@ export function HighlightCard({
               <button
                 type="button"
                 onClick={() => setShowDetails(!showDetails)}
+                aria-expanded={showDetails}
+                aria-controls={`suggested-titles-${highlight.id}`}
                 className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
               >
                 {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                 {showDetails ? 'Ocultar opções' : 'Ver títulos alternativos'}
               </button>
               {showDetails && (
-                <div className="space-y-1">
+                <div id={`suggested-titles-${highlight.id}`} className="space-y-1">
                   {[highlight.title, ...highlight.suggestedTitles].map((title, i) => (
                     <button
                       key={i}
