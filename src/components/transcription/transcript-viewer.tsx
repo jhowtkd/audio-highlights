@@ -144,6 +144,25 @@ export const TranscriptViewer = memo(function TranscriptViewer({
     }
   }, [handleSearch, clearSearch]);
 
+  // Optimized context for Virtuoso to prevent re-creating itemContent on every render
+  const context = useMemo<TranscriptContext>(() => ({
+    activeSegmentIndex,
+    matchingSegmentIds,
+    onSegmentClick,
+  }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
+
+  // Stable itemContent callback
+  const itemContent = useCallback((index: number, segment: TranscriptionSegment, context: TranscriptContext) => (
+    <div className="pb-2 pr-2">
+      <TranscriptSegment
+        segment={segment}
+        isActive={index === context.activeSegmentIndex}
+        isMatch={context.matchingSegmentIds.has(segment.id)}
+        onSegmentClick={context.onSegmentClick}
+      />
+    </div>
+  ), []);
+
   // Export handlers
   const [showExportMenu, setShowExportMenu] = useState(false);
 
@@ -362,7 +381,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
         </div>
       ) : (
         <div className={cn('flex-1 h-full min-h-0', className)}>
-          <Virtuoso
+          <Virtuoso<TranscriptionSegment, TranscriptContext>
             ref={virtuosoRef}
             className="scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700"
             style={{ height: '100%' }}
