@@ -79,7 +79,7 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
+        if (!confirm('Retranscrever arquivo? Os resultados atuais serão apagados.')) {
             return;
         }
 

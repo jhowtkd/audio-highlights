@@ -32,3 +32,28 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-05-18 - Confirmation Dialog Copy Structure
+
+**Copy Type:** Browser confirmation dialog text (window.confirm)
+
+**Original:**
+- "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+- "Deseja realmente descartar este projeto? Todo o progresso será perdido."
+
+**Changed To:**
+- "Retranscrever arquivo? Os resultados atuais serão apagados."
+- "Descartar projeto? Todo o progresso será perdido."
+
+**Learning:**
+Phrases like "Tem certeza que deseja" (Are you sure you want to) and "Deseja realmente" (Do you really want to) add unnecessary cognitive load and read like a machine. They are filler words. Furthermore, "gastar créditos novamente" might not be universally true or primary concern for user action (especially if it's a free local app or flat subscription).
+
+**Rule:**
+For confirmation dialogs ALWAYS:
+1. Front-load the action as a question (Verb + Noun?).
+2. State the consequence clearly in the next sentence.
+3. Remove filler phrases ("Tem certeza", "Deseja realmente").
+
+**Pattern to follow:**
+- ❌ "Tem certeza que deseja [ação]? Isso irá [consequência]."
+- ✅ "[Ação]? [Consequência]."
