@@ -59,11 +59,15 @@ export function Waveform({
                     const bucketSize = duration / samples;
 
                     // Calculate speech activity per bucket
+                    const maxSamplesIndex = samples - 1;
                     segments.forEach(segment => {
                         const startBucket = Math.floor(segment.start / bucketSize);
                         const endBucket = Math.floor(segment.end / bucketSize);
 
-                        for (let i = Math.max(0, startBucket); i <= Math.min(samples - 1, endBucket); i++) {
+                        const startIdx = Math.max(0, startBucket);
+                        const endIdx = Math.min(maxSamplesIndex, endBucket);
+
+                        for (let i = startIdx; i <= endIdx; i++) {
                             // Add value proportional to overlap, but simple counting works for visualization
                             data[i] += 1;
                         }
