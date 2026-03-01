@@ -11,12 +11,14 @@ import rateLimit from 'express-rate-limit';
 const app = express();
 const PORT = process.env.PORT || 3001;
 
+
 // Trust the first proxy (e.g. Vercel / load balancer) to ensure correct IP detection
 app.set('trust proxy', 1);
 
-// Security headers
+// Security headers with Helmet - Apply early to ensure headers on all responses
+// Allow cross-origin resource policy so frontend can load video/audio
 app.use(helmet({
-    crossOriginResourcePolicy: { policy: "cross-origin" },
+    crossOriginResourcePolicy: { policy: "cross-origin" }
 }));
 
 // CORS configuration - allow requests from your Vercel domain
@@ -42,13 +44,14 @@ app.use(cors({
     credentials: true,
 }));
 
-// Rate limiting
+
+// Rate limiting to prevent abuse - Apply after CORS so rate-limited responses have CORS headers
 const limiter = rateLimit({
     windowMs: 15 * 60 * 1000, // 15 minutes
-    limit: 100, // Limit each IP to 100 requests per windowMs
+    limit: 100, // Limit each IP to 100 requests per windowMs (use limit instead of max for express-rate-limit v7+)
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
-    message: 'Too many requests from this IP, please try again later',
+    message: { error: 'Too many requests, please try again later.' }
 });
 
 // Apply rate limiting to all requests
@@ -216,6 +219,22 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
     } catch {
         res.status(400).json({ error: 'Invalid segments format. Expected JSON array of {start, end} objects.' });
         return;
+    }
+
+    const MAX_SEGMENTS = 100;
+    if (parsedSegments.length > MAX_SEGMENTS) {
+        res.status(400).json({ error: `Too many segments. Maximum allowed is ${MAX_SEGMENTS}.` });
+        return;
+    }
+
+    // Validate each segment content for security
+    for (const seg of parsedSegments) {
+        if (!seg || typeof seg.start !== 'number' || typeof seg.end !== 'number' ||
+            isNaN(seg.start) || isNaN(seg.end) ||
+            seg.start < 0 || seg.end <= seg.start) {
+            res.status(400).json({ error: 'Invalid segment values. Start must be >= 0 and End > Start.' });
+            return;
+        }
     }
 
     const sessionId = uuidv4();

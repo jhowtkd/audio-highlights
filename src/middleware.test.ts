@@ -12,6 +12,8 @@ describe('Middleware', () => {
     expect(csp).toContain("default-src 'self'");
     expect(csp).toContain("script-src 'self'");
     expect(csp).toContain('https://unpkg.com');
+    expect(csp).toContain('https://vercel.live');
+    expect(csp).toContain('https://r2cdn.perplexity.ai');
   });
 
   it('should maintain existing security headers', () => {

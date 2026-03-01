@@ -3,7 +3,7 @@
 import { useRef, useEffect, useState, useCallback, useMemo, memo } from 'react';
 import { Search, X, Loader2, Sparkles, Download, FileText, FileCode } from 'lucide-react';
 import { toast } from 'sonner';
-import { Virtuoso, type VirtuosoHandle } from 'react-virtuoso';
+import { Virtuoso, type VirtuosoHandle, type ItemContent } from 'react-virtuoso';
 import { formatTime } from '@/lib/format-utils';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -34,6 +34,12 @@ interface TranscriptViewerProps {
   className?: string;
 }
 
+interface TranscriptContext {
+  activeSegmentIndex: number;
+  matchingSegmentIds: Set<string>;
+  onSegmentClick: (startTime: number) => void;
+}
+
 export const TranscriptViewer = memo(function TranscriptViewer({
   segments,
   activeSegmentIndex,
@@ -56,6 +62,25 @@ export const TranscriptViewer = memo(function TranscriptViewer({
     }
     return ids;
   }, [searchResults]);
+
+  // Create context for Virtuoso
+  const context = useMemo<TranscriptContext>(() => ({
+    activeSegmentIndex,
+    matchingSegmentIds,
+    onSegmentClick
+  }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
+
+  // Stable itemContent function
+  const itemContent = useCallback((index: number, segment: TranscriptionSegment, context: TranscriptContext) => (
+    <div className="pb-2 pr-2">
+      <TranscriptSegment
+        segment={segment}
+        isActive={index === context.activeSegmentIndex}
+        isMatch={context.matchingSegmentIds.has(segment.id)}
+        onSegmentClick={context.onSegmentClick}
+      />
+    </div>
+  ), []);
 
   // Auto-scroll para o segmento ativo (Virtualized)
   useEffect(() => {
@@ -149,6 +174,25 @@ export const TranscriptViewer = memo(function TranscriptViewer({
     toast.success(`Transcrição baixada: ${filename}`);
     setShowExportMenu(false);
   }, [segments]);
+
+  // Memoize context for Virtuoso
+  const context = useMemo<TranscriptContext>(() => ({
+    activeSegmentIndex,
+    matchingSegmentIds,
+    onSegmentClick
+  }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
+
+  // Stable itemContent function using useCallback
+  const itemContent = useCallback<ItemContent<TranscriptionSegment, TranscriptContext>>((index, segment, context) => (
+    <div className="pb-2 pr-2">
+      <TranscriptSegment
+        segment={segment}
+        isActive={index === context.activeSegmentIndex}
+        isMatch={context.matchingSegmentIds.has(segment.id)}
+        onSegmentClick={context.onSegmentClick}
+      />
+    </div>
+  ), []);
 
   if (segments.length === 0) {
     return (
@@ -323,16 +367,8 @@ export const TranscriptViewer = memo(function TranscriptViewer({
             className="scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-700"
             style={{ height: '100%' }}
             data={segments}
-            itemContent={(index, segment) => (
-              <div className="pb-2 pr-2">
-                <TranscriptSegment
-                  segment={segment}
-                  isActive={index === activeSegmentIndex}
-                  isMatch={matchingSegmentIds.has(segment.id)}
-                  onSegmentClick={onSegmentClick}
-                />
-              </div>
-            )}
+            context={context}
+            itemContent={itemContent}
           />
         </div>
       )}
