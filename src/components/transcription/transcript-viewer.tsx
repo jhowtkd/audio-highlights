@@ -63,6 +63,25 @@ export const TranscriptViewer = memo(function TranscriptViewer({
     return ids;
   }, [searchResults]);
 
+  // Create context for Virtuoso
+  const context = useMemo<TranscriptContext>(() => ({
+    activeSegmentIndex,
+    matchingSegmentIds,
+    onSegmentClick
+  }), [activeSegmentIndex, matchingSegmentIds, onSegmentClick]);
+
+  // Stable itemContent function
+  const itemContent = useCallback((index: number, segment: TranscriptionSegment, context: TranscriptContext) => (
+    <div className="pb-2 pr-2">
+      <TranscriptSegment
+        segment={segment}
+        isActive={index === context.activeSegmentIndex}
+        isMatch={context.matchingSegmentIds.has(segment.id)}
+        onSegmentClick={context.onSegmentClick}
+      />
+    </div>
+  ), []);
+
   // Auto-scroll para o segmento ativo (Virtualized)
   useEffect(() => {
     if (virtuosoRef.current && activeSegmentIndex >= 0 && !showSearchResults) {
