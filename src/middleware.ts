@@ -8,15 +8,17 @@ export function middleware(_request: NextRequest) {
   // Content Security Policy
   // script-src: 'unsafe-eval' 'unsafe-inline' needed for Next.js and some libs.
   // unpkg.com for ffmpeg, blob: for workers/media.
+  // vercel.live for preview feedback features.
+  // r2cdn.perplexity.ai for fonts injected by Vercel preview.
   const csp = `
     default-src 'self';
-    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com blob:;
+    script-src 'self' 'unsafe-eval' 'unsafe-inline' https://unpkg.com https://vercel.live blob:;
     worker-src 'self' blob: https://unpkg.com;
     style-src 'self' 'unsafe-inline';
-    img-src 'self' blob: data:;
+    img-src 'self' blob: data: https://vercel.com;
     media-src 'self' blob: data:;
-    connect-src 'self' https://unpkg.com;
-    font-src 'self';
+    connect-src 'self' https://unpkg.com https://vercel.live https://*.pusher.com wss://*.pusher.com;
+    font-src 'self' https://r2cdn.perplexity.ai;
     object-src 'none';
     base-uri 'self';
     form-action 'self';

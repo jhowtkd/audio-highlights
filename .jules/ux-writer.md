@@ -24,3 +24,11 @@
 **Changed To:** "Recomendamos áudios acima de 1 minuto para highlights melhores."
 **Learning:** Reassuring permissions ("Você pode continuar") are redundant when the UI state is non-blocking (warning color vs error color). Users prefer concise, actionable advice over wordy clarifications.
 **Rule:** For non-blocking warnings, skip the "You can continue" preamble and state the recommendation directly.
+
+## 2026-02-27 - AI Context Explanation in Warnings
+
+**Copy Type:** Warning message (Short Audio)
+**Original:** "Recomendamos áudios acima de 1 minuto para highlights melhores."
+**Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
+**Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
+**Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
