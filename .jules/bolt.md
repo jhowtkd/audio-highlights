@@ -33,3 +33,19 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-03-02 - Audio Array Max Aggregation Crash
+
+**Bottleneck:** Rendering the `Waveform` component triggered `Maximum call stack size exceeded` errors when handling long audio segments due to `Math.max(...data)` usage on arrays potentially exceeding argument limits in JavaScript engines. Moreover, using `Math.abs` inside the array aggregation loop causes notable function call overhead.
+**Learning:** Using the spread operator (`...`) with built-in functions like `Math.max()` or `Math.min()` scales poorly and crashes on massive arrays like decoded audio buffers. Inline conditionals and avoiding object/function allocations in hot paths drastically reduce CPU time.
+**Action:** Replace `Math.max(...array)` with `array.reduce((a, b) => a > b ? a : b)`. Inline `Math.abs(val)` to `val < 0 ? -val : val` in tight array processing loops. Lift invariant calculations like block division to inverse multiplication outside loops.
+**Code:**
+```typescript
+// Replace: const max = Math.max(...data);
+const max = data.reduce((a, b) => (a > b ? a : b), 1);
+
+// Inside hot loop:
+// Replace: sum += Math.abs(channelData[blockStart + j]);
+const val = channelData[blockStart + j];
+sum += val < 0 ? -val : val;
+```
