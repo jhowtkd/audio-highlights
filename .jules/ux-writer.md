@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-02 - Task Button Label Improvement
+
+**Copy Type:** Button label in task card
+**Original:** "Ver Resultado"
+**Changed To:** "Abrir projeto"
+**Learning:** "Ver Resultado" implies viewing a static output, whereas clicking the button opens an interactive workspace (transcription, highlights, decupagem). "Abrir projeto" sets the right expectation that this is a workspace, and aligns terminology with the empty state "Criar novo projeto" and delete button tooltip "Excluir projeto".
+**Rule:** Use "projeto" to refer to the workspace of an uploaded audio/video instead of generic terms like "resultado" or "task" to create a consistent mental model for users.
