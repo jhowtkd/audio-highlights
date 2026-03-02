@@ -74,7 +74,8 @@ export function Waveform({
                     });
 
                     // Normalize
-                    const max = Math.max(...data, 1);
+                    // Performance: Using reduce instead of Math.max(...data) to avoid call stack size limits on large arrays
+                    const max = data.reduce((a, b) => (a > b ? a : b), 1);
                     const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
 
                     setWaveformData(normalizedData);
@@ -98,19 +99,25 @@ export function Waveform({
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
 
+                // Performance: Extract division to multiplication outside the loop
+                const invBlockSize = 1 / blockSize;
+
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
 
                     for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                        // Performance: Inline Math.abs to eliminate redundant function call overhead in tight loop
+                        const val = channelData[blockStart + j];
+                        sum += val < 0 ? -val : val;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum * invBlockSize);
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
+                // Performance: Using reduce instead of Math.max(...filteredData) to avoid call stack size limits on large arrays
+                const multiplier = filteredData.reduce((a, b) => (a > b ? a : b), 0);
                 const normalizedData = filteredData.map(n => n / multiplier);
 
                 setWaveformData(normalizedData);
