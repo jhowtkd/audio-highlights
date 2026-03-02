@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Programmatic Video Export Research
+
+**Research Topic:** Adding dynamic, burned-in captions to exported highlights.
+
+**Finding:** Evaluated approaches for programmatic video generation:
+1.  FFmpeg `drawtext` - Free, but impossible to create modern, word-by-word "bouncing" animations or emoji integration easily.
+2.  Client-side Canvas rendering - Flaky, extremely slow on mobile devices, difficult to encode to MP4.
+3.  Remotion - Allows building video templates with React. Supports word-level animations, custom backgrounds, and full CSS styling.
+
+**Decision:** Propose Remotion. It bridges the gap between web development (React/CSS) and video rendering. It's the only viable path to matching competitors like Opus Clip for stylized video exports.
+
+**Learning:** When evaluating features that require heavy computation (like video rendering), the UX shifts from synchronous HTTP requests to asynchronous jobs. We need to account for infrastructure costs (Puppeteer instances) and queueing mechanisms (like Redis) alongside the core feature, not just the library itself.
+
+**Resources:**
+-   https://www.remotion.dev/
+-   research/proposals/2026-03-01-remotion-video-export.md
