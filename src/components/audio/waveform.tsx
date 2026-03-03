@@ -74,7 +74,11 @@ export function Waveform({
                     });
 
                     // Normalize
-                    const max = Math.max(...data, 1);
+                    // Performance: Replaced Math.max(...array) with for-loop to prevent stack overflow errors and improve array processing speed by eliminating function call overhead.
+                    let max = 1;
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i] > max) max = data[i];
+                    }
                     const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
 
                     setWaveformData(normalizedData);
@@ -110,7 +114,11 @@ export function Waveform({
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
+                // Performance: Replaced Math.max(...array) with for-loop to prevent stack overflow errors and improve array processing speed by eliminating function call overhead.
+                let multiplier = 0;
+                for (let i = 0; i < filteredData.length; i++) {
+                    if (filteredData[i] > multiplier) multiplier = filteredData[i];
+                }
                 const normalizedData = filteredData.map(n => n / multiplier);
 
                 setWaveformData(normalizedData);
