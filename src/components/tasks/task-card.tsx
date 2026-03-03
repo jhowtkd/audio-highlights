@@ -151,7 +151,7 @@ export function TaskCard({ task }: TaskCardProps) {
                             config.bg,
                             config.color
                         )}>
-                            <StatusIcon className={cn("h-4 w-4", isProcessing && "animate-spin")} />
+                            <StatusIcon aria-hidden="true" className={cn("h-4 w-4", isProcessing && "animate-spin")} />
                             <span>{config.label}</span>
                         </div>
                     </div>
@@ -159,7 +159,11 @@ export function TaskCard({ task }: TaskCardProps) {
                     {/* Progress Bar */}
                     {isProcessing && (
                         <div className="mt-3">
-                            <div className="flex items-center justify-between text-sm mb-1.5">
+                            <div
+                                className="flex items-center justify-between text-sm mb-1.5"
+                                aria-live="polite"
+                                aria-atomic="true"
+                            >
                                 <span className="text-slate-600 dark:text-slate-400">
                                     {task.progress.message}
                                 </span>
@@ -196,9 +200,10 @@ export function TaskCard({ task }: TaskCardProps) {
                                 variant="ghost"
                                 onClick={handleRetranscribe}
                                 className="text-slate-500 hover:text-blue-600"
+                                aria-label="Retranscrever arquivo"
                                 title="Retranscrever arquivo"
                             >
-                                <RefreshCw className="h-4 w-4" />
+                                <RefreshCw className="h-4 w-4" aria-hidden="true" />
                             </Button>
                         )}
 
@@ -208,9 +213,10 @@ export function TaskCard({ task }: TaskCardProps) {
                                 variant="ghost"
                                 onClick={() => removeTask(task.id)}
                                 className="text-slate-500 hover:text-red-600"
+                                aria-label="Excluir projeto"
                                 title="Excluir projeto"
                             >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" aria-hidden="true" />
                             </Button>
                         )}
 
