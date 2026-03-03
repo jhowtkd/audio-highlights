@@ -56,7 +56,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const handleRetranscribe = () => {
         if (!task) return;
 
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
+        if (!confirm('Retranscrever arquivo? Isso apagará os resultados atuais e gastará créditos novamente.')) {
             return;
         }
 
