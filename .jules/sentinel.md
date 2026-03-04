@@ -31,3 +31,11 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2026-03-04 - Exposure of Internal Config and Active Debug Endpoints
+
+**Vulnerability:** The application exposed internal environment variables (`NODE_ENV`, presence of `GROQ_API_KEY`) on the public unauthenticated `/api/health` endpoint. Additionally, an active debug endpoint (`/api/test-transcribe`) was present in production, allowing unauthenticated users to trigger external API calls to Groq.
+**Root Cause:** The health check endpoint was originally built to include environment status for easy debugging, while a test endpoint was left in the codebase without authentication.
+**Learning:** NEVER expose environment details (even seemingly harmless ones like `NODE_ENV`) on public unauthenticated endpoints. Active debug or test endpoints must be either removed prior to production deployment or secured with strict authentication to prevent resource exhaustion (Denial of Wallet).
+**Prevention:**
+- Only return a simple status (e.g., `status: 'ok'`) on health check endpoints.
+- Ensure all test routes are removed before production or placed behind authentication.
