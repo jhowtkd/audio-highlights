@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-05 - Direct Confirmation Dialogs
+
+**Copy Type:** Confirmation Dialog (Retranscription)
+**Original:** "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+**Changed To:** "Retranscrever arquivo? Isso apagará os resultados atuais e consumirá créditos novamente."
+**Learning:** "Tem certeza que deseja" is a robotic filler phrase. Users prefer direct, specific, and action-oriented questions. We also updated "gastar" to "consumir" to sound slightly more professional while remaining simple.
+**Rule:** For confirmation dialogs, always ask a direct, action-oriented question (e.g., "Retranscrever arquivo?") instead of using "Tem certeza que deseja" or "Deseja realmente".
