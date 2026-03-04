@@ -33,3 +33,32 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-03-04 - Array Spread in Math.max Crashes on Large Arrays
+
+**Bottleneck:** `Math.max(...data)` on large arrays (e.g., audio sample buffers) causes `RangeError: Maximum call stack size exceeded` and severely degrades performance.
+**Learning:** The spread operator `...` passes array elements as arguments. For large arrays (thousands of elements), this exceeds the engine's argument limit.
+**Action:** Replace `Math.max(...arr)` with `arr.reduce((a, b) => a > b ? a : b, 0)` or use a standard `for` loop. `.reduce()` is significantly faster and `O(1)` space, preventing call stack overflow.
+**Code:**
+```javascript
+// BAD
+const max = Math.max(...data, 1);
+
+// GOOD
+const max = data.reduce((acc, val) => (acc > val ? acc : val), 1);
+```
+
+## 2026-03-04 - Math.abs Function Call Overhead in Tight Loops
+
+**Bottleneck:** Calling `Math.abs(val)` millions of times inside a tight audio processing `for` loop creates unnecessary function invocation overhead.
+**Learning:** While modern V8 engines may inline simple `Math` functions, replacing `Math.abs` with a direct inline ternary check is reliably faster for processing millions of audio samples in synchronous execution.
+**Action:** Replace `Math.abs(val)` with `val < 0 ? -val : val` in highly critical tight loops.
+**Code:**
+```javascript
+// BAD
+sum += Math.abs(channelData[i]);
+
+// GOOD
+const val = channelData[i];
+sum += val < 0 ? -val : val;
+```
