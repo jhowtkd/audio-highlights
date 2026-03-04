@@ -102,3 +102,23 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Remotion Video Export Research
+
+**Research Topic:** Enabling programmatic, highly-styled video exports (burned-in captions, progress bars, templates) from React.
+
+**Finding:** Evaluated native FFmpeg vs. HTML5 Canvas vs. Remotion.
+1. FFmpeg `drawtext` - Inflexible, poor styling, no animations.
+2. HTML5 Canvas recording - Prone to lag and dropped frames; sync issues.
+3. Remotion - React-native, highly composable, perfect frame-accuracy, massive ecosystem.
+
+**Decision:** Propose Remotion + `@remotion/player`.
+- Enables exact 1:1 parity between in-browser preview and final render.
+- Our team can build video styles using standard React and Tailwind CSS.
+- Offloads heavy MP4 encoding to `@remotion/lambda` or a dedicated worker, preventing browser crashes.
+
+**Learning:** When evaluating programmatic video solutions, the ability to reuse existing frontend skills (React, CSS) and ensure pixel-perfect synchronization between preview and final render makes Remotion the superior choice over raw FFmpeg filter graphs or complex Canvas manipulations, despite the infra overhead.
+
+**Resources:**
+- https://www.remotion.dev/docs
+- research/proposals/2026-03-01-remotion-video-export.md
