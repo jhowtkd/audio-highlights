@@ -102,3 +102,22 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Remotion Video Export Research
+
+**Research Topic:** Advanced video exporting with burned-in dynamic captions and custom backgrounds.
+
+**Finding:** Evaluated Remotion for generating programmatic videos from React components.
+-   POC confirmed we can use our existing React knowledge to build dynamic video templates (e.g., synchronizing subtitles with audio playback).
+-   `@remotion/player` provides a 1:1 real-time preview in the browser.
+-   FFmpeg's `drawtext` is too limited and complex for the required styling and animations (like karaoke-style captions).
+
+**Decision:** Proposed integrating Remotion.
+-   The developer experience of using React for video templates outweighs the complexity of setting up a new rendering pipeline.
+-   It directly addresses the user need for "ready-to-post" viral clips (e.g., 9:16 aspect ratio for TikTok/Reels).
+
+**Learning:** When evaluating video generation tools, the ability to preview perfectly in the browser before rendering is critical for UX. Also, licensing (like Remotion's company license) must be verified early for tools that generate commercial media.
+
+**Resources:**
+-   https://www.remotion.dev/
+-   research/proposals/2026-03-01-remotion-video-export.md
