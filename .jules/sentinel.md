@@ -31,3 +31,35 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-03-05 - Information Disclosure in Health Check API
+
+**Vulnerability:** The public `/api/health` endpoint exposed internal environment variables including `NODE_ENV` and boolean indicators of API key configuration (`groq_configured`).
+**Root Cause:** The health check endpoint was designed to provide diagnostic information, likely for internal debugging or monitoring. However, it was not secured behind any authentication or network restrictions.
+**Learning:** Publicly accessible endpoints must never expose internal configuration state, environment variables, or other diagnostic information that could assist an attacker in fingerprinting the system or understanding its infrastructure.
+**Prevention:** For all public health checks:
+- Only return a minimal status indicator (e.g., `{"status": "ok"}`).
+- Ensure more detailed diagnostic endpoints are strictly authenticated and authorized.
+- Add tests to verify health endpoints do not leak environment details.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+export async function GET() {
+    return NextResponse.json({
+        status: 'ok',
+        env: {
+            groq_configured: !!process.env.GROQ_API_KEY,
+            node_env: process.env.NODE_ENV,
+        }
+    });
+}
+
+// Secure pattern to use:
+export async function GET() {
+    return NextResponse.json({
+        status: 'ok',
+        timestamp: new Date().toISOString()
+    });
+}
+```
