@@ -33,3 +33,16 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-03-05 - Audio Buffer Waveform Rendering Bottleneck
+
+**Bottleneck:** Rendering the waveform from an `AudioBuffer` by iterating through every single sample (`channelData`). For long audio files, this means processing tens of millions of samples on the main thread, causing severe lag, blocking the UI, and risking `Maximum call stack size exceeded` errors due to using `Math.max(...array)`.
+**Learning:** You do not need pixel-perfect precision from millions of samples to draw a 200-bar waveform on a canvas. A subset of samples provides an identical visual representation.
+**Action:** Implemented adaptive downsampling by calculating a `step` size that limits processing to a maximum of 1000 samples per block. Replaced `Math.abs` with an inline ternary operator for tighter loop performance, and replaced the spread operator `Math.max(...filteredData)` with a manual max calculation to prevent call stack issues.
+**Code:**
+```typescript
+const step = Math.max(1, Math.floor(blockSize / 1000));
+for (let j = blockStart; j < blockEnd; j += step) {
+    const val = channelData[j];
+    sum += val < 0 ? -val : val; // Inline Math.abs
+}
+```

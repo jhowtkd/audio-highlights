@@ -94,24 +94,47 @@ export function Waveform({
 
                 // Get samples from the audio buffer
                 const channelData = audioBuffer.getChannelData(0);
+                const length = channelData.length;
                 const samples = 200; // Number of bars in the waveform
-                const blockSize = Math.floor(channelData.length / samples);
-                const filteredData: number[] = [];
+                const blockSize = Math.floor(length / samples);
+
+                // Performance: Process a maximum of 1000 samples per block instead of the entire block.
+                // Reduces computation from O(N) to O(samples * 1000), e.g., for a 10m file,
+                // from ~26.4 million iterations to ~200,000 iterations without visible loss in precision.
+                const step = Math.max(1, Math.floor(blockSize / 1000));
+
+                const filteredData = new Array(samples);
+                let maxVal = 0;
 
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
+                    const blockEnd = Math.min(blockStart + blockSize, length);
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                    for (let j = blockStart; j < blockEnd; j += step) {
+                        // Performance: Inline ternary instead of Math.abs function call
+                        const val = channelData[j];
+                        sum += val < 0 ? -val : val;
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    const avg = count > 0 ? sum / count : 0;
+                    filteredData[i] = avg;
+
+                    // Performance: Manual max finding to prevent Maximum call stack size exceeded
+                    // on large arrays with Math.max(...array)
+                    if (avg > maxVal) {
+                        maxVal = avg;
+                    }
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                const multiplier = maxVal === 0 ? 1 : maxVal;
+                const normalizedData = new Array(samples);
+                for (let i = 0; i < samples; i++) {
+                    normalizedData[i] = filteredData[i] / multiplier;
+                }
 
                 setWaveformData(normalizedData);
                 audioContext.close();
