@@ -102,3 +102,22 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Advanced Video Export Engine (Remotion)
+
+**Research Topic:** Integrating an advanced, code-based video rendering engine for dynamic burned-in captions and audio visualizers.
+
+**Finding:** Evaluated 3 approaches for generating social-ready (TikTok/Reels) video clips directly from our application:
+1.  **FFmpeg (Server-side with ASS subtitles):** Uses our existing microservice. Pros: Fast, free. Cons: Extremely rigid styling, cannot easily achieve modern word-by-word pop animations or complex reactive visualizers.
+2.  **Client-side Canvas Recording:** Pros: Free compute. Cons: Unreliable, slow, hangs the browser, poor UX.
+3.  **Remotion (React-based video generation):** Pros: Allows us to build video templates using our existing React/CSS skills. Perfect for mapping precise JSON transcript data to video frames. Cons: Requires deploying to AWS Lambda (`@remotion/lambda`) for scalable rendering, which incurs continuous cloud costs.
+
+**Decision:** Proposed adopting **Remotion** as the engine for "Advanced Exports", while retaining our existing fast FFmpeg service for raw clip extraction.
+-   It provides the exact high-value, ready-to-publish feature set our users need (no secondary tools like CapCut required).
+-   The developer experience of building video components in React matches our team's core competencies.
+
+**Learning:** For features that require complex, dynamic visual layouts (like modern social media captions), declarative UI frameworks (React/Remotion) are vastly superior to procedural command-line tools (FFmpeg filters) in terms of maintainability and developer velocity. However, the trade-off is moving from cheap server instances to potentially expensive serverless compute. This feature should likely be gated behind a premium tier to manage unit economics.
+
+**Resources:**
+-   https://www.remotion.dev/
+-   https://www.remotion.dev/docs/lambda
