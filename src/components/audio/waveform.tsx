@@ -74,7 +74,12 @@ export function Waveform({
                     });
 
                     // Normalize
-                    const max = Math.max(...data, 1);
+                    // Optimization: Avoid Math.max(...array) which can trigger Maximum call stack size exceeded
+                    // on large arrays. A for loop is also generally faster than reduce for simple aggregation.
+                    let max = 1;
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i] > max) max = data[i];
+                    }
                     const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
 
                     setWaveformData(normalizedData);
@@ -110,7 +115,12 @@ export function Waveform({
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
+                // Optimization: Avoid Math.max(...array) which can trigger Maximum call stack size exceeded
+                // on large arrays. A for loop is also generally faster than reduce for simple aggregation.
+                let multiplier = 0;
+                for (let i = 0; i < filteredData.length; i++) {
+                    if (filteredData[i] > multiplier) multiplier = filteredData[i];
+                }
                 const normalizedData = filteredData.map(n => n / multiplier);
 
                 setWaveformData(normalizedData);
