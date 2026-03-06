@@ -31,3 +31,29 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-03-24 - Unauthenticated Resource Exhaustion via Test Routes
+
+**Vulnerability:** An unauthenticated `/api/test-transcribe` endpoint was left in the codebase. This endpoint triggered a real request to the paid Groq external API, generating a 1-second WAV file and submitting it for transcription. Anyone could call this endpoint repeatedly, causing unauthenticated resource exhaustion and financial drain.
+
+**Root Cause:** The endpoint was likely created for local development or testing but was not removed or secured with authentication before being committed to the repository.
+
+**Learning:** Test, debug, or "health check" routes that call external paid APIs MUST NEVER be left unauthenticated or in production code without strict authorization. They are prime targets for resource exhaustion attacks.
+
+**Prevention:**
+- Always remove test endpoints that trigger external APIs before creating a PR.
+- If a test endpoint is absolutely necessary, enforce strict authentication.
+- Regularly review all endpoints in `src/app/api` to ensure no debug functionality is exposed.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase (removed):
+export async function GET() {
+    // ... creates silence.wav ...
+    const response = await client.audio.transcriptions.create({
+        file: file,
+        model: GROQ_WHISPER_MODEL,
+    });
+    // ...
+}
+```
