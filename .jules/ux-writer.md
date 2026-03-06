@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Error Message Actionability Improvement
+
+**Copy Type:** Error messages (API limits, file missing, transcription/highlight failures)
+**Original:** "Não foi possível gerar os highlights. Tente novamente em alguns instantes." / "Chave da API OpenAI não configurada"
+**Changed To:** "A geração de highlights falhou. Verifique sua conexão e tente novamente." / "Chave da API OpenAI não configurada. Adicione sua chave nas configurações para continuar."
+**Learning:** Error messages that simply state the failure are dead-ends. Providing actionable next steps (like checking the connection, configuring a key, or explicitly selecting a file) empowers the user to solve the problem rather than feeling stuck. Also changing from passive "Não foi possível" to active "falhou" is shorter and clearer.
+**Rule:** Always pair an error notification with a clear, actionable next step. Avoid passive voice in error headers (prefer "O processamento falhou" over "Não foi possível processar").
