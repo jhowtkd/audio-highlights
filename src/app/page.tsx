@@ -426,7 +426,7 @@ export default function Home() {
               </div>
             </div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-3">
-              Não foi possível processar
+              O processamento falhou
             </h2>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
               {errorMessage || 'Tivemos um problema técnico. Por favor, tente novamente.'}
