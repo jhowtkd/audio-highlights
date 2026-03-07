@@ -31,3 +31,43 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-03-07 - Information Disclosure and Unauthenticated Debug Routes
+
+**Vulnerability:**
+1. A test route (`/api/test-transcribe`) was exposed without any authentication, executing an expensive transcription task (Groq API). This allows an unauthenticated user to spam the endpoint and exhaust API resources (Denial of Wallet).
+2. The `/api/health` endpoint returned environment-specific values (`NODE_ENV`, presence of `GROQ_API_KEY`). This leaks application configuration details to the public.
+
+**Root Cause:**
+1. The developer left an active test endpoint in production that had no guardrails or authentication for executing API-heavy requests.
+2. The developer used the healthcheck to verify environmental setups but exposed this detailed information directly in the response payload.
+
+**Learning:** NEVER expose endpoints that consume resources (APIs, databases) without rate limiting and authentication, especially debug/test routes. Ensure healthcheck endpoints only expose generic success states and never leak environment data or configurations.
+
+**Prevention:**
+- For resource-intensive operations, ensure proper authentication checks and rate limits are in place.
+- Delete debug or test routes that are not intended for production.
+- Healthcheck endpoints should return only a simple status (e.g., `status: "ok"`) and perhaps a timestamp.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+export async function GET() {
+    return NextResponse.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        env: {
+            groq_configured: !!process.env.GROQ_API_KEY,
+            node_env: process.env.NODE_ENV,
+        }
+    });
+}
+
+// Secure pattern to use:
+export async function GET() {
+    return NextResponse.json({
+        status: 'ok',
+        timestamp: new Date().toISOString()
+    });
+}
+```
