@@ -32,3 +32,18 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-04-14 - Confirmation Dialog Tone Decision
+
+**Copy Type:** Confirmation dialogs for destructive actions
+
+**Original:** "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente." and "Deseja realmente descartar este projeto? Todo o progresso será perdido."
+
+**Changed To:** "Retranscrever arquivo? Os resultados atuais serão apagados e novos créditos serão consumidos." and "Descartar projeto? Todo o progresso será perdido."
+
+**Learning:** This app's Portuguese UI copy shouldn't use wordy, robotic filler phrases like 'Tem certeza que deseja' or 'Deseja realmente'. Direct, action-oriented questions are clearer. Also, the term 'consumir' should be used over 'gastar' for credits/resources to maintain a professional yet simple tone.
+
+**Rule:** For this app, ALWAYS:
+1. Avoid wordy filler phrases ('Tem certeza que deseja', 'Deseja realmente').
+2. Ask direct, specific, action-oriented questions (e.g., 'Retranscrever arquivo?', 'Descartar projeto?').
+3. Use professional terms like 'consumir' instead of 'gastar' when referring to credits or resources.
