@@ -42,3 +42,15 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-03-08 - Screen Reader Compatibility with Dynamic Progress Bars
+
+**UX Problem:** Screen readers fail to automatically read dynamic progress messages and percentage updates inside the task queue because the text is simply rendered inside standard `span` elements. Users relying on assistive technologies remain unaware of ongoing processing status unless they repeatedly tab to check.
+
+**Learning:** Next.js UI progress elements and standard `div` containers don't naturally announce their dynamic content changes to screen readers, leaving them silent during long-running tasks.
+
+**Solution:** Wrapped the dynamic progress text (message and percentage) in a container with `aria-live="polite"` and `aria-atomic="true"`.
+
+**Pattern:** For this design system, ALL dynamic progress updates or status readouts must use:
+1. `aria-live="polite"` to instruct screen readers to announce changes when idle.
+2. `aria-atomic="true"` to ensure the whole message block is read together rather than fragmented updates.
