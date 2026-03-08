@@ -64,8 +64,10 @@ export function Waveform({
                         const startBucket = Math.floor(segment.start / bucketSize);
                         const endBucket = Math.floor(segment.end / bucketSize);
 
-                        const startIdx = Math.max(0, startBucket);
-                        const endIdx = Math.min(maxSamplesIndex, endBucket);
+                        // Bolt Performance Optimization:
+                        // Inline ternary operator instead of Math.max/Math.min in tight loops to avoid function call overhead
+                        const startIdx = startBucket < 0 ? 0 : startBucket;
+                        const endIdx = endBucket > maxSamplesIndex ? maxSamplesIndex : endBucket;
 
                         for (let i = startIdx; i <= endIdx; i++) {
                             // Add value proportional to overlap, but simple counting works for visualization
@@ -74,8 +76,19 @@ export function Waveform({
                     });
 
                     // Normalize
-                    const max = Math.max(...data, 1);
-                    const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
+                    // Bolt Performance Optimization:
+                    // Avoid spread operator on potentially large arrays and use inline max check
+                    let max = 1;
+                    for (let i = 0; i < data.length; i++) {
+                        const val = data[i];
+                        max = val > max ? val : max;
+                    }
+
+                    // Bolt Performance Optimization: Use inline min calculation instead of Math.min
+                    const normalizedData = data.map(v => {
+                        const scaled = (v / max) * 1.5;
+                        return scaled > 1 ? 1 : scaled;
+                    }); // 1.5x gain for visibility
 
                     setWaveformData(normalizedData);
                     setIsLoading(false);
@@ -102,15 +115,24 @@ export function Waveform({
                     const blockStart = blockSize * i;
                     let sum = 0;
 
+                    // Bolt Performance Optimization:
+                    // Use inline ternary for absolute value calculation in a very tight loop (executes thousands/millions of times)
                     for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                        const val = channelData[blockStart + j];
+                        sum += val < 0 ? -val : val;
                     }
 
                     filteredData.push(sum / blockSize);
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
+                // Bolt Performance Optimization:
+                // Avoid Math.max(...arr) to prevent maximum call stack size exceeded errors on large buffers
+                let multiplier = 0;
+                for (let i = 0; i < filteredData.length; i++) {
+                    const val = filteredData[i];
+                    multiplier = val > multiplier ? val : multiplier;
+                }
                 const normalizedData = filteredData.map(n => n / multiplier);
 
                 setWaveformData(normalizedData);
