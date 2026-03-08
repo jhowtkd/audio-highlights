@@ -102,3 +102,22 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Remotion Video Exporting
+
+**Research Topic:** Advanced video exporting with dynamic captions and custom backgrounds.
+
+**Finding:** Evaluated `remotion` as a replacement for raw FFmpeg commands to generate video compositions.
+- Allows building video templates using React components.
+- Excellent for syncing transcription text (captions) to exact video frames.
+- A POC (`research/pocs/remotion-export/index.tsx`) confirmed that complex text styling and CSS backgrounds map seamlessly into video output.
+
+**Decision:** Propose integrating Remotion for high-quality video exports.
+- Solves the problem of visually plain FFmpeg exports.
+- Enables "viral-style" clips with animated captions out of the box.
+
+**Learning:** When building programmable video features, using a web-native layout engine (DOM/CSS via Remotion) is vastly more productive and maintainable than constructing complex `ffmpeg -filter_complex` strings for text and graphics.
+
+**Resources:**
+- https://www.remotion.dev/docs/
+- research/proposals/2026-03-01-remotion-video-export.md
