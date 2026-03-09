@@ -102,3 +102,22 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-09 - Client-Side Highlight Generation Research
+
+**Research Topic:** Migrating highlight generation from OpenAI API to Client-Side WebGPU SLMs.
+
+**Finding:** Evaluated `@mlc.ai/web-llm` for running models like Llama-3-8B in the browser.
+- WebGPU allows for hardware-accelerated LLM execution directly on the client.
+- It completely eliminates recurring API costs for the application's core feature.
+- However, it requires a large initial download (2-5GB) and capable hardware (8GB+ RAM, WebGPU support).
+
+**Decision:** Propose implementing client-side highlight generation as an optional "Local Compute" mode.
+- This offers a privacy-first, zero-marginal-cost alternative for power users with modern hardware.
+- The existing OpenAI API will be kept as a seamless fallback for incompatible devices or fast initial runs.
+
+**Learning:** WebGPU is making local-first AI a viable alternative for heavy computational tasks like transcript summarization, provided the user experience handles the massive initial model download gracefully.
+
+**Resources:**
+- https://webllm.mlc.ai/
+- research/proposals/2026-03-09-client-side-highlights.md
