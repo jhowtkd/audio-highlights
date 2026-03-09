@@ -135,7 +135,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
       <div className="border-2 border-slate-300 dark:border-slate-700 rounded-xl p-6 bg-slate-50 dark:bg-slate-900">
         <div className="flex items-start gap-4">
           <div className="p-3 bg-slate-200 dark:bg-slate-800 rounded-lg">
-            <FileAudio className="h-8 w-8 text-slate-600 dark:text-slate-400" />
+            <FileAudio className="h-8 w-8 text-slate-600 dark:text-slate-400" aria-hidden="true" />
           </div>
 
           <div className="flex-1 min-w-0">
@@ -161,7 +161,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
             aria-label="Remover arquivo"
             title="Remover arquivo"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </Button>
         </div>
 
@@ -182,7 +182,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
 
         <div className="mt-6 flex justify-end">
           <Button onClick={handleSubmit} size="lg" className="w-full sm:w-auto">
-            <Upload className="mr-2 h-4 w-4" />
+            <Upload className="mr-2 h-4 w-4" aria-hidden="true" />
             Iniciar Transcrição
           </Button>
         </div>
@@ -229,6 +229,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
                     ? 'text-red-600 dark:text-red-400'
                     : 'text-slate-500'
               )}
+              aria-hidden="true"
             />
           </div>
 
