@@ -98,19 +98,32 @@ export function Waveform({
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
 
+                let maxFilteredData = 0;
+
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
+                    const blockEnd = blockStart + blockSize;
                     let sum = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                    // Performance: Inline Math.abs logic avoiding function overhead in tight loop
+                    // over potentially millions of samples
+                    for (let j = blockStart; j < blockEnd; j++) {
+                        const val = channelData[j];
+                        sum += val < 0 ? -val : val;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    const average = sum / blockSize;
+                    filteredData.push(average);
+
+                    if (average > maxFilteredData) {
+                        maxFilteredData = average;
+                    }
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
+                // Performance: Avoid using Math.max(...filteredData) as it uses the spread
+                // operator which can cause Maximum call stack size exceeded on large arrays
+                const multiplier = maxFilteredData > 0 ? maxFilteredData : 1;
                 const normalizedData = filteredData.map(n => n / multiplier);
 
                 setWaveformData(normalizedData);
