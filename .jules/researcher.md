@@ -102,3 +102,24 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Programmatic Video Export Research
+
+**Research Topic:** Dynamic video export with burned-in captions
+
+**Finding:**
+Current application allows raw text/SRT export and basic trimmed video export, but social media platforms strongly favor videos with animated, styled text (burned-in captions).
+Using FFmpeg `drawtext` for this is extremely complex and hard to style dynamically. Remotion provides a React-based solution for rendering videos, allowing us to reuse existing component logic.
+
+**Decision:**
+Propose integrating Remotion to handle advanced video exports.
+- Enables Tailwind-styled, React-rendered animated captions directly on the video.
+- Requires serverless/Lambda architecture to avoid blocking backend.
+- License review required before full commitment.
+
+**Learning:**
+Programmatic video rendering with React (Remotion) bridges the gap between web UI state and complex video production workflows, turning a transcription app into a full content generator.
+
+**Resources:**
+- https://www.remotion.dev/
+- research/proposals/2026-03-01-remotion-video-export.md
