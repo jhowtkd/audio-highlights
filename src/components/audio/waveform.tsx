@@ -59,13 +59,15 @@ export function Waveform({
                     const bucketSize = duration / samples;
 
                     // Calculate speech activity per bucket
+                    // Optimization: Extract static max calculation and replace Math.min/Math.max with inline conditionals
                     const maxSamplesIndex = samples - 1;
+
                     segments.forEach(segment => {
                         const startBucket = Math.floor(segment.start / bucketSize);
                         const endBucket = Math.floor(segment.end / bucketSize);
 
-                        const startIdx = Math.max(0, startBucket);
-                        const endIdx = Math.min(maxSamplesIndex, endBucket);
+                        const startIdx = startBucket < 0 ? 0 : startBucket;
+                        const endIdx = endBucket > maxSamplesIndex ? maxSamplesIndex : endBucket;
 
                         for (let i = startIdx; i <= endIdx; i++) {
                             // Add value proportional to overlap, but simple counting works for visualization
@@ -74,8 +76,16 @@ export function Waveform({
                     });
 
                     // Normalize
-                    const max = Math.max(...data, 1);
-                    const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
+                    // Optimization: Avoid spread operator on potentially large arrays and use inline min
+                    let max = 1;
+                    for (let i = 0; i < samples; i++) {
+                        if (data[i] > max) max = data[i];
+                    }
+
+                    const normalizedData = data.map(v => {
+                        const val = (v / max) * 1.5;
+                        return val > 1 ? 1 : val;
+                    }); // 1.5x gain for visibility
 
                     setWaveformData(normalizedData);
                     setIsLoading(false);
@@ -98,19 +108,27 @@ export function Waveform({
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
 
+                // Optimization: Replace Math.abs with inline ternary and defer division
+                let maxFiltered = Number.MIN_VALUE;
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
 
                     for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                        const val = channelData[blockStart + j];
+                        sum += val < 0 ? -val : val;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    const avg = sum / blockSize;
+                    filteredData.push(avg);
+                    if (avg > maxFiltered) {
+                        maxFiltered = avg;
+                    }
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
+                // Optimization: Pre-calculated max to avoid Math.max(...array)
+                const multiplier = maxFiltered > 0 ? maxFiltered : 1;
                 const normalizedData = filteredData.map(n => n / multiplier);
 
                 setWaveformData(normalizedData);
