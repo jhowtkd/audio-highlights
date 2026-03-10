@@ -33,3 +33,28 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-03-10 - Math.abs and Array iteration overhead in tight loops
+
+**Bottleneck:** High CPU usage and slow processing time when generating waveform bars directly from large audio buffers (e.g. hundreds of thousands of samples).
+**Learning:** `Math.abs()` and array spread operators like `Math.max(...filteredData)` incur significant performance overhead in high-frequency loops (millions of iterations). Calling the functions has an overhead compared to standard inline operators.
+**Action:** Replaced `Math.abs(val)` with an inline ternary conditional `val < 0 ? -val : val`, deferred division operations until after the loops by pre-calculating and adding inside the loop and dividing later, and manually found max values within the loop instead of using `Math.max(...array)` or spread operator that may throw Maximum Call Stack.
+**Code:**
+```typescript
+let maxFiltered = Number.MIN_VALUE;
+for (let i = 0; i < samples; i++) {
+    const blockStart = blockSize * i;
+    let sum = 0;
+
+    for (let j = 0; j < blockSize; j++) {
+        const val = channelData[blockStart + j];
+        sum += val < 0 ? -val : val; // inline ternary instead of Math.abs
+    }
+
+    const avg = sum / blockSize;
+    filteredData.push(avg);
+    if (avg > maxFiltered) {
+        maxFiltered = avg;
+    }
+}
+```
