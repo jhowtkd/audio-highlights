@@ -42,3 +42,13 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-03-11 - Imperative Navigation vs. Link Accessibility
+
+**UX Problem:** The "Ver Projeto" (formerly "Ver Resultado") button in the `TaskCard` used `router.push()` for navigation. This prevented users from opening the project in a new tab (Ctrl+Click/Cmd+Click) and didn't expose the element as a native link to screen readers.
+
+**Learning:** Using JavaScript for navigation breaks standard web expectations for links. Screen reader users expect to know where a link goes before clicking it, and power users rely on native browser tab management.
+
+**Solution:** Replaced `useRouter()` navigation with Next.js `<Link>` component using `asChild` to wrap the custom `<Button>`.
+
+**Pattern:** For internal navigation that looks like a button but functions as a link to another page, ALWAYS use `<Button asChild><Link href="...">...</Link></Button>` instead of an `onClick` handler with `router.push()`.
