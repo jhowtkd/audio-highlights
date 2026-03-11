@@ -31,3 +31,40 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-03-11 - Information Disclosure in Public API Endpoint
+
+**Vulnerability:** The `/api/health` endpoint, which is publicly accessible, exposed internal environment variables (`node_env: process.env.NODE_ENV`). This configuration detail can give potential attackers insights into the environment.
+
+**Root Cause:** Developers often add environment details in health check endpoints for debugging purposes, without considering the security implications of exposing this information to the public.
+
+**Learning:** Public endpoints must not expose environment configuration details such as `NODE_ENV` or the presence of API keys. Only return information strictly necessary for the endpoint's purpose.
+
+**Prevention:** Ensure that health check endpoints only return basic status information and do not include sensitive internal environment details.
+
+**Code:**
+```typescript
+// Vulnerable:
+export async function GET() {
+    return NextResponse.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        env: {
+            groq_configured: !!process.env.GROQ_API_KEY,
+            node_env: process.env.NODE_ENV,
+        }
+    });
+}
+
+// Secure:
+export async function GET() {
+    // SECURITY: Prevent information disclosure of environment configuration
+    return NextResponse.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        env: {
+            groq_configured: !!process.env.GROQ_API_KEY,
+        }
+    });
+}
+```
