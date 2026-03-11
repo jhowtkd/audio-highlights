@@ -102,3 +102,23 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Remotion Video Export Integration
+
+**Research Topic:** Integrating Remotion for Advanced Video Export functionality.
+
+**Finding:** Evaluated Remotion for server-side video rendering with dynamic captions.
+- It enables writing video templates using standard React components.
+- Excellent for syncing timestamped text (like Whisper segments) with audio frames.
+- Replaces the need for complex, unmaintainable FFmpeg `drawtext` commands.
+- Comes with `@remotion/player` for client-side previews without rendering overhead.
+
+**Decision:** Propose Remotion integration.
+- The UX benefits of providing platform-ready (TikTok/Reels) clips outweigh the infrastructure complexity.
+- It fits perfectly with our existing React/Next.js stack and transcript data model.
+
+**Learning:** When moving from basic feature (audio clipping) to advanced content creation (social media templates), tools that leverage existing UI paradigms (React DOM) are vastly superior to trying to force low-level tools (FFmpeg) to do high-level UI work. The main challenge shifts from "how to render" to "how to scale rendering infrastructure".
+
+**Resources:**
+- https://www.remotion.dev/docs/
+- research/proposals/2026-03-01-remotion-video-export.md
