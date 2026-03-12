@@ -74,8 +74,18 @@ export function Waveform({
                     });
 
                     // Normalize
-                    const max = Math.max(...data, 1);
-                    const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
+                    // Performance: Manual loop prevents 'Maximum call stack size exceeded' with large audio data
+                    // compared to Math.max(...data)
+                    let max = 1;
+                    for (let i = 0; i < samples; i++) {
+                        if (data[i] > max) max = data[i];
+                    }
+
+                    const normalizedData = data.map(v => {
+                        const val = (v / max) * 1.5;
+                        // Performance: Inline ternary replaces Math.min for faster execution in hot loops
+                        return val > 1 ? 1 : val; // 1.5x gain for visibility
+                    });
 
                     setWaveformData(normalizedData);
                     setIsLoading(false);
@@ -103,14 +113,20 @@ export function Waveform({
                     let sum = 0;
 
                     for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                        const val = channelData[blockStart + j];
+                        // Performance: Inline ternary replaces Math.abs to avoid function call overhead in tight loop
+                        sum += val < 0 ? -val : val;
                     }
 
                     filteredData.push(sum / blockSize);
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
+                // Performance: Manual loop prevents 'Maximum call stack size exceeded' compared to Math.max(...filteredData)
+                let multiplier = 0;
+                for (let i = 0; i < filteredData.length; i++) {
+                    if (filteredData[i] > multiplier) multiplier = filteredData[i];
+                }
                 const normalizedData = filteredData.map(n => n / multiplier);
 
                 setWaveformData(normalizedData);

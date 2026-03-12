@@ -33,3 +33,17 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-03-12 - Math.max vs Explicit loop over large audio data
+
+**Bottleneck:** Spread operator with `Math.max(...data)` on audio buffer arrays.
+**Learning:** Large arrays (e.g., hundreds of thousands of items) can exceed the call stack size limit when passed to `Math.max()` via the spread operator (`...`). Also, `Math.abs` and `Math.min` inside tight loops cause unnecessary function call overhead.
+**Action:** Use manual `for` loops instead of `Math.max(...array)` when dealing with audio sample arrays. Replace `Math.min`, `Math.max`, and `Math.abs` with inline ternary operators in hot code paths.
+**Code:**
+```typescript
+// ❌ BAD
+const max = Math.max(...data);
+sum += Math.abs(val);
+// ✅ GOOD
+let max = 0; for(let i=0; i<data.length; i++) if(data[i] > max) max = data[i];
+sum += val < 0 ? -val : val;
+```
