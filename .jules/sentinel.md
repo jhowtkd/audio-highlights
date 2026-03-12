@@ -31,3 +31,27 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2026-03-05 - Missing Length Limits in Validation Schemas
+
+**Vulnerability:** Zod `z.string()` and `z.array()` inputs lacked explicit maximum length limits, making the application vulnerable to Denial of Service (DoS) and memory exhaustion attacks via excessively long strings.
+
+**Root Cause:** The validation schemas ensured required formats but did not restrict the size of string inputs, allowing malicious payloads to potentially consume excessive memory during parsing or downstream processing.
+
+**Learning:** Always apply explicit length limits (`.max()`) to all string and array inputs in validation schemas to prevent DoS and memory exhaustion attacks.
+
+**Prevention:** Ensure that all Zod validation schemas for string and array fields use `.max()` referencing global maximum length constants defined in `src/lib/constants.ts`.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+export const transcriptionSegmentSchema = z.object({
+  id: z.string(),
+  text: z.string(),
+});
+
+// Secure pattern to use:
+export const transcriptionSegmentSchema = z.object({
+  id: z.string().max(MAX_SEGMENT_ID_LENGTH),
+  text: z.string().max(MAX_SEGMENT_TEXT_LENGTH),
+});
+```
