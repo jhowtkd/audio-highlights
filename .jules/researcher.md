@@ -102,3 +102,15 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Dynamic Video Export with Burned-in Captions using Remotion
+
+**Research Topic:** Migrating advanced video export features from raw FFmpeg to Remotion.
+**Finding:** Evaluated Remotion against raw FFmpeg and Puppeteer + FFmpeg. Found Remotion allows React-driven dynamic video generation with high-quality burned-in captions, custom backgrounds, and advanced visual styling, significantly enhancing our output for viral clips. FFmpeg is too limited for modern dynamic social media styling, while Puppeteer is too slow and fragile.
+**Decision:** Chose Remotion because it translates React and CSS skills directly into programmatic video rendering.
+- Uses React, lowering the learning curve for the team.
+- Allows highly complex styled subtitles easily synced via standard transcript timestamps.
+**Learning:** For programmatic video requiring visual polish, standard video rendering paradigms (FFmpeg) fail compared to modern declarative web rendering paradigms (Remotion). There is a trade-off between raw speed (FFmpeg stream copying) and visual flexibility.
+**Resources:**
+- https://www.remotion.dev/docs
+- https://www.remotion.dev/docs/captioning
