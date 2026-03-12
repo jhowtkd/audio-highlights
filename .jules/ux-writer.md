@@ -32,3 +32,14 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-12 - Confirmation Dialog Improvement
+
+**Copy Type:** Confirmation Dialog and Tooltips
+**Original:** "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+**Changed To:** "Retranscrever projeto? Isso apagará os resultados atuais e consumirá créditos novamente."
+**Learning:** "Tem certeza que deseja" is a robotic, wordy pattern that delays the actual action statement. Using "arquivo" is inconsistent with the user's mental model of "projeto" as established in earlier learnings. Finally, "gastar" implies waste, whereas "consumir" is a more professional and neutral term for credit usage.
+**Rule:** For confirmation dialogs:
+1. Avoid filler phrases like "Tem certeza que deseja" and state the action directly as a question (e.g., "Retranscrever projeto?").
+2. Use professional terms like "consumir" instead of "gastar" for system resources/credits.
+3. Consistently use "projeto" instead of "arquivo" or "task" when referring to the user's workspace.

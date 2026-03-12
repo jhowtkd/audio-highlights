@@ -79,7 +79,7 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
+        if (!confirm('Retranscrever projeto? Isso apagará os resultados atuais e consumirá créditos novamente.')) {
             return;
         }
 
@@ -196,7 +196,7 @@ export function TaskCard({ task }: TaskCardProps) {
                                 variant="ghost"
                                 onClick={handleRetranscribe}
                                 className="text-slate-500 hover:text-blue-600"
-                                title="Retranscrever arquivo"
+                                title="Retranscrever projeto"
                             >
                                 <RefreshCw className="h-4 w-4" />
                             </Button>
