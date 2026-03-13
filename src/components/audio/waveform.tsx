@@ -96,7 +96,10 @@ export function Waveform({
                 const channelData = audioBuffer.getChannelData(0);
                 const samples = 200; // Number of bars in the waveform
                 const blockSize = Math.floor(channelData.length / samples);
-                const filteredData: number[] = [];
+
+                // Performance: Preallocate arrays and find max inline to prevent array copies and spread operator limits
+                const filteredData = new Array(samples);
+                let multiplier = 0;
 
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
@@ -106,12 +109,17 @@ export function Waveform({
                         sum += Math.abs(channelData[blockStart + j]);
                     }
 
-                    filteredData.push(sum / blockSize);
+                    const avg = sum / blockSize;
+                    filteredData[i] = avg;
+                    if (avg > multiplier) multiplier = avg;
                 }
 
-                // Normalize the data
-                const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                // Normalize the data inline avoiding .map overhead
+                const normalizedData = new Array(samples);
+                const invMultiplier = multiplier > 0 ? 1 / multiplier : 1;
+                for (let i = 0; i < samples; i++) {
+                    normalizedData[i] = filteredData[i] * invMultiplier;
+                }
 
                 setWaveformData(normalizedData);
                 audioContext.close();
