@@ -102,3 +102,13 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - wavesurfer.js Evaluation
+
+**Research Topic:** wavesurfer.js Upgrade
+**Finding:** POC demonstrated better memory management and built-in zoom/regions support compared to custom canvas.
+**Decision:** Propose migrating Waveform.tsx to use wavesurfer.js.
+**Learning:** The Regions plugin handles highlight visualization significantly better than custom canvas drawing.
+**Resources:**
+- https://wavesurfer.xyz/
+- research/proposals/2026-03-01-wavesurfer-upgrade.md
