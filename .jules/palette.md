@@ -42,3 +42,10 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-03-05 - Dynamic Progress and Error Announcements
+
+**UX Problem:** Screen readers weren't announcing real-time progress updates or immediate task errors on the TaskCard component, leaving non-visual users unaware of critical state changes.
+**Learning:** React state changes don't automatically trigger screen reader announcements unless proper ARIA roles or live regions are specified, especially for components representing background tasks.
+**Solution:** Applied `aria-live="polite"` and `aria-atomic="true"` to the dynamic progress text container, and `role="alert"` to the error message display container in `TaskCard`.
+**Pattern:** For dynamic loading/processing states and async errors, always wrap the container with `aria-live` or `role="alert"` respectively. Ensure icon-only action buttons have an explicit `aria-label` and `aria-hidden="true"` on the underlying SVG to prevent redundant reading.

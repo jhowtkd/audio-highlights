@@ -13,6 +13,14 @@ You can learn more, including how to opt-out if you'd not like to participate in
 https://nextjs.org/telemetry
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1485ms
-○ Compiling /verify-config ...
- GET /verify-config 200 in 7.2s (compile: 6.3s, proxy.ts: 167ms, render: 655ms)
+✓ Ready in 2.3s
+○ Compiling /tasks ...
+ GET /tasks 200 in 6.9s (compile: 6.3s, proxy.ts: 125ms, render: 412ms)
+ GET /tasks 200 in 112ms (compile: 6ms, proxy.ts: 5ms, render: 101ms)
+ GET /tasks 200 in 92ms (compile: 5ms, proxy.ts: 4ms, render: 83ms)
+ GET /tasks 200 in 73ms (compile: 4ms, proxy.ts: 3ms, render: 66ms)
+ GET /tasks 200 in 148ms (compile: 7ms, proxy.ts: 5ms, render: 136ms)
+ GET /tasks 200 in 80ms (compile: 7ms, proxy.ts: 4ms, render: 69ms)
+ GET /tasks 200 in 129ms (compile: 4ms, proxy.ts: 4ms, render: 120ms)
+ GET /verify-task-card 404 in 830ms (compile: 671ms, proxy.ts: 3ms, render: 155ms)
+ GET /verify-task-card 200 in 995ms (compile: 677ms, proxy.ts: 55ms, render: 264ms)
