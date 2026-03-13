@@ -13,6 +13,9 @@ You can learn more, including how to opt-out if you'd not like to participate in
 https://nextjs.org/telemetry
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1485ms
-○ Compiling /verify-config ...
- GET /verify-config 200 in 7.2s (compile: 6.3s, proxy.ts: 167ms, render: 655ms)
+✓ Ready in 2.5s
+○ Compiling /verify-waveform ...
+ GET /verify-waveform 200 in 5.8s (compile: 5.3s, proxy.ts: 147ms, render: 304ms)
+ GET /fake-audio.mp3 404 in 933ms (compile: 785ms, proxy.ts: 9ms, render: 139ms)
+ GET /verify-waveform 200 in 277ms (compile: 110ms, proxy.ts: 19ms, render: 148ms)
+ GET /fake-audio.mp3 404 in 121ms (compile: 43ms, proxy.ts: 4ms, render: 74ms)

@@ -33,3 +33,27 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-03-13 - Optimizing Waveform Audio Decoding loops
+
+**Bottleneck:** Rendering the waveform iterates over the whole `AudioBuffer` block twice, calculates `Math.abs`, does array unrolling to find `Math.max` and uses `Array.map` to normalize the array.
+**Learning:** Found several performance opportunities in `src/components/audio/waveform.tsx`: Math.abs on typed arrays natively is surprisingly faster than inline ternary, however mapping inline and avoiding the unrolling of the `Math.max` inside `Math.max(...filteredData)` avoids maximum call stack size limits on large typed arrays and brings the execution time significantly down. Moreover, preallocating the array using `new Array(size)` saves allocations over time.
+**Action:** In loops over large float buffers/arrays, avoid spreading the array `...array` in functions like `Math.max()`. Also prefer preallocating arrays and setting indexes directly instead of pushing to an empty array.
+**Code:**
+```typescript
+const filteredData = new Array(samples);
+let multiplier = 0;
+
+for (let i = 0; i < samples; i++) {
+    // ... loop calculations ...
+    const avg = sum / blockSize;
+    filteredData[i] = avg;
+    if (avg > multiplier) multiplier = avg;
+}
+
+const normalizedData = new Array(samples);
+const invMultiplier = multiplier > 0 ? 1 / multiplier : 1;
+for (let i = 0; i < samples; i++) {
+    normalizedData[i] = filteredData[i] * invMultiplier;
+}
+```
