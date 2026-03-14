@@ -120,7 +120,7 @@ export function TaskCard({ task }: TaskCardProps) {
             <div className="flex items-start gap-4">
                 {/* Icon */}
                 <div className="p-3 bg-slate-100 dark:bg-slate-800 rounded-lg shrink-0">
-                    <FileAudio className="h-6 w-6 text-slate-500" />
+                    <FileAudio className="h-6 w-6 text-slate-500" aria-hidden="true" />
                 </div>
 
                 {/* Content */}
@@ -151,14 +151,14 @@ export function TaskCard({ task }: TaskCardProps) {
                             config.bg,
                             config.color
                         )}>
-                            <StatusIcon className={cn("h-4 w-4", isProcessing && "animate-spin")} />
+                            <StatusIcon className={cn("h-4 w-4", isProcessing && "animate-spin")} aria-hidden="true" />
                             <span>{config.label}</span>
                         </div>
                     </div>
 
                     {/* Progress Bar */}
                     {isProcessing && (
-                        <div className="mt-3">
+                        <div className="mt-3" aria-live="polite" aria-atomic="true">
                             <div className="flex items-center justify-between text-sm mb-1.5">
                                 <span className="text-slate-600 dark:text-slate-400">
                                     {task.progress.message}
@@ -173,7 +173,7 @@ export function TaskCard({ task }: TaskCardProps) {
 
                     {/* Error Message */}
                     {task.status === 'error' && task.error && (
-                        <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg" role="alert">
                             <p className="text-sm text-red-600 dark:text-red-400">
                                 {task.error}
                             </p>
@@ -184,9 +184,9 @@ export function TaskCard({ task }: TaskCardProps) {
                     <div className="flex items-center gap-2 mt-4">
                         {task.status === 'completed' && (
                             <Button size="sm" onClick={handleViewResult}>
-                                <Play className="h-4 w-4 mr-1.5" />
+                                <Play className="h-4 w-4 mr-1.5" aria-hidden="true" />
                                 Ver Resultado
-                                <ArrowRight className="h-4 w-4 ml-1.5" />
+                                <ArrowRight className="h-4 w-4 ml-1.5" aria-hidden="true" />
                             </Button>
                         )}
 
@@ -197,8 +197,9 @@ export function TaskCard({ task }: TaskCardProps) {
                                 onClick={handleRetranscribe}
                                 className="text-slate-500 hover:text-blue-600"
                                 title="Retranscrever arquivo"
+                                aria-label="Retranscrever arquivo"
                             >
-                                <RefreshCw className="h-4 w-4" />
+                                <RefreshCw className="h-4 w-4" aria-hidden="true" />
                             </Button>
                         )}
 
@@ -209,8 +210,9 @@ export function TaskCard({ task }: TaskCardProps) {
                                 onClick={() => removeTask(task.id)}
                                 className="text-slate-500 hover:text-red-600"
                                 title="Excluir projeto"
+                                aria-label="Excluir projeto"
                             >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" aria-hidden="true" />
                             </Button>
                         )}
 
