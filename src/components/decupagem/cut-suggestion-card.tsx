@@ -46,7 +46,7 @@ export function CutSuggestionCard({ segment, onAction }: CutSuggestionCardProps)
                     <div className="flex gap-2 items-center">
                         <Badge className={config.color}>{config.label}</Badge>
                         <div className="text-xs text-muted-foreground flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
+                            <Clock className="w-3 h-3" aria-hidden="true" />
                             {formatTime(segment.startTime)} - {formatTime(segment.endTime)} ({formatDuration(segment.startTime, segment.endTime)})
                         </div>
                     </div>
@@ -73,8 +73,9 @@ export function CutSuggestionCard({ segment, onAction }: CutSuggestionCardProps)
                     className="h-8 w-8 p-0 rounded-full"
                     onClick={() => onAction(segment.id, 'keep')}
                     title="Manter (Ignorar corte)"
+                    aria-label="Manter (Ignorar corte)"
                 >
-                    <Check className="w-4 h-4 text-green-600" />
+                    <Check className="w-4 h-4 text-green-600" aria-hidden="true" />
                 </Button>
                 <Button
                     size="sm"
@@ -82,8 +83,9 @@ export function CutSuggestionCard({ segment, onAction }: CutSuggestionCardProps)
                     className="h-8 w-8 p-0 rounded-full"
                     onClick={() => onAction(segment.id, 'cut')}
                     title="Confirmar Corte"
+                    aria-label="Confirmar Corte"
                 >
-                    <Scissors className="w-4 h-4 text-red-600" />
+                    <Scissors className="w-4 h-4 text-red-600" aria-hidden="true" />
                 </Button>
                 <Button
                     size="sm"
@@ -91,8 +93,9 @@ export function CutSuggestionCard({ segment, onAction }: CutSuggestionCardProps)
                     className="h-8 w-8 p-0 rounded-full"
                     onClick={() => onAction(segment.id, 'review')}
                     title="Marcar para Revisão"
+                    aria-label="Marcar para Revisão"
                 >
-                    <Search className="w-4 h-4 text-yellow-600" />
+                    <Search className="w-4 h-4 text-yellow-600" aria-hidden="true" />
                 </Button>
             </CardFooter>
         </Card>

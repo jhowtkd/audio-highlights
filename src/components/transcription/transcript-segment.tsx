@@ -19,6 +19,7 @@ export const TranscriptSegment = memo(forwardRef<HTMLButtonElement, TranscriptSe
         type="button"
         ref={ref}
         onClick={() => onSegmentClick(segment.start)}
+        aria-current={isActive ? 'true' : undefined}
         className={cn(
           'w-full text-left p-3 rounded-lg cursor-pointer transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none',
           isActive
