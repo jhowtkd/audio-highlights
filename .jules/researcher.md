@@ -102,3 +102,22 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Remotion Video Export Research
+
+**Research Topic:** Advanced Server-Side Video Rendering with Dynamic Captions
+
+**Finding:** Evaluated Remotion for generating social-media ready vertical videos with burned-in captions, replacing complex FFmpeg filters.
+- POC demonstrated that defining video templates in React (using `<AbsoluteFill>`, `<Sequence>`, etc.) is dramatically faster and easier to style than FFmpeg's `drawtext`.
+- Remotion allows for "CapCut-style" animations and precise subtitle synchronization using `useVideoConfig()`.
+
+**Decision:** Propose adopting Remotion for our final video exports.
+- The development velocity and visual quality gains justify the required infrastructure setup (e.g., AWS Lambda or a dedicated Node render worker).
+- It enables features (like custom backgrounds and word-level highlighting) that are table-stakes for modern AI clipping tools but near-impossible to maintain in raw FFmpeg.
+
+**Learning:** When evaluating programmatic video generation, prioritizing the developer experience (React/CSS) over raw processing speed (FFmpeg stream copying) is often necessary to achieve the high visual quality expected by modern social media users.
+
+**Resources:**
+- https://www.remotion.dev/
+- research/proposals/2026-03-01-remotion-video-export.md
+- research/pocs/remotion-export/VideoExport.tsx
