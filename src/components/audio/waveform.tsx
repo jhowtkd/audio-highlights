@@ -56,13 +56,14 @@ export function Waveform({
                     console.log('Using optimized waveform generation from segments...');
                     const samples = 200;
                     const data = new Array(samples).fill(0);
-                    const bucketSize = duration / samples;
+                    // Performance: Using multiplication (samples / duration) is faster than division inside loops
+                    const bucketMultiplier = samples / duration;
 
                     // Calculate speech activity per bucket
                     const maxSamplesIndex = samples - 1;
                     segments.forEach(segment => {
-                        const startBucket = Math.floor(segment.start / bucketSize);
-                        const endBucket = Math.floor(segment.end / bucketSize);
+                        const startBucket = Math.floor(segment.start * bucketMultiplier);
+                        const endBucket = Math.floor(segment.end * bucketMultiplier);
 
                         const startIdx = Math.max(0, startBucket);
                         const endIdx = Math.min(maxSamplesIndex, endBucket);
@@ -74,8 +75,14 @@ export function Waveform({
                     });
 
                     // Normalize
-                    const max = Math.max(...data, 1);
-                    const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
+                    // Performance: Explicit reduce replaces Math.max(...data) to avoid call stack limits on large arrays
+                    const max = data.reduce((acc, val) => (val > acc ? val : acc), 1);
+                    // Performance: Inline ternary replaces Math.min for faster execution in loops, along with multiplying inverse max instead of division
+                    const inverseMax = 1.5 / max; // 1.5x gain for visibility
+                    const normalizedData = data.map(v => {
+                        const scaled = v * inverseMax;
+                        return scaled > 1 ? 1 : scaled;
+                    });
 
                     setWaveformData(normalizedData);
                     setIsLoading(false);
@@ -97,21 +104,28 @@ export function Waveform({
                 const samples = 200; // Number of bars in the waveform
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
+                // Performance: Using multiplication instead of division is faster inside loops
+                const inverseBlockSize = 1 / blockSize;
 
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
 
                     for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                        // Performance: Inline ternary replaces Math.abs for faster execution in hot loops
+                        const val = channelData[blockStart + j];
+                        sum += val < 0 ? -val : val;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum * inverseBlockSize);
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                // Performance: Explicit reduce replaces Math.max(...filteredData) to avoid call stack limits
+                const multiplier = filteredData.reduce((acc, val) => (val > acc ? val : acc), 0);
+                // Performance: Multiplication instead of division
+                const inverseMultiplier = 1 / multiplier;
+                const normalizedData = filteredData.map(n => n * inverseMultiplier);
 
                 setWaveformData(normalizedData);
                 audioContext.close();
