@@ -31,3 +31,25 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-03-15 - Unauthenticated API Triggering External Costs
+
+**Vulnerability:** A public, unauthenticated endpoint (`/api/test-transcribe`) made direct requests to the paid Groq API.
+**Root Cause:** A test endpoint used during development was left in the codebase, accessible to anyone.
+**Learning:** Test routes that trigger external APIs or heavy computations must never be pushed to production without authentication, as they expose the application to financial DoS and resource exhaustion.
+**Prevention:** Remove debug/test endpoints before committing, or secure them behind strict authentication checks and rate limiting.
+
+## 2026-03-15 - Information Disclosure in Health Check
+
+**Vulnerability:** The public `/api/health` endpoint exposed environment details, specifically `NODE_ENV` and the presence of `GROQ_API_KEY`.
+**Root Cause:** The health check returned verbose debug data intended for developers, exposing internal configuration to external users.
+**Learning:** Public health endpoints should only return generic status information (e.g., `status: 'ok'`). Verbose environment data can aid attackers in footprinting the application.
+**Prevention:** Never include `process.env` or related status flags in public API responses.
+**Code:**
+```typescript
+// Vulnerable:
+return NextResponse.json({ status: 'ok', env: { node_env: process.env.NODE_ENV } });
+
+// Secure:
+return NextResponse.json({ status: 'ok' });
+```
