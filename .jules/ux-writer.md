@@ -32,3 +32,15 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Positive Empty State Decision
+
+**Copy Type:** Empty states for main feature area
+
+**Original:** "Nenhum highlight gerado ainda" / "Configure os parâmetros e clique em 'Gerar Highlights'"
+
+**Changed To:** "Pronto para encontrar os melhores momentos" / "Configure as opções e clique em 'Gerar Highlights' para começar"
+
+**Learning:** This app focuses on helping users discover the best moments in their audio/video. Negative empty states ("Nenhum", "No items") focus on what's missing and feel like a dead end. Positive states focus on what the user will achieve and feel encouraging.
+
+**Rule:** For this app, ALWAYS use positive, action-oriented copy for empty states rather than negative statements. Avoid "Nenhum" or "Empty" when possible.
