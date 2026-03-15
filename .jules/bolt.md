@@ -33,3 +33,22 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-03-05 - Avoid flatMap for Large Arrays in Silence Detection
+
+**Bottleneck:** High memory allocation and computation time when flattening nested transcription segments into a single words array (`flatMap`) for silence detection across thousands of segments.
+**Learning:** `flatMap` allocates a large intermediate array. Generating arrays inside tight or high-frequency loops is expensive in Javascript. Using a generator `function*` to yield values iteratively avoids creating this intermediate array, drastically reducing memory footprint and offering a performance boost. Although a single-pass loop is technically fastest, using an `Iterable` offers a good compromise by keeping utility functions generic while improving performance and memory efficiency over `flatMap`.
+**Action:** Replace `flatMap` with a generator `function*` when aggregating large datasets (like words from transcription segments) and update utility functions to accept `Iterable` interfaces.
+**Code:**
+```typescript
+function* iterateWords(segs: TranscriptionSegment[]) {
+    for (const segment of segs) {
+        if (segment.words) {
+            for (const word of segment.words) {
+                yield word;
+            }
+        }
+    }
+}
+detectSilences(iterateWords(segments));
+```
