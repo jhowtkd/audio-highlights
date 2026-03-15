@@ -102,3 +102,24 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Wavesurfer.js Audio Visualization Research
+
+**Research Topic:** Migrating custom audio canvas to wavesurfer.js for zooming and region support.
+
+**Finding:**
+Current `src/components/audio/waveform.tsx` implementation decodes the full file in memory, has fixed 200 samples, and lacks zoom. Evaluated `wavesurfer.js` v7 with `RegionsPlugin` in a local POC.
+- **Memory/Performance:** Better handling of decoding and streaming.
+- **UX:** Built-in `minPxPerSec` enables instant timeline zooming.
+- **Regions:** `RegionsPlugin` supports precise overlay and interaction for highlights.
+
+**Decision:**
+Propose replacing custom canvas implementation with `wavesurfer.js`.
+Benefits: Huge UX improvement for editing long files (zooming), less custom math/canvas code to maintain, and future-proofs the app for manual highlight editing.
+
+**Learning:**
+Maintaining custom, static canvas implementations for audio waveforms quickly hits a ceiling when advanced features like zooming or virtualized rendering are required. Relying on an established, battle-tested library like `wavesurfer.js` prevents reinventing a highly complex wheel.
+
+**Resources:**
+- https://wavesurfer.xyz/
+- research/proposals/2026-03-01-wavesurfer-upgrade.md
