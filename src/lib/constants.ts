@@ -27,9 +27,7 @@ export const ACCEPTED_AUDIO_TYPES = {
 
 // API configuration
 export const GPT_MAX_TOKENS = 16000;
-export const GPT_TEMPERATURE = 0.7;
 export const GPT_MODEL = 'gpt-4o';
-export const WHISPER_MODEL = 'whisper-1';
 
 // Parallel transcription settings
 // IMPORTANT: Vercel Hobby plan has 10s timeout per function call
@@ -96,10 +94,6 @@ export const PLATFORM_TEMPLATES = {
     description: 'Configure manualmente'
   }
 } as const;
-
-// Audio player
-export const SKIP_INTERVAL = 10; // seconds
-export const DEFAULT_VOLUME = 1;
 
 // Error messages
 export const ERROR_MESSAGES = {
