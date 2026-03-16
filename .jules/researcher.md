@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Waveform Memory Optimization and Zooming
+
+**Research Topic:** Addressing memory exhaustion and lack of zooming in the custom canvas waveform for long audio files.
+**Finding:** Evaluated upgrading from custom canvas to `wavesurfer.js` vs `peaks.js`. `wavesurfer.js` v7 handles chunked rendering efficiently, solving memory issues while providing built-in zooming and a `RegionsPlugin` perfectly suited for our generated highlights.
+**Decision:** Chose `wavesurfer.js` (with `RegionsPlugin`).
+- Drastically reduces peak memory usage (e.g., ~1.2GB to ~150MB for a 60min file).
+- Provides semantic, out-of-the-box zooming capabilities (`minPxPerSec`).
+- Battle-tested, stable API with a small bundle size (~35kb).
+**Learning:** Manually decoding and holding full PCM data in memory for canvas rendering is an anti-pattern for large files. Relying on established Web Audio abstractions like `wavesurfer.js` prevents reinventing the wheel and solves critical browser performance bottlenecks simultaneously.
+**Resources:**
+- https://wavesurfer-js.org/docs/
+- https://github.com/katspaugh/wavesurfer.js
