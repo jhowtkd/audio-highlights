@@ -42,3 +42,16 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-03-16 - Accessible Error and Progress States in Task Cards
+
+**UX Problem:** Screen readers were not reliably announcing dynamic error messages or progress updates when tasks failed or were processing, forcing users to discover these changes manually.
+
+**Learning:** When dynamic content (like loading states or error messages) is injected into the DOM after the initial page load, it must use ARIA live regions so assistive technologies know to announce it immediately.
+
+**Solution:** Added `role="alert"` to the dynamic error message container. Added `aria-live="polite"` and `aria-atomic="true"` to the progress update container. Additionally, added `aria-hidden="true"` to decorative icons to reduce screen reader noise, and `aria-label` to icon-only action buttons.
+
+**Pattern:** For this design system, ANY dynamic feedback or progress indication must:
+1. Use `role="alert"` for critical errors that require immediate attention.
+2. Use `aria-live="polite"` for non-disruptive progress updates.
+3. Hide decorative icons with `aria-hidden="true"` and label icon-only buttons with `aria-label`.
