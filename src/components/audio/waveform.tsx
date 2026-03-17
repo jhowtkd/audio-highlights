@@ -96,22 +96,41 @@ export function Waveform({
                 const channelData = audioBuffer.getChannelData(0);
                 const samples = 200; // Number of bars in the waveform
                 const blockSize = Math.floor(channelData.length / samples);
-                const filteredData: number[] = [];
+                const filteredData = new Array(samples);
+                let multiplier = 0;
+
+                // Performance: Step through channel data instead of reading every sample
+                // to speed up waveform generation on large audio files
+                const step = Math.ceil(blockSize / 100);
 
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                    for (let j = 0; j < blockSize; j += step) {
+                        const val = channelData[blockStart + j];
+                        // Performance: Inline ternary replaces Math.abs for faster execution
+                        sum += val < 0 ? -val : val;
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    const avg = sum / count;
+                    filteredData[i] = avg;
+
+                    // Performance: Compute max in the same loop to avoid spread operator (...)
+                    // on array which can trigger "Maximum call stack size exceeded"
+                    if (avg > multiplier) {
+                        multiplier = avg;
+                    }
                 }
 
-                // Normalize the data
-                const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                // Performance: Replace division in map with inverse multiplication for faster execution
+                const inverseMultiplier = multiplier > 0 ? 1 / multiplier : 0;
+                const normalizedData = new Array(samples);
+                for (let i = 0; i < samples; i++) {
+                    normalizedData[i] = filteredData[i] * inverseMultiplier;
+                }
 
                 setWaveformData(normalizedData);
                 audioContext.close();
