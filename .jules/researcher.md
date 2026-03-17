@@ -102,3 +102,23 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+
+## 2026-03-01 - WaveSurfer Upgrade Research
+
+**Research Topic:** Migrating custom audio visualization to wavesurfer.js
+
+**Finding:** Evaluated `wavesurfer.js` to replace the custom canvas waveform implementation.
+- Current canvas approach decodes entire audio arrays and frequently crashes the browser with `Maximum call stack size exceeded` errors on long files due to naive spread operations.
+- `wavesurfer.js` provides built-in chunking, streaming, zooming, and robust region selection out-of-the-box.
+- Adding ~35kB to the bundle is an acceptable trade-off for the massive stability and UX improvements.
+
+**Decision:** Propose upgrading the waveform component to use `wavesurfer.js`.
+- It directly resolves a critical bug (crashes on long files) and adds a heavily requested feature (zooming for precise editing).
+- The effort required to optimize the custom canvas code is not justified compared to integrating a battle-tested library.
+
+**Learning:** When dealing with large datasets (like millions of audio samples), custom canvas implementations are prone to memory leaks and performance bottlenecks unless specifically optimized for chunking and streaming. Relying on specialized, mature libraries like `wavesurfer.js` is essential for web audio visualization at scale.
+
+**Resources:**
+- https://wavesurfer.xyz/
+- research/proposals/2026-03-01-wavesurfer-upgrade.md
