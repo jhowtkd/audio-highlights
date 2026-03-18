@@ -33,3 +33,31 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-03-01 - Avoid Math functions and division in tight loops
+
+**Bottleneck:** High CPU utilization when iteratively generating waveform arrays over 10,000+ transcript segments for long audio files.
+**Learning:** `Math.floor`, `Math.min`, `Math.max` function calls and floating-point divisions inside tight loops add significant overhead.
+**Action:** Replace floating point division with inverted multiplication (`* (1/value)`). Replace `Math.floor` with fast bitwise floor `~~` (when numbers are always positive). Replace `Math.min`/`Math.max` with inline ternary conditionals `a < b ? a : b`.
+**Code:**
+```typescript
+// BEFORE:
+segments.forEach(segment => {
+    const startBucket = Math.floor(segment.start / bucketSize);
+    const endBucket = Math.floor(segment.end / bucketSize);
+    const startIdx = Math.max(0, startBucket);
+    const endIdx = Math.min(maxSamplesIndex, endBucket);
+    // ... loop
+});
+
+// AFTER:
+const invBucketSize = 1 / bucketSize;
+for (let i = 0; i < segments.length; i++) {
+    const segment = segments[i];
+    const startBucket = ~~(segment.start * invBucketSize);
+    const endBucket = ~~(segment.end * invBucketSize);
+    const startIdx = startBucket < 0 ? 0 : startBucket;
+    const endIdx = endBucket > maxSamplesIndex ? maxSamplesIndex : endBucket;
+    // ... loop
+}
+```
