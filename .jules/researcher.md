@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - WaveSurfer Upgrade Research
+
+**Research Topic:** Migrating custom waveform to wavesurfer.js
+
+**Finding:** Evaluated `wavesurfer.js` as a replacement for our custom canvas waveform implementation to fix memory crashes on large files and add zooming capabilities.
+
+**Decision:** Proposed `wavesurfer.js` and `RegionsPlugin` (from `wavesurfer.js/dist/plugins/regions.esm.js`). POC created at `research/pocs/wavesurfer/Waveform.tsx` and proposal at `research/proposals/2026-03-01-wavesurfer-upgrade.md`.
+
+**Learning:** Replacing custom drawing logic with an industry standard visualization library resolves long-standing feature requests (like zooming) and handles performance edge cases automatically.
+
+**Resources:**
+- https://wavesurfer.xyz/
