@@ -102,3 +102,25 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Advanced Waveform Visualization and Zooming
+
+**Research Topic:** Implementing zooming capabilities and preventing memory crashes on large audio waveforms.
+
+**Finding:** Evaluated `wavesurfer.js` v7 with `RegionsPlugin` to replace our custom canvas implementation.
+- POC confirmed that using the `MediaElement` backend prevents `AudioContext.decodeAudioData` from crashing the browser on long audio files.
+- `wavesurfer.js` natively supports zooming via API.
+- `RegionsPlugin` easily maps to our `GeneratedHighlight` objects.
+
+**Decision:** Proposed migrating `src/components/audio/waveform.tsx` to use `wavesurfer.js`.
+- Solves critical Out of Memory (OOM) errors for podcast-length audio.
+- Adds highly requested "Zoom" functionality without maintaining complex chunking logic.
+- Adds a small ~30KB dependency footprint.
+
+**Learning:** Building custom canvas implementations for audio visualization is prone to performance and memory scaling issues. Relying on specialized, actively maintained libraries (`wavesurfer.js`) for complex web audio tasks is significantly safer and more feature-complete, especially when dealing with long-form media.
+
+**Resources:**
+- https://wavesurfer.xyz/docs/
+- https://wavesurfer.xyz/docs/classes/plugins_regions.default
+- research/proposals/2026-03-01-wavesurfer-upgrade.md
+- research/pocs/wavesurfer/Waveform.tsx
