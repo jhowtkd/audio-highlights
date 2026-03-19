@@ -61,9 +61,18 @@ export async function POST(request: NextRequest) {
         const { segments, config } = validatedData;
 
         // 1. Detect Silences (Algorithmically)
-        // We need to flatten all words from all segments to run silence detection globally
-        const allWords = segments.flatMap(s => s.words || []);
-        const silenceSegments = detectSilences(allWords, config.silenceThreshold);
+        // We need to pass all words to run silence detection globally
+        // Performance: Use a generator to avoid flatMap and large intermediate array allocation
+        function* iterateWords(segs: TranscriptionSegment[]) {
+            for (const s of segs) {
+                if (s.words) {
+                    for (const w of s.words) {
+                        yield w;
+                    }
+                }
+            }
+        }
+        const silenceSegments = detectSilences(iterateWords(segments), config.silenceThreshold);
 
         console.log(`[Decupagem API] Detected ${silenceSegments.length} silences`);
 

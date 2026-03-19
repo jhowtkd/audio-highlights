@@ -5,41 +5,44 @@ import type { DecupageSegment } from '@/types/decupagem';
 /**
  * Detects silences in a transcript by analyzing gaps between word timestamps.
  * 
- * @param words List of word timestamps from the transcription
+ * @param words Iterable of word timestamps from the transcription
  * @param thresholdMs Minimum duration in milliseconds to consider a gap as silence (default: 2000ms)
  * @returns List of DecupageSegments representing detected silences
  */
 export function detectSilences(
-    words: WordTimestamp[],
+    words: Iterable<WordTimestamp>,
     thresholdMs: number = 2000
 ): DecupageSegment[] {
-    if (!words || words.length < 2) {
+    if (!words) {
         return [];
     }
 
     const silences: DecupageSegment[] = [];
     const thresholdSec = thresholdMs / 1000;
 
-    for (let i = 0; i < words.length - 1; i++) {
-        const currentWord = words[i];
-        const nextWord = words[i + 1];
+    let previousWord: WordTimestamp | null = null;
 
-        // Check gap between end of current word and start of next word
-        const gapDuration = nextWord.start - currentWord.end;
+    // Performance: Using Iterable avoids memory allocation for large arrays (e.g. flatMap)
+    for (const currentWord of words) {
+        if (previousWord) {
+            // Check gap between end of previous word and start of current word
+            const gapDuration = currentWord.start - previousWord.end;
 
-        if (gapDuration >= thresholdSec) {
-            silences.push({
-                id: uuidv4(),
-                startTime: currentWord.end,
-                endTime: nextWord.start,
-                text: '[SILÊNCIO]',
-                problemType: 'silence',
-                severity: 'high',
-                suggestion: 'cut',
-                reason: `Silêncio detectado de ${gapDuration.toFixed(1)}s`,
-                status: 'pending' // Default to pending so user can review, or we could default to 'cut'
-            });
+            if (gapDuration >= thresholdSec) {
+                silences.push({
+                    id: uuidv4(),
+                    startTime: previousWord.end,
+                    endTime: currentWord.start,
+                    text: '[SILÊNCIO]',
+                    problemType: 'silence',
+                    severity: 'high',
+                    suggestion: 'cut',
+                    reason: `Silêncio detectado de ${gapDuration.toFixed(1)}s`,
+                    status: 'pending' // Default to pending so user can review, or we could default to 'cut'
+                });
+            }
         }
+        previousWord = currentWord;
     }
 
     return silences;
