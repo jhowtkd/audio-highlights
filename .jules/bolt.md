@@ -33,3 +33,26 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-03-19 - Removed `flatMap` Overhead in Silence Detection
+
+**Bottleneck:** The `detectSilences` logic in `src/app/api/decupagem/route.ts` flattened nested `TranscriptionSegment` structures using `segments.flatMap(s => s.words || [])` to pass the `WordTimestamp`s into the detector. This created a large temporary array allocation, causing potential memory overhead on long transcriptions.
+**Learning:** For deep array structures that just need sequential iteration (like checking sequential words for silences), mapping to a massive single array uses excess memory. Generator functions and `Iterable` inputs are an elegant, zero-allocation alternative.
+**Action:** Changed the signature of `detectSilences` from `WordTimestamp[]` to `Iterable<WordTimestamp>`, and replaced `flatMap` with a generator `function* iterateWords(segs)` in the parent.
+**Code:**
+```typescript
+// Replaced flatMap:
+// const allWords = segments.flatMap(s => s.words || []);
+
+// With Generator:
+function* iterateWords(segs: TranscriptionSegment[]) {
+    for (const s of segs) {
+        if (s.words) {
+            for (const w of s.words) {
+                yield w;
+            }
+        }
+    }
+}
+const silenceSegments = detectSilences(iterateWords(segments), config.silenceThreshold);
+```
