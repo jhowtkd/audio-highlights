@@ -31,3 +31,26 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-03-01 - Unauthenticated External API Endpoint & Info Disclosure
+
+**Vulnerability:** An unauthenticated `/api/test-transcribe` endpoint was left in the codebase which triggered a real, paid external API (Groq Whisper) using a generated "silence" audio file. Additionally, the `/api/health` endpoint exposed environment variables (`NODE_ENV` and presence of `GROQ_API_KEY`).
+**Root Cause:** Developer convenience during initial integration. A test endpoint was built to verify Groq API connectivity but was left exposed. The health check was also overly verbose for debugging.
+**Learning:** Never leave unauthenticated or "test" endpoints that trigger costly third-party APIs in production builds. They can be exploited for resource exhaustion / Denial of Wallet (DoS). Similarly, health endpoints should be strictly "status ok", never exposing system configuration.
+**Prevention:**
+- Remove all `/test-*` or debugging API endpoints before committing, or secure them behind strict authentication checks.
+- Keep `/api/health` endpoints minimalist. No environment, config, or internal states.
+**Code:**
+```typescript
+// ❌ VULNERABLE - Information Disclosure in Health Check
+return NextResponse.json({
+    status: 'ok',
+    env: { groq_configured: !!process.env.GROQ_API_KEY } // Exposes config state
+});
+
+// ✅ SECURE
+return NextResponse.json({
+    status: 'ok',
+    timestamp: new Date().toISOString()
+});
+```

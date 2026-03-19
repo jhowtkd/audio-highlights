@@ -5,9 +5,6 @@
     },
     "src/app/api/highlights/route.ts": {
       "maxDuration": 30
-    },
-    "src/app/api/test-transcribe/route.ts": {
-      "maxDuration": 30
     }
   }
 }
