@@ -32,3 +32,21 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-05-24 - Tone and Terminology Decisions for Confirmation Dialogs
+
+**Copy Type:** Confirmation Dialog
+
+**Original:** "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+
+**Changed To:** "Retranscrever arquivo? Isso irá apagar o projeto atual e consumir créditos novamente."
+
+**Learning:**
+In Portuguese UI copy and confirmation dialogs, wordy, robotic filler phrases like 'Tem certeza que deseja' or 'Deseja realmente' are unnecessary and slow down the user.
+Additionally, we established the system terminology "projeto" to refer to the workspace of an uploaded audio/video instead of generic terms like "resultado", maintaining a consistent user mental model.
+Using professional yet simple terms like "consumir" over "gastar" for credits/resources creates a better tone.
+
+**Rule:** For confirmation dialogs and system terminology, ALWAYS:
+1. Avoid wordy filler phrases like "Tem certeza que deseja". Use direct, specific, and action-oriented questions (e.g., 'Retranscrever arquivo?').
+2. Use the term 'projeto' (project) in user-facing copy to refer to the workspace of an uploaded audio/video instead of generic or internal terms like 'resultado' or 'task'.
+3. Use professional yet simple terms like 'consumir' over 'gastar' for credits/resources.
