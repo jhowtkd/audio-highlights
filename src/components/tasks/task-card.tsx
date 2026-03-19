@@ -159,7 +159,11 @@ export function TaskCard({ task }: TaskCardProps) {
                     {/* Progress Bar */}
                     {isProcessing && (
                         <div className="mt-3">
-                            <div className="flex items-center justify-between text-sm mb-1.5">
+                            <div
+                                className="flex items-center justify-between text-sm mb-1.5"
+                                aria-live="polite"
+                                aria-atomic="true"
+                            >
                                 <span className="text-slate-600 dark:text-slate-400">
                                     {task.progress.message}
                                 </span>
@@ -173,7 +177,10 @@ export function TaskCard({ task }: TaskCardProps) {
 
                     {/* Error Message */}
                     {task.status === 'error' && task.error && (
-                        <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg">
+                        <div
+                            role="alert"
+                            className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 rounded-lg"
+                        >
                             <p className="text-sm text-red-600 dark:text-red-400">
                                 {task.error}
                             </p>
