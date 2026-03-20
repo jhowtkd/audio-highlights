@@ -32,3 +32,22 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-05-20 - Empty State Positive Framing
+
+**Copy Type:** Empty state
+
+**Original:** "Nenhum highlight gerado ainda"
+
+**Changed To:** "Pronto para encontrar os melhores momentos"
+
+**Learning:** Empty states represent the beginning of a user's journey with a feature, not a failure or lack of data. Using negative words like "Nenhum" (None) and "ainda" (yet) sets a discouraging tone. Shifting to positive, action-oriented framing ("Pronto para", "Ready to") encourages the user to engage with the tool and aligns with a friendly, helpful brand voice.
+
+**Rule:** For empty states, ALWAYS:
+1. Use positive, action-oriented copy.
+2. Avoid negative words like "Nenhum" (None) or "Vazio" (Empty) when possible.
+3. Frame the empty state as an opportunity to start a task, rather than a lack of results.
+
+**Pattern to follow:**
+- ❌ "Nenhum [item] gerado/encontrado"
+- ✅ "Pronto para [ação]" ou "Comece a [ação]"
