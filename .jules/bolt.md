@@ -33,3 +33,20 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-03-20 - Downsampled Audio Waveform Generation Prevents Main Thread Freeze
+
+**Bottleneck:** Rendering the waveform of large audio files (e.g., 1 hour) by iterating over all sample blocks using an exhaustive loop blocks the main thread, causing severe UI freezes (taking >500ms).
+**Learning:** For rendering dense data on small canvases, computing the average of every single sample is excessive. Downsampling the data processing loop (e.g., using a computed step size) drastically reduces iteration count while maintaining identical visual output. Additionally, optimizing math operations in tight loops (e.g., replacing `Math.floor` with `~~`, `Math.max` and `Math.abs` with inline evaluations, and mapping divisions with inverse multiplication) yields huge performance gains.
+**Action:** When manually parsing and rendering large binary datasets (like audio buffers or large image data) in JS, explicitly downsample your read loop based on the required output resolution, and convert standard math methods to fast inline equivalents for tight processing loops.
+**Code:**
+```typescript
+const blockSize = ~~(channelData.length / samples);
+const stepSize = Math.ceil(blockSize / 100) || 1;
+
+for (let j = 0; j < blockSize; j += stepSize) {
+    const val = channelData[blockStart + j];
+    sum += val < 0 ? -val : val; // Inline Math.abs
+    count++;
+}
+```

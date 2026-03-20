@@ -95,23 +95,36 @@ export function Waveform({
                 // Get samples from the audio buffer
                 const channelData = audioBuffer.getChannelData(0);
                 const samples = 200; // Number of bars in the waveform
-                const blockSize = Math.floor(channelData.length / samples);
+                // Performance: Replace Math.floor with ~~ for faster integer conversion
+                const blockSize = ~~(channelData.length / samples);
                 const filteredData: number[] = [];
+
+                // Performance: Downsample the inner loop to prevent freezing on large files
+                const stepSize = Math.ceil(blockSize / 100) || 1;
+                let multiplier = 0;
 
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                    // Performance: Use stepSize to limit iterations
+                    for (let j = 0; j < blockSize; j += stepSize) {
+                        // Performance: Inline Math.abs replacing function call
+                        const val = channelData[blockStart + j];
+                        sum += val < 0 ? -val : val;
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    const avg = sum / count;
+                    filteredData.push(avg);
+                    // Performance: Calculate max inline instead of Math.max(...array)
+                    if (avg > multiplier) multiplier = avg;
                 }
 
-                // Normalize the data
-                const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                // Performance: Replace division with inverse multiplication
+                const inverseMultiplier = multiplier > 0 ? 1 / multiplier : 1;
+                const normalizedData = filteredData.map(n => n * inverseMultiplier);
 
                 setWaveformData(normalizedData);
                 audioContext.close();
