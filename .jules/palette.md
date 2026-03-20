@@ -42,3 +42,10 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-03-20 - Transcript Segment Screen Reader Announcement
+
+**UX Problem:** Active/playing transcript segments were visually highlighted but not semantically marked for screen readers, making it difficult for visually impaired users to know which segment is currently playing.
+**Learning:** For list items or segments that denote a currently active or playing state, visual cues (like background colors or borders) are insufficient for accessibility.
+**Solution:** Added `aria-current={isActive ? 'true' : undefined}` to the `TranscriptSegment` button element.
+**Pattern:** For interactive list items or segments that denote a currently active or playing state, always apply the `aria-current` attribute to ensure screen readers correctly announce the active element.
