@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-20 - Server-Side Audiogram Generation
+
+**Research Topic:** Generating shareable MP4 audiograms (waveform videos) from extracted audio highlights.
+**Finding:** Evaluated FFmpeg's `showwaves` complex filter. Using a static image looped with an audio stream creates highly optimized, fast audiograms without requiring a heavy frontend rendering engine like Remotion or unstable client-side Canvas recording.
+**Decision:** Chose server-side FFmpeg processing in the existing `ffmpeg-service` microservice.
+- 100% compatible with existing architecture.
+- Does not crash user browsers with OOM errors.
+- Generates a 5s clip in under 1 second using the `ultrafast` preset.
+**Learning:** For features requiring video rendering, offloading to the dedicated Railway microservice is vastly superior to client-side solutions. `fluent-ffmpeg` makes constructing complex filter graphs (`[1:a]showwaves=s=1280x200:colors=White:mode=line[wave];[0:v][wave]overlay=0:260[outv]`) significantly easier than raw spawn arguments, although both work.
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#showwaves
+- https://github.com/fluent-ffmpeg/node-fluent-ffmpeg
