@@ -31,3 +31,15 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-03-01 - Denial of Wallet via Unauthenticated Test Endpoint
+
+**Vulnerability:** An unauthenticated test endpoint (`/api/test-transcribe`) triggered external paid APIs (Groq Whisper) directly. A malicious actor could hit this endpoint repeatedly to exhaust API limits or cause significant unexpected costs (Denial of Wallet).
+
+**Root Cause:** A test route used for debugging API integration during development was left in the production codebase without proper authentication or environment checks.
+
+**Learning:** Any endpoint that triggers a paid, external API must never be left unauthenticated or unprotected in a production-facing application, even if it is meant for 'testing'.
+
+**Prevention:**
+- Delete test/debug endpoints before shipping to production.
+- If a test endpoint is absolutely necessary, secure it behind strict authentication (e.g., admin-only access) and ensure it enforces severe rate limiting.
