@@ -97,21 +97,36 @@ export function Waveform({
                 const samples = 200; // Number of bars in the waveform
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
+                // Downsample inner loop to prevent main thread freezing
+                const step = Math.ceil(blockSize / 100);
+
+                let multiplier = -Infinity;
 
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                    for (let j = 0; j < blockSize; j += step) {
+                        const val = channelData[blockStart + j];
+                        // Performance: Inline ternary replaces Math.abs for faster execution in hot loops
+                        sum += val < 0 ? -val : val;
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    const average = sum / count;
+                    filteredData.push(average);
+
+                    // Performance: Inline max tracking avoids Math.max(...array) which can throw Maximum call stack size exceeded
+                    if (average > multiplier) {
+                        multiplier = average;
+                    }
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                // Performance: Extract division out of loop into inverse multiplication
+                const inverseMultiplier = multiplier > 0 ? 1 / multiplier : 1;
+                const normalizedData = filteredData.map(n => n * inverseMultiplier);
 
                 setWaveformData(normalizedData);
                 audioContext.close();

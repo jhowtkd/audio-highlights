@@ -33,3 +33,9 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-03-22 - AudioBuffer Waveform Processing Freezing Main Thread
+
+**Bottleneck:** Rendering waveforms for large (1 hour+) AudioBuffers using manual O(n) loop calculating `Math.abs()` on every frame.
+**Learning:** Iterating through 150 million+ data points using Math.abs inside a tight loop takes around ~500ms and freezes the browser's main thread. Furthermore, spreading arrays `Math.max(...filteredData)` throws "Maximum call stack size exceeded" on large datasets.
+**Action:** Downsample the inner loop to bound executions to a constant iteration maximum per visual block `step = Math.ceil(blockSize / 100)`. Replace `Math.abs` inside the hot loop with an inline ternary operator (`val < 0 ? -val : val`) avoiding function call overhead. Replace `Math.max` array spreading with an explicit checking loop tracking the highest value.
