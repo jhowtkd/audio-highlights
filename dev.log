@@ -13,6 +13,10 @@ You can learn more, including how to opt-out if you'd not like to participate in
 https://nextjs.org/telemetry
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1485ms
-○ Compiling /verify-config ...
- GET /verify-config 200 in 7.2s (compile: 6.3s, proxy.ts: 167ms, render: 655ms)
+✓ Ready in 1539ms
+○ Compiling /_not-found/page ...
+ GET /transcription/poc 404 in 1408ms (compile: 669ms, proxy.ts: 29ms, render: 710ms)
+ GET /research/transcription-poc 404 in 98ms (compile: 12ms, proxy.ts: 5ms, render: 81ms)
+ GET /research-poc/karaoke 200 in 1520ms (compile: 1153ms, proxy.ts: 5ms, render: 362ms)
+ GET /research-poc/karaoke 200 in 203ms (compile: 9ms, proxy.ts: 10ms, render: 184ms)
+ GET /research-poc 200 in 1161ms (compile: 660ms, proxy.ts: 5ms, render: 495ms)
