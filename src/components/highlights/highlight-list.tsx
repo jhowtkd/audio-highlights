@@ -1,7 +1,7 @@
 'use client';
 
 import { memo } from 'react';
-import { Download, Clock, Percent, Check } from 'lucide-react';
+import { Download, Clock, Percent, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { HighlightCard } from './highlight-card';
@@ -63,8 +63,11 @@ export const HighlightList = memo(function HighlightList({ highlights, segments,
   if (highlights.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-        <p>Nenhum highlight gerado ainda</p>
-        <p className="text-sm mt-1">Configure os parâmetros e clique em &quot;Gerar Highlights&quot;</p>
+        <Sparkles className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-4" />
+        <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100">Pronto para encontrar os melhores momentos</h3>
+        <p className="text-sm mt-2 text-center max-w-sm">
+          Configure os parâmetros e clique em &quot;Gerar Highlights&quot; para começar
+        </p>
       </div>
     );
   }
