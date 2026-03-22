@@ -33,3 +33,21 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-03-22 - Optimized Waveform Rendering Loop
+
+**Bottleneck:** High CPU usage and main thread blocking during audio waveform rendering in `src/components/audio/waveform.tsx` for large files due to inefficient loops and heavy function calls.
+**Learning:** In hot loops processing large arrays (like audio channels or transcription segments), `Math.min`, `Math.max` and `Math.abs` incur significant overhead. Also, using the spread operator on large arrays (`Math.max(...data)`) can throw "Maximum call stack size exceeded" errors. Division is slower than multiplication.
+**Action:** Replaced division with inverse multiplication, replaced `Math` functions with inline ternaries (`val < 0 ? -val : val`, `v < 1 ? v : 1`), used `~~` instead of `Math.floor`, and replaced spread operators with manual loops for calculating max values.
+**Code:**
+```typescript
+// Before
+const max = Math.max(...data);
+for (let i = 0; i < blockSize; i++) { sum += Math.abs(data[i]); }
+const startBucket = Math.floor(segment.start / bucketSize);
+
+// After
+let max = 0; for (let i = 0; i < data.length; i++) { if (data[i] > max) max = data[i]; }
+for (let i = 0; i < blockSize; i++) { const val = data[i]; sum += val < 0 ? -val : val; }
+const inverseBucketSize = 1 / bucketSize; const startBucket = ~~(segment.start * inverseBucketSize);
+```

@@ -60,22 +60,36 @@ export function Waveform({
 
                     // Calculate speech activity per bucket
                     const maxSamplesIndex = samples - 1;
-                    segments.forEach(segment => {
-                        const startBucket = Math.floor(segment.start / bucketSize);
-                        const endBucket = Math.floor(segment.end / bucketSize);
+                    // Performance: Replace division with inverse multiplication for faster loop execution
+                    const inverseBucketSize = 1 / bucketSize;
 
-                        const startIdx = Math.max(0, startBucket);
-                        const endIdx = Math.min(maxSamplesIndex, endBucket);
+                    for (let s = 0; s < segments.length; s++) {
+                        const segment = segments[s];
+                        const startBucket = ~~(segment.start * inverseBucketSize);
+                        const endBucket = ~~(segment.end * inverseBucketSize);
+
+                        // Performance: Inline ternary replaces Math.max/min for faster execution
+                        const startIdx = startBucket > 0 ? startBucket : 0;
+                        const endIdx = endBucket < maxSamplesIndex ? endBucket : maxSamplesIndex;
 
                         for (let i = startIdx; i <= endIdx; i++) {
                             // Add value proportional to overlap, but simple counting works for visualization
                             data[i] += 1;
                         }
-                    });
+                    }
 
                     // Normalize
-                    const max = Math.max(...data, 1);
-                    const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
+                    let max = 1;
+                    // Performance: Avoid spread operator Math.max(...array) which can exceed call stack
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i] > max) max = data[i];
+                    }
+
+                    const inverseMaxGain = 1.5 / max;
+                    const normalizedData = data.map(v => {
+                        const val = v * inverseMaxGain;
+                        return val < 1 ? val : 1;
+                    });
 
                     setWaveformData(normalizedData);
                     setIsLoading(false);
@@ -95,23 +109,37 @@ export function Waveform({
                 // Get samples from the audio buffer
                 const channelData = audioBuffer.getChannelData(0);
                 const samples = 200; // Number of bars in the waveform
-                const blockSize = Math.floor(channelData.length / samples);
+                // Performance: ~~ is faster than Math.floor
+                const blockSize = ~~(channelData.length / samples);
                 const filteredData: number[] = [];
+
+                // Downsample inner loop to avoid main thread freeze
+                const step = Math.ceil(blockSize / 100) || 1;
 
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                    for (let j = 0; j < blockSize; j += step) {
+                        const val = channelData[blockStart + j];
+                        // Performance: Inline ternary replaces Math.abs for faster execution in hot loops
+                        sum += val < 0 ? -val : val;
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    // Replace division with inverse multiplication
+                    filteredData.push(sum * (1 / count));
                 }
 
-                // Normalize the data
-                const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                // Normalize the data without spread operator
+                let multiplier = 0;
+                for (let i = 0; i < filteredData.length; i++) {
+                    if (filteredData[i] > multiplier) multiplier = filteredData[i];
+                }
+
+                const inverseMultiplier = 1 / (multiplier || 1);
+                const normalizedData = filteredData.map(n => n * inverseMultiplier);
 
                 setWaveformData(normalizedData);
                 audioContext.close();
