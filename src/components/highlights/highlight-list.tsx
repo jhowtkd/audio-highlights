@@ -63,7 +63,7 @@ export const HighlightList = memo(function HighlightList({ highlights, segments,
   if (highlights.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-        <p>Nenhum highlight gerado ainda</p>
+        <p className="text-lg font-medium text-slate-700 dark:text-slate-300">Pronto para encontrar os melhores momentos</p>
         <p className="text-sm mt-1">Configure os parâmetros e clique em &quot;Gerar Highlights&quot;</p>
       </div>
     );
