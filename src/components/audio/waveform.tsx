@@ -56,26 +56,44 @@ export function Waveform({
                     console.log('Using optimized waveform generation from segments...');
                     const samples = 200;
                     const data = new Array(samples).fill(0);
-                    const bucketSize = duration / samples;
+                    // Performance: Inverse multiplication instead of division
+                    const inverseBucketSize = 1 / (duration / samples);
 
                     // Calculate speech activity per bucket
                     const maxSamplesIndex = samples - 1;
-                    segments.forEach(segment => {
-                        const startBucket = Math.floor(segment.start / bucketSize);
-                        const endBucket = Math.floor(segment.end / bucketSize);
 
-                        const startIdx = Math.max(0, startBucket);
-                        const endIdx = Math.min(maxSamplesIndex, endBucket);
+                    // Performance: Native for loop to avoid closure overhead
+                    for (let i = 0; i < segments.length; i++) {
+                        const segment = segments[i];
 
-                        for (let i = startIdx; i <= endIdx; i++) {
+                        // Performance: Bitwise double NOT `~~` instead of Math.floor for positive numbers
+                        const startBucket = ~~(segment.start * inverseBucketSize);
+                        const endBucket = ~~(segment.end * inverseBucketSize);
+
+                        // Performance: Inline ternary instead of Math.max/Math.min
+                        const startIdx = startBucket > 0 ? startBucket : 0;
+                        const endIdx = endBucket < maxSamplesIndex ? endBucket : maxSamplesIndex;
+
+                        for (let j = startIdx; j <= endIdx; j++) {
                             // Add value proportional to overlap, but simple counting works for visualization
-                            data[i] += 1;
+                            data[j] += 1;
                         }
-                    });
+                    }
 
                     // Normalize
-                    const max = Math.max(...data, 1);
-                    const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
+                    // Performance: Native for loop tracking maximum to prevent "Maximum call stack size exceeded" on spread
+                    let max = 1;
+                    for (let i = 0; i < samples; i++) {
+                        if (data[i] > max) max = data[i];
+                    }
+
+                    // Performance: Inverse max multiplication instead of division inside map loop
+                    const inverseMax = 1.5 / max;
+                    const normalizedData = new Array(samples);
+                    for (let i = 0; i < samples; i++) {
+                        const val = data[i] * inverseMax;
+                        normalizedData[i] = val > 1 ? 1 : val; // Inline ternary replacing Math.min
+                    }
 
                     setWaveformData(normalizedData);
                     setIsLoading(false);
@@ -95,23 +113,44 @@ export function Waveform({
                 // Get samples from the audio buffer
                 const channelData = audioBuffer.getChannelData(0);
                 const samples = 200; // Number of bars in the waveform
-                const blockSize = Math.floor(channelData.length / samples);
-                const filteredData: number[] = [];
+
+                // Performance: Bitwise double NOT `~~` instead of Math.floor
+                const blockSize = ~~(channelData.length / samples);
+
+                // Performance: Calculate step size to downsample inner loop and prevent main thread freezes
+                const step = Math.ceil(blockSize / 100) || 1;
+
+                const filteredData = new Array(samples);
 
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
-                        sum += Math.abs(channelData[blockStart + j]);
+                    for (let j = 0; j < blockSize; j += step) {
+                        // Performance: Inline ternary replacing Math.abs
+                        const val = channelData[blockStart + j];
+                        sum += val < 0 ? -val : val;
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    // Use count instead of blockSize since we're downsampling
+                    filteredData[i] = count > 0 ? sum / count : 0;
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                // Performance: Native loop avoiding Math.max(...array) which can blow stack limits
+                let multiplier = 0;
+                for (let i = 0; i < samples; i++) {
+                    if (filteredData[i] > multiplier) multiplier = filteredData[i];
+                }
+
+                // Performance: Prevent division by zero and use inverse multiplication
+                const inverseMultiplier = multiplier > 0 ? 1 / multiplier : 0;
+                const normalizedData = new Array(samples);
+                for (let i = 0; i < samples; i++) {
+                    normalizedData[i] = filteredData[i] * inverseMultiplier;
+                }
 
                 setWaveformData(normalizedData);
                 audioContext.close();
