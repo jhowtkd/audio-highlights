@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Highlight Empty State Improvement
+
+**Copy Type:** Empty State
+**Original:** "Nenhum highlight gerado ainda" / "Configure os parâmetros e clique em 'Gerar Highlights'"
+**Changed To:** "Pronto para encontrar os melhores momentos" / "Ajuste as configurações ao lado e clique em 'Gerar Highlights'"
+**Learning:** The original copy was dead-end and robotic. By changing it to a positive, action-oriented phrase ("Pronto para encontrar os melhores momentos"), it encourages the user to proceed. Providing specific, helpful instructions directly points the user to what to do next.
+**Rule:** For empty states, replace negative phrasing (e.g., "Nenhum [item] gerado ainda") with positive, action-oriented statements that communicate readiness and direct the user to their next action.
