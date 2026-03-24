@@ -33,3 +33,9 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-03-01 - Avoid unreadable micro-optimizations for negligible gains
+
+**Bottleneck:** Audio waveform rendering loops for 200 items
+**Learning:** Replacing standard Math functions (like Math.floor, Math.min, Math.max, Math.abs) with operators like ~~ and inline ternaries, or swapping array methods for manual for-loops over small arrays (< 1000 items), results in unreadable code for virtually zero measurable performance gain.
+**Action:** Do not sacrifice readability for micro-optimizations. Focus algorithmic changes (like downsampling) rather than syntax hacks.
