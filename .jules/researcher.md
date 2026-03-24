@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Audio Visualization Memory Leak Research
+
+**Research Topic:** Browser Out of Memory (OOM) crashes when generating waveforms for long audio files (>1hr).
+
+**Finding:**
+The current implementation utilizes `AudioContext.decodeAudioData` which decompresses the full audio file into raw PCM format in memory. For a 2-hour podcast, this allocates an enormous, uncompressed array buffer that rapidly exhausts browser limits, leading to tab crashes and freezing.
+
+**Decision:**
+Propose migrating the custom canvas waveform to `wavesurfer.js` utilizing the `backend: 'MediaElement'` configuration. This backend sidesteps full memory decoding by leveraging the browser's native `<audio>` element streaming capabilities, drastically reducing the RAM footprint. We also import `RegionsPlugin` to visually represent AI highlights on the waveform.
+
+**Learning:**
+When utilizing `wavesurfer.js` for rendering waveforms of long audio files, always configure it to use the `MediaElement` backend to prevent browser Out of Memory (OOM) crashes caused by `AudioContext.decodeAudioData`. Full PCM decoding is only viable for very short audio clips.
+
+**Resources:**
+- https://wavesurfer.xyz/docs/options
+- research/proposals/2026-03-01-wavesurfer-upgrade.md
