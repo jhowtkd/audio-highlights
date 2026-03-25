@@ -32,3 +32,19 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-05-18 - Positive Empty States
+
+**Copy Type:** Empty state message
+
+**Original:** "Nenhum highlight gerado ainda"
+
+**Changed To:** "Pronto para encontrar os melhores momentos"
+
+**Learning:** Empty states should feel inviting and action-oriented, not like a dead end or a failure. The original copy stated a lack of something ("nenhum"), which feels slightly negative. The new copy focuses on the positive potential of the feature ("encontrar os melhores momentos").
+
+**Rule:** For empty states, avoid negative framing (like "nenhum", "vazio", "ainda não"). Instead, use positive, action-oriented copy that focuses on what the user can achieve or what the feature offers.
+
+**Examples:**
+- ❌ "Nenhum projeto encontrado"
+- ✅ "Crie seu primeiro projeto para começar"
