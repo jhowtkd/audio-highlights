@@ -31,3 +31,35 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-03-01 - Information Disclosure in Health Endpoint
+
+**Vulnerability:** The public `/api/health` endpoint returned an `env` object that exposed internal environment variables (`process.env.NODE_ENV` and `!!process.env.GROQ_API_KEY`) to unauthenticated users.
+
+**Root Cause:** The endpoint was likely designed to provide debugging or configuration info during development but was exposed publicly without considering the implications of leaking server state.
+
+**Learning:** Public health or status endpoints must NEVER expose environment variables, configuration details, API key presence, or internal server state, as this information can be valuable for reconnaissance by attackers.
+
+**Prevention:** Health endpoints should only return a minimal, non-sensitive status indicator (e.g., `{"status": "ok"}`) and optionally a timestamp. All debugging/configuration info should be restricted to authenticated, privileged endpoints.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+export async function GET() {
+    return NextResponse.json({
+        status: 'ok',
+        env: {
+            node_env: process.env.NODE_ENV,
+        }
+    });
+}
+
+// Secure pattern to use:
+export async function GET() {
+    // SECURITY: Prevent information disclosure by not exposing environment state in health endpoint
+    return NextResponse.json({
+        status: 'ok',
+        timestamp: new Date().toISOString()
+    });
+}
+```
