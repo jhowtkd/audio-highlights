@@ -43,14 +43,15 @@ export const KaraokeTranscriptPOC = memo(forwardRef<HTMLDivElement, KaraokeTrans
             const isPast = isActive && currentTime > word.end;
 
             return (
-              <span
+              <button
+                type="button"
                 key={`${segment.id}-word-${index}`}
                 onClick={(e) => {
                   e.stopPropagation(); // Prevent segment click
                   onSegmentClick(word.start);
                 }}
                 className={cn(
-                  "cursor-pointer rounded px-0.5 transition-colors duration-100",
+                  "cursor-pointer rounded px-0.5 transition-colors duration-100 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none",
                   // Hover state
                   "hover:bg-blue-100 dark:hover:bg-blue-900/40 hover:text-blue-700 dark:hover:text-blue-300",
                   // Active state (Karaoke highlight)
@@ -63,7 +64,7 @@ export const KaraokeTranscriptPOC = memo(forwardRef<HTMLDivElement, KaraokeTrans
                 title={`${formatTime(word.start)} - ${formatTime(word.end)}`}
               >
                 {word.word}
-              </span>
+              </button>
             );
           })}
         </p>
@@ -74,8 +75,17 @@ export const KaraokeTranscriptPOC = memo(forwardRef<HTMLDivElement, KaraokeTrans
       <div
         ref={ref}
         onClick={() => onSegmentClick(segment.start)}
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            onSegmentClick(segment.start);
+          }
+        }}
+        aria-current={isActive ? 'true' : undefined}
         className={cn(
-          'p-3 rounded-lg cursor-pointer transition-all duration-200',
+          'w-full text-left p-3 rounded-lg cursor-pointer transition-all duration-200 focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:outline-none',
           isActive
             ? 'bg-blue-50 dark:bg-blue-950/30 border-l-4 border-blue-500 shadow-sm'
             : 'hover:bg-slate-100 dark:hover:bg-slate-800 border-l-4 border-transparent',
