@@ -134,7 +134,6 @@ ${transcriptWithTimestamps}
   "keyTopics": ["tópico1", "tópico2", "tópico3"],
   "highlights": [
     {
-    {
       "title": "${config.episodeTitle ? `[${config.episodeTitle}] - ` : ''}Título descritivo do conteúdo do trecho (máx 80 chars)",
       "suggestedTitles": [
         "Versão TikTok/Reels - mais provocativa",
