@@ -102,3 +102,17 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Migrate Waveform Canvas to wavesurfer.js
+
+**Research Topic:** Fixing Out of Memory (OOM) browser crashes when rendering audio waveforms for large files (> 1 hour).
+
+**Finding:** The custom HTML canvas implementation manually downsampled audio buffers by decoding the entire file into memory using `AudioContext.decodeAudioData()`. This approach is unstable for long audio files (podcasts). `wavesurfer.js` supports a `backend: 'MediaElement'` option that extracts peaks dynamically without holding the full uncompressed PCM data in memory.
+
+**Decision:** Adopt `wavesurfer.js` with the `MediaElement` backend and use `RegionsPlugin` to replace the custom manual canvas rendering.
+
+**Learning:** For rendering audio waveforms of long audio files, avoid manually decoding and holding full PCM data arrays in memory to prevent browser crashes. Use chunked rendering libraries like `wavesurfer.js` configured with `backend: 'MediaElement'`.
+
+**Resources:**
+- https://wavesurfer.xyz/docs/options#backend
+- https://developer.mozilla.org/en-US/docs/Web/API/BaseAudioContext/decodeAudioData
