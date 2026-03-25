@@ -56,13 +56,15 @@ export function Waveform({
                     console.log('Using optimized waveform generation from segments...');
                     const samples = 200;
                     const data = new Array(samples).fill(0);
-                    const bucketSize = duration / samples;
+
+                    // Performance: Inverse multiplication replaces division in hot loops for faster execution.
+                    const inverseBucketSize = samples / duration;
 
                     // Calculate speech activity per bucket
                     const maxSamplesIndex = samples - 1;
                     segments.forEach(segment => {
-                        const startBucket = Math.floor(segment.start / bucketSize);
-                        const endBucket = Math.floor(segment.end / bucketSize);
+                        const startBucket = Math.floor(segment.start * inverseBucketSize);
+                        const endBucket = Math.floor(segment.end * inverseBucketSize);
 
                         const startIdx = Math.max(0, startBucket);
                         const endIdx = Math.min(maxSamplesIndex, endBucket);
@@ -74,8 +76,16 @@ export function Waveform({
                     });
 
                     // Normalize
-                    const max = Math.max(...data, 1);
-                    const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
+                    // Performance: Explicit loop tracking highest value prevents "Maximum call stack size exceeded" errors
+                    // on large arrays and avoids expensive spread operator overhead.
+                    let max = 1;
+                    for (let i = 0; i < samples; i++) {
+                        if (data[i] > max) max = data[i];
+                    }
+
+                    // Performance: Precompute inverse multiplier to avoid division inside .map() loop
+                    const inverseMax = 1.5 / max;
+                    const normalizedData = data.map(v => Math.min(1, v * inverseMax)); // 1.5x gain for visibility
 
                     setWaveformData(normalizedData);
                     setIsLoading(false);
@@ -98,6 +108,7 @@ export function Waveform({
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
 
+                const inverseBlockSize = 1 / blockSize;
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
@@ -106,12 +117,21 @@ export function Waveform({
                         sum += Math.abs(channelData[blockStart + j]);
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum * inverseBlockSize);
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                // Performance: Explicit loop tracking highest value prevents "Maximum call stack size exceeded" errors
+                // on large arrays and avoids expensive spread operator overhead.
+                let multiplier = 0;
+                for (let i = 0; i < samples; i++) {
+                    if (filteredData[i] > multiplier) multiplier = filteredData[i];
+                }
+                multiplier = multiplier || 1; // prevent division by zero
+
+                // Performance: Precompute inverse multiplier to avoid division inside .map() loop
+                const inverseMultiplier = 1 / multiplier;
+                const normalizedData = filteredData.map(n => n * inverseMultiplier);
 
                 setWaveformData(normalizedData);
                 audioContext.close();
