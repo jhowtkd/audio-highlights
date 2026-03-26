@@ -522,8 +522,10 @@ export default function Home() {
                             size="sm"
                             onClick={handleRemoveVideo}
                             className="text-red-500 hover:text-red-600"
+                            aria-label="Remover vídeo"
+                            title="Remover vídeo"
                           >
-                            <X className="h-4 w-4" />
+                            <X className="h-4 w-4" aria-hidden="true" />
                           </Button>
                         ) : (
                           <label>
