@@ -102,3 +102,25 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - WaveSurfer.js MediaElement Backend Research
+
+**Research Topic:** Migrating from Custom Canvas Waveform to WaveSurfer.js
+
+**Finding:** Evaluated `wavesurfer.js` (v7+) with the `MediaElement` backend and `RegionsPlugin` to solve Out of Memory (OOM) crashes on large 2-4 hour audio files.
+- **Custom Canvas:** Crashes browser when decoding 2 hours of PCM data via `AudioContext.decodeAudioData()`. Lacks zoom functionality, preventing precise clip editing.
+- **WaveSurfer.js (MediaElement):** Streams the audio from an `<audio>` tag to generate peaks visually without holding the uncompressed audio in memory. Solves OOM crashes entirely. Enables zooming via `ws.zoom()`.
+
+**Decision:** Propose migrating to `wavesurfer.js`.
+- Eliminates browser crashes for long podcast episodes.
+- Drastically simplifies the codebase by offloading complex rendering and region management.
+- Built-in Regions plugin is perfect for visualizing and editing our Highlights.
+
+**Learning:** When building web-based audio visualization for long files (>10 minutes), decoding the full buffer into memory is an anti-pattern. Streaming backends (like `MediaElement`) are critical for stability. Do not reinvent the wheel for complex, interactive waveform rendering when robust, actively maintained libraries exist.
+
+**Resources:**
+- https://wavesurfer.xyz/
+- https://wavesurfer.xyz/examples/?mediaelement.js
+- https://wavesurfer.xyz/examples/?regions.js
+- research/proposals/2026-03-01-wavesurfer-upgrade.md
+- research/pocs/wavesurfer/Waveform.tsx
