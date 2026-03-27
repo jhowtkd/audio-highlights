@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -32,7 +32,8 @@ function formatTime(seconds: number) {
     return `${min}:${sec.toString().padStart(2, '0')}`;
 }
 
-export function CutSuggestionCard({ segment, onAction }: CutSuggestionCardProps) {
+// Performance: Memoize component to prevent re-rendering when parent state changes but segment/props do not
+export const CutSuggestionCard = memo(function CutSuggestionCard({ segment, onAction }: CutSuggestionCardProps) {
     const config = PROBLEM_CONFIG[segment.problemType];
 
     return (
@@ -97,4 +98,4 @@ export function CutSuggestionCard({ segment, onAction }: CutSuggestionCardProps)
             </CardFooter>
         </Card>
     );
-}
+});

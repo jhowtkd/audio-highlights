@@ -1,4 +1,4 @@
-import React, { useState, memo } from 'react';
+import React, { useState, memo, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { AlertCircle, Download, Play, RefreshCw, Scissors } from 'lucide-react';
@@ -50,25 +50,28 @@ export const DecupagemView = memo(function DecupagemView({ segments, projectId }
         }
     };
 
-    const handleAction = (id: string, action: 'keep' | 'cut' | 'review') => {
-        if (!result) return;
+    // Performance: Memoize handleAction with functional state update to completely avoid re-rendering list items
+    const handleAction = useCallback((id: string, action: 'keep' | 'cut' | 'review') => {
+        setResult(prevResult => {
+            if (!prevResult) return prevResult;
 
-        const updatedSegments = result.segments.map(seg =>
-            seg.id === id ? { ...seg, status: action } : seg
-        );
+            const updatedSegments = prevResult.segments.map(seg =>
+                seg.id === id ? { ...seg, status: action } : seg
+            );
 
-        // Recalculate stats
-        const cutDuration = updatedSegments
-            .filter(s => s.status === 'cut') // Only count confirmed cuts
-            .reduce((acc, s) => acc + (s.endTime - s.startTime), 0);
+            // Recalculate stats
+            const cutDuration = updatedSegments
+                .filter(s => s.status === 'cut') // Only count confirmed cuts
+                .reduce((acc, s) => acc + (s.endTime - s.startTime), 0);
 
-        setResult({
-            ...result,
-            segments: updatedSegments,
-            timeSaved: cutDuration,
-            cleanDuration: result.originalDuration - cutDuration
+            return {
+                ...prevResult,
+                segments: updatedSegments,
+                timeSaved: cutDuration,
+                cleanDuration: prevResult.originalDuration - cutDuration
+            };
         });
-    };
+    }, []);
 
     const handleExport = async (format: 'cmx3600' | 'csv') => {
         if (!result) return;
