@@ -102,3 +102,26 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Audio Waveform Visualization Research
+
+**Research Topic:** Migrating custom canvas waveform to `wavesurfer.js` to resolve OOM and add Zoom functionality.
+
+**Finding:**
+Evaluated replacing the custom memory-intensive HTML5 Canvas waveform in `src/components/audio/waveform.tsx` with `wavesurfer.js` (v7).
+- Custom canvas implementation decodes the entire audio file into PCM memory array causing browser Out of Memory (OOM) crashes on 2+ hour audio files.
+- `wavesurfer.js` (v7) configured with the `media` option pointing to an `<audio>` tag streams the file natively without allocating the full PCM array upfront, entirely preventing OOM crashes.
+- Crucially, it provides a native `.zoom()` method which is essential for editing long podcasts, and the `RegionsPlugin` natively supports overlaying the AI-generated highlights.
+
+**Decision:**
+Proposed migrating to `wavesurfer.js` to dramatically improve stability and UX.
+- The 50kb bundle size increase is a minor trade-off for eliminating application-crashing memory leaks.
+- Avoids the need to write complex manual chunking/downsampling logic for the custom canvas.
+
+**Learning:**
+When implementing audio waveform visualization for long files, avoid manually decoding and holding full PCM data arrays in memory to prevent browser crashes. Use chunked rendering libraries like `wavesurfer.js` utilizing an external `media` element to ensure memory stability.
+
+**Resources:**
+- https://wavesurfer.xyz/docs/classes/WaveSurfer
+- research/proposals/2026-03-01-wavesurfer-upgrade.md
+- research/pocs/wavesurfer/Waveform.tsx
