@@ -15,3 +15,15 @@ services:
     # Persist data if needed (e.g. for uploads if we change logic, but currently local storage is in-memory/browser)
     # volumes:
     #   - ./uploads:/app/public/uploads
+
+  ffmpeg-service:
+    container_name: audio-highlights-ffmpeg
+    build:
+      context: ./ffmpeg-service
+      dockerfile: Dockerfile
+    restart: always
+    ports:
+      - "3001:3001"
+    environment:
+      - PORT=3001
+      - ALLOWED_ORIGIN=http://localhost:3000

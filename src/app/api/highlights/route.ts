@@ -250,10 +250,10 @@ ${transcriptWithTimestamps}
         "completionPotential": 9
       },
       "segments": [
-        { "start": 45.0, "end": 92.5 },
-        { "start": 150.0, "end": 195.0 },
-        { "start": 280.0, "end": 330.5 },
-        { "start": 400.0, "end": 445.0 },
+        { "start": 45.0, "end": 90.0 },
+        { "start": 150.0, "end": 200.0 },
+        { "start": 280.0, "end": 330.0 },
+        { "start": 400.0, "end": 440.0 },
         { "start": 520.0, "end": 560.0 }
       ],
       "reasoning": "Explicação de como os segmentos se conectam narrativamente.",
@@ -481,15 +481,32 @@ export async function POST(request: NextRequest) {
 
         // Handling segments for Mix mode
         if (h.segments && h.segments.length > 0) {
+          // Filter invalid segments (duration < minSegmentDuration)
+          // We use a small tolerance (14s) instead of hard 15s to avoid cutting valid but slightly short segments
+          const MIN_SEGMENT_DURATION = 14;
+          const validSegments = h.segments.filter(seg => (seg.end - seg.start) >= MIN_SEGMENT_DURATION);
+
+          if (validSegments.length < h.segments.length) {
+            console.warn(`[Mix] Filtered ${h.segments.length - validSegments.length} invalid segments (< ${MIN_SEGMENT_DURATION}s)`);
+          }
+
+          // If we filtered everything, keep at least the longest one to avoid total failure,
+          // OR check if we really want to skip. Let's keep the original array if filtering removes everything,
+          // but logging the error. Or better: use validSegments if not empty.
+          const segmentsToUse = validSegments.length > 0 ? validSegments : h.segments;
+
           // Concatenate transcripts from all segments
-          transcript = h.segments.map(seg => extractTranscriptForHighlight(segments, seg.start, seg.end)).join(' ... ');
+          transcript = segmentsToUse.map(seg => extractTranscriptForHighlight(segments, seg.start, seg.end)).join(' ... ');
 
           // Calculate total duration
-          duration = h.segments.reduce((acc, seg) => acc + (seg.end - seg.start), 0);
+          duration = segmentsToUse.reduce((acc, seg) => acc + (seg.end - seg.start), 0);
 
           // Start/End time for the whole mix (first start, last end)
-          startTime = h.segments[0].start;
-          endTime = h.segments[h.segments.length - 1].end;
+          startTime = segmentsToUse[0].start;
+          endTime = segmentsToUse[segmentsToUse.length - 1].end;
+
+          // Update the highlight segments with the valid ones
+          h.segments = segmentsToUse;
         } else {
           // Standard mode
           duration = h.endTime - h.startTime;
@@ -534,6 +551,14 @@ export async function POST(request: NextRequest) {
 
     // Calculate statistics
     const totalDuration = highlights.reduce((sum, h) => sum + h.duration, 0);
+
+    // Validate total duration for mix mode  
+    if (config.isMix && config.mixDuration) {
+      const minTotalDuration = config.mixDuration * 0.5; // Pelo menos 50% do target
+      if (totalDuration < minTotalDuration) {
+        console.warn(`[Mix] Total duration ${totalDuration}s is too short (target: ${config.mixDuration}s).`);
+      }
+    }
     const averageDuration = highlights.length > 0 ? totalDuration / highlights.length : 0;
     const transcriptionDuration = segments[segments.length - 1]?.end || 0;
     const coveragePercent = transcriptionDuration > 0
