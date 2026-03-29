@@ -32,3 +32,22 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-03-29 - Empty State Tone Decision
+
+**Copy Type:** Empty state text in `HighlightList` component
+
+**Original:** "Nenhum highlight gerado ainda"
+
+**Changed To:** "Pronto para encontrar os melhores momentos"
+
+**Learning:** Empty states should be positive and action-oriented, not negative or robotic. Using an engaging phrase rather than a blunt "Nenhum" (None) creates a better user experience, anticipating the user's success rather than just pointing out the lack of data.
+
+**Rule:** For this app, ALWAYS:
+1. Avoid blunt negative statements ("Nenhum", "Sem", "Empty") in empty states.
+2. Focus on the positive outcome the user is trying to achieve.
+3. Make empty states action-oriented or forward-looking.
+
+**Pattern to follow:**
+- ❌ "Nenhum [item] gerado/encontrado"
+- ✅ "Pronto para [ação / encontrar o que procura]"
