@@ -98,20 +98,29 @@ export function Waveform({
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
 
+                // Performance: Downsample the inner loop to prevent main thread freezing on large audio files
+                const step = Math.max(1, Math.ceil(blockSize / 100));
+
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    for (let j = 0; j < blockSize; j += step) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    // Performance: Inverse multiplication instead of division
+                    const inverseCount = 1 / Math.max(1, count);
+                    filteredData.push(sum * inverseCount);
                 }
 
                 // Normalize the data
+                // Performance: Inverse multiplication instead of division in hot array map
                 const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                const inverseMultiplier = multiplier > 0 ? 1 / multiplier : 1;
+                const normalizedData = filteredData.map(n => n * inverseMultiplier);
 
                 setWaveformData(normalizedData);
                 audioContext.close();
