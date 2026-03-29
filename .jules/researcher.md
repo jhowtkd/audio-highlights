@@ -102,3 +102,25 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-29 - Server-Side Audiogram Generation Research
+
+**Research Topic:** Generating visual waveforms (audiograms) from audio highlights for social media.
+
+**Finding:** Evaluated approaches for turning audio clips into shareable videos.
+1. Client-Side (Canvas + MediaRecorder): Prone to Out-of-Memory (OOM) crashes on mobile, inconsistent encoding.
+2. Remotion (React Video): Heavy bundle, overkill for a simple waveform overlay.
+3. Server-Side (FFmpeg `showwaves`): Fast, stable, native to our existing `ffmpeg-service`.
+
+POC confirmed that `child_process.spawn` with `ffmpeg-static` using the `showwaves` complex filter combined with a looped static image (`-loop 1 -i image ... -filter_complex "[1:a]showwaves...[wave];[0:v][wave]overlay..."`) produces high-quality, perfectly synced MP4s.
+
+**Decision:** Chose Server-Side FFmpeg approach.
+- Offloads heavy encoding (H.264) to the backend, avoiding browser crashes.
+- Reuses the existing `ffmpeg-service` infrastructure.
+- `showwaves` filter is standard and robust, avoiding reliance on specific input formats like `lavfi` that might be missing in some FFmpeg builds.
+
+**Learning:** For features requiring video rendering or generating audiograms (waveform videos), offload processing to the dedicated server-side `ffmpeg-service` microservice rather than using client-side alternatives (like Remotion or Canvas) to prevent browser OOM errors and improve stability. Use native `child_process.spawn` with the `ffmpeg-static` binary path over the deprecated `fluent-ffmpeg` package. Rely on the `showwaves` complex filter combined with an audio stream and a looped static image overlay.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#showwaves
+- research/proposals/audiogram-generator.md
