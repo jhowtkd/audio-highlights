@@ -74,8 +74,14 @@ export function Waveform({
                     });
 
                     // Normalize
-                    const max = Math.max(...data, 1);
-                    const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
+                    // Performance: Explicit loop prevents "Maximum call stack size exceeded" on large arrays
+                    let max = 1;
+                    for (let i = 0; i < data.length; i++) {
+                        if (data[i] > max) max = data[i];
+                    }
+                    // Performance: Inverse multiplication avoids division overhead in hot map loop
+                    const inverseMax = 1.5 / max; // 1.5x gain for visibility
+                    const normalizedData = data.map(v => Math.min(1, v * inverseMax));
 
                     setWaveformData(normalizedData);
                     setIsLoading(false);
@@ -97,21 +103,32 @@ export function Waveform({
                 const samples = 200; // Number of bars in the waveform
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
+                // Performance: Downsample PCM iteration for large files to prevent main thread freezing
+                const step = Math.ceil(blockSize / 100);
 
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    for (let j = 0; j < blockSize; j += step) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / count);
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                // Performance: Explicit loop avoids "Maximum call stack size exceeded" on large arrays
+                let multiplier = 0;
+                for (let i = 0; i < filteredData.length; i++) {
+                    if (filteredData[i] > multiplier) multiplier = filteredData[i];
+                }
+
+                // Performance: Inverse multiplication avoids division overhead in map loop
+                const inverseMultiplier = multiplier > 0 ? 1 / multiplier : 1;
+                const normalizedData = filteredData.map(n => n * inverseMultiplier);
 
                 setWaveformData(normalizedData);
                 audioContext.close();
