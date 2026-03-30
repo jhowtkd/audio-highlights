@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>WaveSurfer v7 + Regions POC</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 2rem;
+      background: #f8fafc;
+      color: #0f172a;
+    }
+    .card {
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+      margin-bottom: 2rem;
+    }
+    h1 { margin-top: 0; }
+    .controls {
+      display: flex;
+      gap: 1rem;
+      margin-top: 1rem;
+      align-items: center;
+    }
+    button {
+      padding: 0.5rem 1rem;
+      border: none;
+      background: #3b82f6;
+      color: white;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 500;
+    }
+    button:hover { background: #2563eb; }
+    button:disabled { background: #94a3b8; cursor: not-allowed; }
+    #waveform {
+      margin-top: 1.5rem;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      overflow: hidden;
+      background: #f1f5f9;
+    }
+    .time-display {
+      font-family: monospace;
+      font-size: 1.1rem;
+    }
+    .note {
+      font-size: 0.9rem;
+      color: #64748b;
+      margin-top: 1rem;
+      padding: 1rem;
+      background: #f8fafc;
+      border-radius: 6px;
+      border-left: 4px solid #3b82f6;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card">
+    <h1>Audio Visualization POC</h1>
+    <p>Using <code>wavesurfer.js</code> v7 with native MediaElement for large file support (OOM prevention).</p>
+
+    <div style="margin-bottom: 1.5rem;">
+      <label for="audioFile" style="display: block; margin-bottom: 0.5rem; font-weight: bold;">Select local audio file:</label>
+      <input type="file" id="audioFile" accept="audio/*,video/*" />
+    </div>
+
+    <!-- The audio element used by WaveSurfer -->
+    <audio id="mediaElement" controls style="display: none;"></audio>
+
+    <div id="waveform"></div>
+
+    <div class="controls">
+      <button id="playBtn" disabled>Play / Pause</button>
+      <div class="time-display" id="timeDisplay">00:00 / 00:00</div>
+    </div>
+
+    <div style="margin-top: 1rem;">
+      <button id="addRegionBtn" disabled>Add Random Highlight</button>
+    </div>
+
+    <div class="note">
+      <strong>Memory Note:</strong> By configuring WaveSurfer with an external <code>&lt;audio&gt;</code> element via the <code>media</code> option, the browser natively streams the file instead of decoding the entire audio track into an AudioBuffer (which causes OOM crashes on large podcast files). Peaks are generated efficiently.
+    </div>
+  </div>
+
+  <!-- Load wavesurfer v7 and Regions plugin from unpkg -->
+  <script type="module">
+    import WaveSurfer from 'https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.esm.js';
+    import RegionsPlugin from 'https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.esm.js';
+
+    let wavesurfer = null;
+    let wsRegions = null;
+
+    const fileInput = document.getElementById('audioFile');
+    const playBtn = document.getElementById('playBtn');
+    const addRegionBtn = document.getElementById('addRegionBtn');
+    const timeDisplay = document.getElementById('timeDisplay');
+    const mediaElement = document.getElementById('mediaElement');
+
+    function formatTime(seconds) {
+      if (isNaN(seconds)) return '00:00';
+      const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+      const s = Math.floor(seconds % 60).toString().padStart(2, '0');
+      return `${m}:${s}`;
+    }
+
+    function initWaveSurfer() {
+      if (wavesurfer) {
+        wavesurfer.destroy();
+      }
+
+      // Initialize Regions plugin
+      wsRegions = RegionsPlugin.create();
+
+      // Initialize WaveSurfer
+      wavesurfer = WaveSurfer.create({
+        container: '#waveform',
+        waveColor: '#94a3b8',
+        progressColor: '#3b82f6',
+        cursorColor: '#1e40af',
+        barWidth: 2,
+        barGap: 1,
+        barRadius: 2,
+        height: 100,
+        // CRITICAL FOR MEMORY: Use external media element
+        media: mediaElement,
+        plugins: [wsRegions]
+      });
+
+      // Events
+      wavesurfer.on('ready', () => {
+        playBtn.disabled = false;
+        addRegionBtn.disabled = false;
+        updateTime();
+      });
+
+      wavesurfer.on('audioprocess', updateTime);
+      wavesurfer.on('seek', updateTime);
+      wavesurfer.on('finish', () => playBtn.textContent = 'Play');
+
+      playBtn.addEventListener('click', () => {
+        wavesurfer.playPause();
+      });
+
+      wavesurfer.on('play', () => playBtn.textContent = 'Pause');
+      wavesurfer.on('pause', () => playBtn.textContent = 'Play');
+
+      // Region events
+      wsRegions.on('region-clicked', (region, e) => {
+        e.stopPropagation();
+        region.play();
+      });
+    }
+
+    function updateTime() {
+      if (!wavesurfer) return;
+      const current = wavesurfer.getCurrentTime();
+      const total = wavesurfer.getDuration();
+      timeDisplay.textContent = `${formatTime(current)} / ${formatTime(total)}`;
+    }
+
+    fileInput.addEventListener('change', (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      // Create object URL for the local file
+      const objectUrl = URL.createObjectURL(file);
+
+      // Set the src of the media element
+      mediaElement.src = objectUrl;
+
+      initWaveSurfer();
+    });
+
+    addRegionBtn.addEventListener('click', () => {
+      if (!wavesurfer || !wsRegions) return;
+      const duration = wavesurfer.getDuration();
+      if (duration === 0) return;
+
+      // Random start time
+      const start = Math.random() * (duration - 10);
+      const end = start + 5 + Math.random() * 10;
+
+      // Random color
+      const hue = Math.floor(Math.random() * 360);
+      const color = `hsla(${hue}, 80%, 50%, 0.3)`;
+
+      wsRegions.addRegion({
+        start,
+        end,
+        color,
+        content: 'Highlight',
+        resize: true,
+        drag: true
+      });
+    });
+  </script>
+</body>
+</html>
