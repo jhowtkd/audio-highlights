@@ -22,7 +22,9 @@ describe('generateEDL', () => {
           startTime: 20,
           endTime: 25,
           text: 'Normal text "with quotes"',
+          // @ts-expect-error Testing invalid input for sanitization
           problemType: '-off_topic',
+          // @ts-expect-error Testing invalid input for sanitization
           suggestion: '@review',
           reason: '\tTAB injected',
           severity: 'medium',
