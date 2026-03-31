@@ -33,3 +33,27 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-03-31 - Redundant Division in Waveform Generation
+
+**Bottleneck:** Unnecessary CPU cycles spent dividing summed audio samples by `blockSize` to calculate an average, just to immediately normalize those averages against their own maximum.
+**Learning:** When calculating values that will subsequently be relative to their own maximum (like audio visualization bars), scalar divisions applied equally to all elements cancel out mathematically during the normalization step.
+**Action:** Remove the redundant division during the summation loop, and only apply math during the final normalization pass.
+**Code:**
+```typescript
+// BEFORE:
+filteredData.push(sum / blockSize);
+const max = Math.max(...filteredData);
+const normalized = filteredData.map(n => n / max);
+
+// AFTER:
+filteredData.push(sum);
+const max = Math.max(...filteredData);
+const normalized = filteredData.map(n => n / max);
+```
+
+## 2024-03-31 - Naive Downsampling Breaks Audio Waveforms
+
+**Bottleneck:** Main thread freezing when iterating over massive arrays of PCM audio data to generate visual waveforms.
+**Learning:** A proposed optimization to skip samples (e.g., `j += step`) to speed up the loop caused a severe functional regression. This naive downsampling introduces aliasing and causes the visualizer to completely miss transient peaks (like drum hits) if the `step` jumps over them.
+**Action:** Do not use naive downsampling for audio envelope extraction without applying a proper low-pass filter first. To prevent main thread blocking, the entire iteration should be moved to a Web Worker instead, preserving the accuracy of iterating over every sample.
