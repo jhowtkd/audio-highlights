@@ -32,3 +32,21 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2026-03-31 - Empty State Microcopy Decision
+
+**Copy Type:** Empty state for Highlights list
+
+**Original:** "Nenhum highlight gerado ainda"
+
+**Changed To:** "Pronto para encontrar os melhores momentos"
+
+**Learning:** Vague and negative empty states ("Nenhum X") are unhelpful and can feel like dead ends. Replacing them with positive, action-oriented copy ("Pronto para...") encourages users to engage with the tool and makes the interface feel friendlier. Adding a descriptive helper text ("Configure as opções e clique em Gerar Highlights para começar") clearly guides them on the next step.
+
+**Rule:** For this app, ALWAYS:
+1. Use positive, action-oriented copy for empty states, avoiding negative phrasing like "Nenhum X".
+2. Include clear, actionable helper text guiding the user on the next step to take.
+3. Keep the tone human and encouraging.
+
+**Pattern to follow:**
+- ❌ "Nenhum [item] gerado ainda"
+- ✅ "Pronto para [ação que cria o item]"
