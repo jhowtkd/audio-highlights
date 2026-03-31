@@ -102,3 +102,23 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-31 - Audiogram Generation Technology Research
+
+**Research Topic:** Adding server-side audiogram generation for viral clips.
+
+**Finding:** Evaluated approaches to generate videos with waveforms from audio highlights:
+1. Client-side Canvas: OOM errors, tricky syncing.
+2. Client-side Remotion: Highly customizable, but heavy client load and complex setup.
+3. Server-side FFmpeg: Uses `showwaves` and `overlay` filters. Fast, reliable, no browser OOM issues.
+
+**Decision:** Chose server-side FFmpeg approach.
+- Leverages existing `ffmpeg-service` microservice architecture.
+- FFmpeg's native filters are highly optimized and produce professional-quality outputs quickly.
+- Avoids browser memory limits.
+
+**Learning:** For features requiring video rendering or generating audiograms (waveform videos), offload processing to the dedicated server-side `ffmpeg-service` microservice rather than using client-side alternatives to prevent browser OOM errors and improve stability. Use `showwaves` complex filter combined with an audio stream and a looped static image overlay.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#showwaves
+- research/proposals/2026-03-31-audiogram-generator.md
