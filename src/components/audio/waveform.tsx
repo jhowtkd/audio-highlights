@@ -60,9 +60,10 @@ export function Waveform({
 
                     // Calculate speech activity per bucket
                     const maxSamplesIndex = samples - 1;
+                    const inverseBucketSize = 1 / bucketSize; // Performance: avoid division in loop
                     segments.forEach(segment => {
-                        const startBucket = Math.floor(segment.start / bucketSize);
-                        const endBucket = Math.floor(segment.end / bucketSize);
+                        const startBucket = Math.floor(segment.start * inverseBucketSize);
+                        const endBucket = Math.floor(segment.end * inverseBucketSize);
 
                         const startIdx = Math.max(0, startBucket);
                         const endIdx = Math.min(maxSamplesIndex, endBucket);
@@ -75,7 +76,8 @@ export function Waveform({
 
                     // Normalize
                     const max = Math.max(...data, 1);
-                    const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
+                    const inverseMax = 1.5 / max; // Performance: avoid division in loop, pre-calculate 1.5x gain
+                    const normalizedData = data.map(v => Math.min(1, v * inverseMax));
 
                     setWaveformData(normalizedData);
                     setIsLoading(false);
@@ -106,12 +108,16 @@ export function Waveform({
                         sum += Math.abs(channelData[blockStart + j]);
                     }
 
-                    filteredData.push(sum / blockSize);
+                    // Performance: Remove redundant division by blockSize here,
+                    // as it cancels out mathematically during normalization.
+                    filteredData.push(sum);
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
-                const normalizedData = filteredData.map(n => n / multiplier);
+                const max = Math.max(...filteredData);
+                const multiplier = Math.max(max, 0.001); // Prevent division by 0
+                const inverseMultiplier = 1 / multiplier; // Performance: avoid division in loop
+                const normalizedData = filteredData.map(n => n * inverseMultiplier);
 
                 setWaveformData(normalizedData);
                 audioContext.close();
