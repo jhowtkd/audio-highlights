@@ -33,3 +33,4 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-04-01 - Redundant Division in Waveform Generation\n\n**Bottleneck:** CPU overhead during audio waveform generation loop.\n**Learning:** When calculating average magnitudes for a waveform array that will later be normalized relative to its own maximum, scalar division inside the summation loop cancels out mathematically during the final normalization step and wastes CPU cycles.\n**Action:** Avoid dividing by the block size during the initial summation. Just sum the values and let the final normalization handle the scaling.\n**Code:** ```typescript\n// Before\nfilteredData.push(sum / blockSize);\n\n// After\nfilteredData.push(sum);\n```\n

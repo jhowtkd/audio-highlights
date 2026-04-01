@@ -106,7 +106,10 @@ export function Waveform({
                         sum += Math.abs(channelData[blockStart + j]);
                     }
 
-                    filteredData.push(sum / blockSize);
+                    // Performance: Removed redundant division by blockSize
+                    // Since we normalize the array later relative to its own maximum,
+                    // scalar division here cancels out mathematically and wastes CPU cycles.
+                    filteredData.push(sum);
                 }
 
                 // Normalize the data
