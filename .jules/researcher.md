@@ -102,3 +102,24 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-04-01 - Client-Side Transcription Research
+
+**Research Topic:** Browser-based Audio Transcription using Whisper
+
+**Finding:**
+Current implementation uses a server-side Groq API for transcription, resulting in potential network latency for large uploads and API costs.
+Tested `@xenova/transformers` with `Xenova/whisper-tiny` in a Node.js POC mimicking the browser environment.
+- **Feasibility:** Can load and execute inference on raw audio data.
+- **Trade-offs:** Initial model download size and hardware dependence versus privacy and zero API costs.
+
+**Decision:**
+Propose adding a client-side transcription option using Transformers.js.
+Benefits: Eliminates API costs, ensures absolute privacy for sensitive audio, and reduces server load by processing on the edge.
+
+**Learning:**
+WebAssembly-powered speech recognition in the browser is viable and provides a compelling privacy-first alternative to cloud APIs, albeit with considerations for client hardware capabilities and initial model download times.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js/index
+- research/proposals/2026-04-01-client-side-transcription.md
