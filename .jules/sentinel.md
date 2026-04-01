@@ -31,3 +31,25 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-05-18 - CSV Formula Injection in EDL Export
+
+**Vulnerability:** The application allowed users to export decupagem segments as CSV without sanitizing the output. If a segment's text, problem type, suggestion, or reason started with characters like `=`, `+`, `-`, or `@`, spreadsheet software like Microsoft Excel would interpret them as executable formulas (CSV Formula Injection / CSV Injection). This could lead to arbitrary command execution on the user's machine if the exported CSV is opened.
+
+**Root Cause:** The application directly embedded string properties from the `DecupageSegment` objects into the CSV string (`generateCSV` function in `src/lib/edl-generator.ts`) without any sanitization other than basic escaping of double quotes. It failed to account for formula evaluation vulnerabilities in spreadsheet programs.
+
+**Learning:** Always sanitize user-controlled fields before exporting them to CSV format. Spreadsheet software often evaluates fields starting with specific characters as formulas.
+
+**Prevention:** Before adding fields to a CSV string, check if they start with dangerous characters (`=`, `+`, `-`, `@`, `\t`, `\r`) and prepend a single quote (`'`) to neutralize them.
+
+**Code:**
+```typescript
+function sanitizeCSVField(field: string): string {
+    if (!field) return field;
+    const dangerousChars = ['=', '+', '-', '@', '\t', '\r'];
+    if (dangerousChars.some(char => field.startsWith(char))) {
+        return `'${field}`;
+    }
+    return field;
+}
+```
