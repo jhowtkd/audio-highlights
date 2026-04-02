@@ -106,11 +106,16 @@ export function Waveform({
                         sum += Math.abs(channelData[blockStart + j]);
                     }
 
-                    filteredData.push(sum / blockSize);
+                    // Performance: Do not divide by blockSize here since it mathematically
+                    // cancels out during the normalization relative to the maximum later,
+                    // saving 200 division operations.
+                    filteredData.push(sum);
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
+                // Performance: Avoid Math.max(...array) spread operator on potentially large arrays
+                // to prevent "Maximum call stack size exceeded". Use reduce.
+                const multiplier = filteredData.reduce((max, current) => current > max ? current : max, 0);
                 const normalizedData = filteredData.map(n => n / multiplier);
 
                 setWaveformData(normalizedData);
