@@ -13,6 +13,54 @@ You can learn more, including how to opt-out if you'd not like to participate in
 https://nextjs.org/telemetry
 
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1485ms
-○ Compiling /verify-config ...
- GET /verify-config 200 in 7.2s (compile: 6.3s, proxy.ts: 167ms, render: 655ms)
+✓ Ready in 1414ms
+○ Compiling / ...
+ GET / 200 in 6.8s (compile: 6.2s, proxy.ts: 139ms, render: 526ms)
+ GET / 200 in 79ms (compile: 6ms, proxy.ts: 4ms, render: 69ms)
+⨯ ./src/components/decupagem/decupagem-view.tsx:1:17
+Ecmascript file had an error
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m [33mReact[39m[33m,[39m { useState[33m,[39m memo } [36mfrom[39m [32m'react'[39m[33m;[39m
+ [90m   |[39m                 [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@/components/ui/button'[39m[33m;[39m
+ [90m 3 |[39m [36mimport[39m { [33mScrollArea[39m } [36mfrom[39m [32m'@/components/ui/scroll-area'[39m[33m;[39m
+ [90m 4 |[39m [36mimport[39m { [33mAlertCircle[39m[33m,[39m [33mDownload[39m[33m,[39m [33mPlay[39m[33m,[39m [33mRefreshCw[39m[33m,[39m [33mScissors[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m[0m
+
+You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+
+
+Import trace:
+  Server Component:
+    ./src/components/decupagem/decupagem-view.tsx
+    ./src/app/test-decupagem/page.tsx
+
+
+ GET /test-decupagem 500 in 3.7s (compile: 3.4s, proxy.ts: 107ms, render: 268ms)
+✓ Compiled in 84ms
+ GET /test-decupagem 200 in 350ms (compile: 165ms, proxy.ts: 5ms, render: 180ms)
+ GET /test-decupagem 200 in 79ms (compile: 5ms, proxy.ts: 5ms, render: 68ms)
+⨯ ./src/components/decupagem/decupagem-view.tsx:1:17
+Ecmascript file had an error
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m [33mReact[39m[33m,[39m { useState[33m,[39m memo } [36mfrom[39m [32m'react'[39m[33m;[39m
+ [90m   |[39m                 [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@/components/ui/button'[39m[33m;[39m
+ [90m 3 |[39m [36mimport[39m { [33mScrollArea[39m } [36mfrom[39m [32m'@/components/ui/scroll-area'[39m[33m;[39m
+ [90m 4 |[39m [36mimport[39m { [33mAlertCircle[39m[33m,[39m [33mDownload[39m[33m,[39m [33mPlay[39m[33m,[39m [33mRefreshCw[39m[33m,[39m [33mScissors[39m } [36mfrom[39m [32m'lucide-react'[39m[33m;[39m[0m
+
+You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+
+
+Import trace:
+  Server Component:
+    ./src/components/decupagem/decupagem-view.tsx
+    ./src/app/test-decupagem/page.tsx
+
+
+ GET /test-decupagem 500 in 71ms (compile: 50ms, proxy.ts: 4ms, render: 17ms)
+✓ Compiled in 67ms
+ GET /test-decupagem 200 in 296ms (compile: 129ms, proxy.ts: 4ms, render: 164ms)
