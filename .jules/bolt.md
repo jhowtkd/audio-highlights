@@ -33,3 +33,10 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-04-02 - Waveform Data Processing Overheads
+
+**Bottleneck:** CPU overhead calculating unneeded divisions and a potential Maximum Call Stack Size Exceeded error when normalizing audio waveform data for large audio files.
+**Learning:** Math.max(...array) will cause OOM or stack limit exceptions on sufficiently large arrays. Using reduce resolves this. Also, division operations mathematically cancel out during later normalization against max values, so preliminary block summation division can be entirely bypassed.
+**Action:** Use reduce for large array aggregations and proactively eliminate math ops that later cancel out during percentage calculations.
+**Code:** `const multiplier = filteredData.reduce((max, current) => current > max ? current : max, 0);`
