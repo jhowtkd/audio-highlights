@@ -42,3 +42,9 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2026-03-02 - Redundant announcements on remove video button
+
+**UX Problem:** Screen readers were announcing the remove video icon redundantly or not reading the action at all, leading to confusion.
+**Learning:** Icon-only buttons should explicitly be labeled with `aria-label` to ensure functionality is described. The icon itself must be marked `aria-hidden='true'` so it is not redundantly announced.
+**Solution:** Added `aria-label='Remover vídeo'` to the container `<Button>` and `aria-hidden='true'` to the child `<X>` icon in `page.tsx` and `tasks/[id]/page.tsx`.
+**Pattern:** Always pair `aria-label` on the wrapper element with `aria-hidden='true'` on the internal icon element for icon-only buttons.
