@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Automated Video Cropping Research
+
+**Research Topic:** Automated Video Cropping for Vertical Platforms (16:9 to 9:16)
+
+**Finding:**
+Evaluated FFmpeg's `crop` filter as a lightweight method to automatically convert landscape 16:9 videos to 9:16 vertical aspect ratio for platforms like TikTok/Reels. The POC confirmed that `-vf 'crop=ih*9/16:ih'` effectively center-crops the video.
+
+**Decision:**
+Propose adding an "Auto-Crop to Vertical" feature. It adds immense value by reducing the need for secondary video editing tools. The trade-off is that it requires re-encoding the video (unlike the current fast stream copy), but this is acceptable given the workflow improvement for the user.
+
+**Learning:**
+While advanced AI tracking exists, a simple center crop covers a large percentage of typical podcast setups (where the speaker is centered). For features like this, starting with a simple, computationally cheap FFmpeg filter provides immediate value before investing in complex ML solutions.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#crop
+- research/proposals/2026-03-01-auto-crop.md
