@@ -435,8 +435,9 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                                     size="sm"
                                                     onClick={handleRemoveVideo}
                                                     className="text-red-500 hover:text-red-600"
+                                                    aria-label="Remover vídeo"
                                                 >
-                                                    <X className="h-4 w-4" />
+                                                    <X className="h-4 w-4" aria-hidden="true" />
                                                 </Button>
                                             ) : (
                                                 <label>
