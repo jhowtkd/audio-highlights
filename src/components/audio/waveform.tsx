@@ -74,7 +74,9 @@ export function Waveform({
                     });
 
                     // Normalize
-                    const max = Math.max(...data, 1);
+                    // Bolt: Performance Optimization
+                    // Avoid Math.max(...array) on large arrays to prevent call stack limits
+                    const max = data.reduce((a, b) => Math.max(a, b), 1);
                     const normalizedData = data.map(v => Math.min(1, (v / max) * 1.5)); // 1.5x gain for visibility
 
                     setWaveformData(normalizedData);
@@ -106,11 +108,16 @@ export function Waveform({
                         sum += Math.abs(channelData[blockStart + j]);
                     }
 
-                    filteredData.push(sum / blockSize);
+                    // Bolt: Performance Optimization
+                    // Do not divide by blockSize here; the scalar division cancels out
+                    // mathematically during normalization and adds redundant CPU overhead.
+                    filteredData.push(sum);
                 }
 
                 // Normalize the data
-                const multiplier = Math.max(...filteredData);
+                // Bolt: Performance Optimization
+                // Avoid Math.max(...array) on potentially large arrays to prevent stack limits
+                const multiplier = filteredData.reduce((a, b) => Math.max(a, b), 0) || 1;
                 const normalizedData = filteredData.map(n => n / multiplier);
 
                 setWaveformData(normalizedData);
