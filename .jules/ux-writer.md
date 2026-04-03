@@ -32,3 +32,18 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-04-03 - Replaced generic error messages
+
+**Copy Type:** Error messages and empty states
+
+**Original:** "Erro ao analisar decupagem", "Arquivo não encontrado", "Erro na transcrição", "Falha na análise", "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
+
+**Changed To:** "Não foi possível analisar a decupagem. Tente novamente.", "Arquivo não encontrado. Por favor, envie novamente.", "Não foi possível transcrever. Verifique o arquivo e tente de novo.", "Não foi possível analisar. Tente de novo.", "Arquivos muito curtos podem não gerar bons cortes. Tente enviar um áudio de pelo menos 1 minuto."
+
+**Learning:** Generic error messages like "Erro ao..." or "Falha na..." cause confusion and do not provide clear next steps. In addition, the explanation for why a short file isn't recommended needed to be clearer. Providing actionable suggestions reduces support tickets and improves UX.
+
+**Rule:** For this app, ALWAYS:
+1. Replace generic "Error" prefixes with "Não foi possível [ação]".
+2. Include a clear next step (e.g. "Tente novamente", "Por favor, envie novamente").
+3. Make error messages conversational and empathetic.

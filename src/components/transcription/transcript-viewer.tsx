@@ -171,7 +171,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
     }
 
     downloadFile(content, filename);
-    toast.success(`Transcrição baixada: ${filename}`);
+    toast.success(`Arquivo baixado: ${filename}`);
     setShowExportMenu(false);
   }, [segments]);
 

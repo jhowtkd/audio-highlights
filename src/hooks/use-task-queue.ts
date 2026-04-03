@@ -39,7 +39,7 @@ export function useTaskQueue() {
         const file = getTaskFile(taskId);
 
         if (!task || !file) {
-            failTask(taskId, 'Arquivo não encontrado');
+            failTask(taskId, 'Arquivo não encontrado. Por favor, envie novamente.');
             return;
         }
 
@@ -124,7 +124,7 @@ export function useTaskQueue() {
                 }
 
                 if (!response.ok) {
-                    throw new Error(data.error || 'Erro na transcrição');
+                    throw new Error(data.error || 'Não foi possível transcrever. Verifique o arquivo e tente de novo.');
                 }
 
                 transcription = data.transcription;
@@ -156,9 +156,9 @@ export function useTaskQueue() {
 
         } catch (error) {
             console.error('Erro no processamento:', error);
-            const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
+            const errorMessage = error instanceof Error ? error.message : 'Algo deu errado. Tente novamente em alguns minutos.';
             failTask(taskId, errorMessage);
-            toast.error(`Erro ao processar "${task.filename}": ${errorMessage}`);
+            toast.error(`Não foi possível processar "${task.filename}": ${errorMessage}`);
         }
     }, [getTask, getTaskFile, startProcessing, updateProgress, completeTask, failTask, convertToMp3, splitAudio]);
 
@@ -216,7 +216,7 @@ export function useTaskQueue() {
             return true;
         } catch (error) {
             console.error('Error retrying task:', error);
-            toast.error('Erro ao reiniciar processamento');
+            toast.error('Não foi possível reiniciar. Tente enviar o arquivo novamente.');
             return false;
         }
     }, [state.tasks, getTaskFile, context, resetTask, processQueue]);

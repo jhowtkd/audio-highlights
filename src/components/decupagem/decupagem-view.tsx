@@ -34,7 +34,7 @@ export const DecupagemView = memo(function DecupagemView({ segments, projectId }
 
             if (!response.ok) {
                 const errorData = await response.json();
-                throw new Error(errorData.error || 'Falha na análise');
+                throw new Error(errorData.error || 'Não foi possível analisar. Tente de novo.');
             }
 
             const data = await response.json();
@@ -43,7 +43,7 @@ export const DecupagemView = memo(function DecupagemView({ segments, projectId }
                 toast.success('Análise de decupagem concluída!');
             }
         } catch (error) {
-            toast.error('Erro ao analisar decupagem');
+            toast.error('Não foi possível analisar a decupagem. Tente novamente.');
             console.error(error);
         } finally {
             setIsAnalyzing(false);
@@ -84,7 +84,7 @@ export const DecupagemView = memo(function DecupagemView({ segments, projectId }
                 })
             });
 
-            if (!response.ok) throw new Error('Falha na exportação');
+            if (!response.ok) throw new Error('Não foi possível exportar. Verifique sua conexão.');
 
             const blob = await response.blob();
             const url = window.URL.createObjectURL(blob);
@@ -96,9 +96,9 @@ export const DecupagemView = memo(function DecupagemView({ segments, projectId }
             window.URL.revokeObjectURL(url);
             document.body.removeChild(a);
 
-            toast.success(`Exportado como ${format.toUpperCase()}`);
+            toast.success(`Arquivo ${format.toUpperCase()} baixado!`);
         } catch {
-            toast.error('Erro ao exportar');
+            toast.error('Não foi possível baixar o arquivo. Tente novamente.');
         }
     };
 
