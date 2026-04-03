@@ -133,7 +133,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
 
     const handleGenerateHighlights = useCallback(async (config: HighlightConfig) => {
         if (!task?.result?.transcription) {
-            toast.error('Transcrição não encontrada');
+            toast.error('Transcrição não encontrada. Tente recarregar a página.');
             return;
         }
 
@@ -161,7 +161,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
 
             if (!response.ok) {
                 const error = await response.json();
-                throw new Error(error.error || 'Erro ao gerar highlights');
+                throw new Error(error.error || 'Não foi possível gerar highlights. Tente novamente.');
             }
 
             const data = await response.json();
@@ -179,7 +179,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
             toast.success(`${data.highlights.length} highlights gerados!`);
         } catch (error) {
             console.error('Erro:', error);
-            toast.error(error instanceof Error ? error.message : 'Erro ao gerar highlights');
+            toast.error(error instanceof Error ? error.message : 'Não foi possível gerar highlights. Tente novamente.');
         } finally {
             setIsGenerating(false);
         }
@@ -305,16 +305,16 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                             <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
                         </div>
                         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                            Projeto não disponível
+                            Não encontramos este projeto
                         </h2>
                         <p className="text-slate-600 dark:text-slate-400 mb-6">
                             {task.status === 'error'
                                 ? `Erro: ${task.error}`
-                                : 'Este projeto ainda não foi processado ou não existe.'}
+                                : 'O arquivo pode ter sido removido ou ainda está na fila. Volte para ver seus projetos.'}
                         </p>
                         <Button onClick={() => router.push('/tasks')}>
                             <ArrowLeft className="h-4 w-4 mr-2" />
-                            Voltar para Projetos
+                            Ver todos os projetos
                         </Button>
                     </div>
                 </main>
