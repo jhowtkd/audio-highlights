@@ -1,7 +1,7 @@
 'use client';
 
 import { memo } from 'react';
-import { Download, Clock, Percent, Check } from 'lucide-react';
+import { Download, Clock, Percent, Check, Sparkles } from 'lucide-react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { HighlightCard } from './highlight-card';
@@ -62,9 +62,16 @@ export const HighlightList = memo(function HighlightList({ highlights, segments,
 
   if (highlights.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-12 text-slate-500">
-        <p>Nenhum highlight gerado ainda</p>
-        <p className="text-sm mt-1">Configure os parâmetros e clique em &quot;Gerar Highlights&quot;</p>
+      <div className="flex flex-col items-center justify-center py-16 px-4 text-center border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl bg-slate-50/50 dark:bg-slate-900/50">
+        <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4">
+          <Sparkles className="w-6 h-6 text-slate-400 dark:text-slate-500" aria-hidden="true" />
+        </div>
+        <h3 className="text-lg font-medium text-slate-900 dark:text-slate-100 mb-1">
+          Nenhum highlight gerado
+        </h3>
+        <p className="text-sm text-slate-500 dark:text-slate-400 max-w-sm">
+          Ajuste as configurações no painel acima e clique em &quot;Gerar Highlights&quot; para extrair os melhores momentos do seu áudio.
+        </p>
       </div>
     );
   }
