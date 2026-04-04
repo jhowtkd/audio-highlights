@@ -32,3 +32,17 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2024-04-04 - Empty State Tone Decision
+
+**Copy Type:** Empty state for highlight generation results
+
+**Original:** "Nenhum highlight gerado ainda \n Configure os parâmetros e clique em \"Gerar Highlights\""
+
+**Changed To:** "Nenhum highlight gerado \n Configure os parâmetros acima e clique em \"Gerar Highlights\" para começar."
+
+**Learning:** Empty states should be action-oriented and visually appealing. The original copy was a bit dry and didn't clearly indicate what to do next. Adding a "Sparkles" icon makes it friendlier, and saying "para começar" (to get started) encourages user action. Removing "ainda" (yet) makes it slightly more direct.
+
+**Rule:** For empty states, ALWAYS:
+1. Provide a clear, action-oriented next step.
+2. Use an icon to make it visually appealing and indicate the type of content.
+3. Be encouraging and helpful.
