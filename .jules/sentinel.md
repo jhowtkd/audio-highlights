@@ -31,3 +31,31 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2024-05-24 - Information Disclosure in Health Endpoint
+
+**Vulnerability:** The public health endpoint (`/api/health`) was leaking internal configuration state, specifically whether `GROQ_API_KEY` was configured and the current `NODE_ENV`.
+**Root Cause:** The endpoint was designed to provide diagnostic information, but failed to distinguish between safe uptime status and sensitive configuration details, exposing them to unauthenticated requests.
+**Learning:** Public health endpoints must strictly limit their responses to generic status indicators (e.g., `status: 'ok'`). Detailed diagnostic information or configuration state should only be accessible via authenticated and authorized administrative endpoints.
+**Prevention:** Never include `process.env` values or derived configuration flags in public API responses.
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+export async function GET() {
+    return NextResponse.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+        env: {
+            groq_configured: !!process.env.GROQ_API_KEY,
+            node_env: process.env.NODE_ENV,
+        }
+    });
+}
+
+// Secure pattern to use:
+export async function GET() {
+    return NextResponse.json({
+        status: 'ok',
+        timestamp: new Date().toISOString(),
+    });
+}
+```
