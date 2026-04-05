@@ -102,3 +102,21 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-10 - Server-Side Burned-in Subtitles Research
+
+**Research Topic:** Providing ready-to-publish social media clips with burned-in subtitles.
+
+**Finding:**
+Users currently have to download video and SRT files separately, forcing them to use third-party editors (CapCut/Premiere). Using FFmpeg's `subtitles` filter, we can burn SRT directly onto the video frames during the export process.
+POC in `research/pocs/burned-subtitles` proved that `fluent-ffmpeg` handles this perfectly if paths are escaped.
+
+**Decision:**
+Propose extending `ffmpeg-service` to include a "burn subtitles" endpoint.
+
+**Learning:**
+Burning subtitles requires re-encoding the video (`-c:v libx264` instead of `-c copy`). This significantly increases server load and processing time compared to standard cutting, meaning we may need to introduce queuing or limit resolutions for this feature.
+Path escaping for the `subtitles` filter is tricky and requires replacing backslashes and escaping colons.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
