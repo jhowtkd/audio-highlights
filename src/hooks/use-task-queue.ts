@@ -234,9 +234,15 @@ export function useTaskQueue() {
         tasks: state.tasks,
         currentTaskId: state.currentTaskId,
         isProcessing: state.isProcessing,
-        pendingCount: state.tasks.filter(t => t.status === 'pending').length,
-        completedCount: state.tasks.filter(t => t.status === 'completed').length,
-        errorCount: state.tasks.filter(t => t.status === 'error').length,
+        ...state.tasks.reduce(
+            (acc, t) => {
+                if (t.status === 'pending') acc.pendingCount++;
+                else if (t.status === 'completed') acc.completedCount++;
+                else if (t.status === 'error') acc.errorCount++;
+                return acc;
+            },
+            { pendingCount: 0, completedCount: 0, errorCount: 0 }
+        ),
 
         // Ações
         addTask,
