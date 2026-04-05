@@ -32,3 +32,26 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2025-01-14 - Empty State Tone and Clarity Decision
+
+**Copy Type:** Empty state for highlight generation
+
+**Original:**
+"Nenhum highlight gerado ainda"
+"Configure os parâmetros e clique em \"Gerar Highlights\""
+
+**Changed To:**
+"Pronto para criar seus highlights?"
+"Ajuste as configurações ao lado e clique em \"Gerar Highlights\" para extrair os melhores momentos do seu áudio."
+
+**Learning:** This app's users need clear instructions that focus on the value provided (extracting the best moments) rather than just stating the lack of data. A more engaging question acts as a prompt for action.
+
+**Rule:** For this app, ALWAYS:
+1. Use a positive, action-oriented header for empty states instead of a dry "No items" statement.
+2. Explain what the user needs to do *and* why (the value they will get).
+3. Include a relevant icon to visually engage the user.
+
+**Pattern to follow:**
+- ❌ "Nenhum [item]" + "Faça X"
+- ✅ "Pronto para [ação principal]?" + "Faça X para [obter valor]"
