@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wavesurfer.js POC (v7)</title>
+    <!-- Include React, ReactDOM, and Babel -->
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <!-- Include Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        body { margin: 0; padding: 20px; font-family: system-ui, -apple-system, sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50 dark:bg-slate-900 text-slate-900 dark:text-slate-100 min-h-screen">
+    <div id="root" class="max-w-4xl mx-auto"></div>
+
+    <script type="module">
+        // Import Wavesurfer and RegionsPlugin as ES modules from CDN
+        import WaveSurfer from 'https://unpkg.com/wavesurfer.js@7/dist/wavesurfer.esm.js';
+        import RegionsPlugin from 'https://unpkg.com/wavesurfer.js@7/dist/plugins/regions.esm.js';
+
+        // Expose to window so our Babel compiled script can access them
+        window.WaveSurfer = WaveSurfer;
+        window.RegionsPlugin = RegionsPlugin;
+    </script>
+
+    <script type="text/babel">
+        const { useState, useEffect, useRef, useCallback } = React;
+        const WaveSurfer = window.WaveSurfer;
+        const RegionsPlugin = window.RegionsPlugin;
+
+        const AUDIO_URL = 'https://www.w3schools.com/html/horse.mp3'; // Example audio
+
+        // Example mock highlights
+        const mockHighlights = [
+            { id: '1', startTime: 0.5, endTime: 1.5, title: 'Highlight 1', color: 'rgba(59, 130, 246, 0.3)' },
+            { id: '2', startTime: 2.0, endTime: 2.5, title: 'Highlight 2', color: 'rgba(236, 72, 153, 0.3)' }
+        ];
+
+        function WaveformPOC() {
+            const containerRef = useRef(null);
+            const wavesurferRef = useRef(null);
+            const regionsRef = useRef(null);
+            const [isPlaying, setIsPlaying] = useState(false);
+            const [isReady, setIsReady] = useState(false);
+            const [currentTime, setCurrentTime] = useState(0);
+            const [duration, setDuration] = useState(0);
+
+            useEffect(() => {
+                if (!containerRef.current || !window.WaveSurfer || !window.RegionsPlugin) return;
+
+                console.log('Initializing WaveSurfer v7 with media option');
+
+                // 1. Create a native hidden audio element
+                // This is crucial for avoiding OOM crashes on large files.
+                // It streams the audio instead of full PCM decode.
+                const audio = new Audio();
+                audio.src = AUDIO_URL;
+                audio.crossOrigin = "anonymous";
+
+                // 2. Initialize the Regions plugin
+                const wsRegions = RegionsPlugin.create();
+                regionsRef.current = wsRegions;
+
+                // 3. Initialize WaveSurfer
+                const wavesurfer = WaveSurfer.create({
+                    container: containerRef.current,
+                    waveColor: '#cbd5e1',
+                    progressColor: '#3b82f6',
+                    cursorColor: '#ef4444',
+                    cursorWidth: 2,
+                    height: 80,
+                    normalize: true,
+                    // Pass the native audio element to use media mode instead of Web Audio buffer
+                    media: audio,
+                    // Register plugins
+                    plugins: [wsRegions],
+                });
+
+                wavesurferRef.current = wavesurfer;
+
+                // Event Listeners
+                wavesurfer.on('ready', () => {
+                    setIsReady(true);
+                    setDuration(wavesurfer.getDuration());
+
+                    // Add highlight regions once ready
+                    mockHighlights.forEach(highlight => {
+                        wsRegions.addRegion({
+                            id: highlight.id,
+                            start: highlight.startTime,
+                            end: highlight.endTime,
+                            content: highlight.title,
+                            color: highlight.color,
+                            drag: false,
+                            resize: false,
+                        });
+                    });
+                });
+
+                wavesurfer.on('play', () => setIsPlaying(true));
+                wavesurfer.on('pause', () => setIsPlaying(false));
+
+                wavesurfer.on('audioprocess', () => {
+                    setCurrentTime(wavesurfer.getCurrentTime());
+                });
+
+                wavesurfer.on('seeking', () => {
+                    setCurrentTime(wavesurfer.getCurrentTime());
+                });
+
+                // Cleanup
+                return () => {
+                    wavesurfer.destroy();
+                };
+            }, []);
+
+            const togglePlay = useCallback(() => {
+                if (wavesurferRef.current) {
+                    wavesurferRef.current.playPause();
+                }
+            }, []);
+
+            const formatTime = (timeInSeconds) => {
+                const mins = Math.floor(timeInSeconds / 60);
+                const secs = Math.floor(timeInSeconds % 60);
+                return `${mins}:${secs.toString().padStart(2, '0')}`;
+            };
+
+            return (
+                <div className="space-y-6 bg-white dark:bg-slate-800 p-6 rounded-xl shadow-sm border border-slate-200 dark:border-slate-700">
+                    <div>
+                        <h2 className="text-xl font-bold mb-2">WaveSurfer v7 Integration POC</h2>
+                        <p className="text-slate-500 text-sm mb-4">
+                            Demonstrating WaveSurfer v7 using the <code>media</code> option with an HTML5 Audio element.
+                            This streams the audio to prevent Out of Memory (OOM) crashes on large files,
+                            resolving the current issue with <code>AudioBuffer.decodeAudioData</code>.
+                        </p>
+                    </div>
+
+                    <div className="space-y-2">
+                        {/* Waveform Container */}
+                        <div
+                            ref={containerRef}
+                            className="bg-slate-50 dark:bg-slate-900 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700"
+                        />
+
+                        <div className="flex justify-between text-xs text-slate-500 font-mono px-1">
+                            <span>{formatTime(currentTime)}</span>
+                            <span>{formatTime(duration)}</span>
+                        </div>
+                    </div>
+
+                    <div className="flex items-center gap-4">
+                        <button
+                            onClick={togglePlay}
+                            disabled={!isReady}
+                            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+                                isReady
+                                    ? 'bg-blue-600 hover:bg-blue-700 text-white'
+                                    : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                            }`}
+                        >
+                            {isPlaying ? 'Pause' : 'Play'}
+                        </button>
+
+                        {!isReady && (
+                            <span className="text-sm text-slate-500 animate-pulse">Loading audio data...</span>
+                        )}
+                    </div>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+
+        // Wait a small tick to ensure ES modules are loaded
+        setTimeout(() => {
+            root.render(<WaveformPOC />);
+        }, 100);
+    </script>
+</body>
+</html>
