@@ -31,3 +31,10 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-04-06 - Information Disclosure in Health Check Endpoint
+
+**Vulnerability:** The `/api/health` endpoint exposed backend environment details, specifically `NODE_ENV` and whether the `GROQ_API_KEY` was configured.
+**Root Cause:** The endpoint was designed to provide diagnostic information but failed to consider the security implications of exposing this data on an unauthenticated, public route.
+**Learning:** Health check endpoints should provide the absolute minimum information necessary (e.g., status: ok). Exposing environment variables or configuration states can leak internal architecture details useful for reconnaissance.
+**Prevention:** Never include the `env` object or any internal state variables in responses from public health endpoints.
