@@ -32,3 +32,24 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2025-01-25 - Upload Error Microcopy Optimization
+
+**Copy Type:** Error messages for file upload validation
+
+**Original:**
+- "Nenhum arquivo enviado"
+- "Formato inválido. Aceitamos: MP3, WAV, M4A, OGG, FLAC, WebM."
+- "Formato não suportado"
+
+**Changed To:**
+- "Nenhum arquivo selecionado. Escolha um arquivo de áudio ou vídeo para enviar."
+- "O arquivo deve ser um áudio ou vídeo válido (MP3, WAV, M4A, OGG, FLAC, WebM)."
+- "Formato não suportado. Tente um arquivo de áudio ou vídeo."
+
+**Learning:** Vague, system-centric error messages like "invalid format" or "no file sent" don't help the user resolve the issue. By rephrasing them to suggest an actionable next step ("Escolha um arquivo de áudio ou vídeo", "Tente um arquivo de áudio ou vídeo") and replacing harsh phrasing ("Formato inválido"), we empower the user and maintain a friendlier tone.
+
+**Rule:** For file upload errors in this app, ALWAYS:
+1. Specify what went wrong in plain language.
+2. Provide a clear, actionable next step (e.g., what kind of file to try).
+3. Avoid blunt terms like "Inválido" or "Falhou" when a friendlier alternative exists.

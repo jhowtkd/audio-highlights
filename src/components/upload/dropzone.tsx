@@ -235,7 +235,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
           <p className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-1">
             {isDragActive
               ? isDragReject
-                ? 'Formato não suportado'
+                ? 'Formato não suportado. Tente um arquivo de áudio ou vídeo.'
                 : 'Solte o arquivo aqui'
               : 'Arraste seu áudio aqui'}
           </p>
