@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-04-07 - Advanced Waveform Navigation Research
+
+**Research Topic:** Upgrading audio visualization for precision editing.
+
+**Finding:** Evaluated `wavesurfer.js` v7 for replacing the custom Canvas waveform.
+- POC confirmed that using the `media` property (passing an HTML `<audio>` element) effectively streams the audio, avoiding the severe OOM crashes caused by the current `AudioContext.decodeAudioData` full-file decoding.
+- `RegionsPlugin` easily replaces our custom highlight rendering and adds drag-to-resize capabilities out of the box.
+
+**Decision:** Proposed adopting `wavesurfer.js`.
+- It solves the performance/crash issues for long podcasts while adding necessary professional features (zoom, interactive regions) without having to build them from scratch.
+
+**Learning:** When dealing with large media files on the web, always prioritize streaming APIs (like HTMLMediaElement) over full-buffer processing APIs (like WebAudio's `decodeAudioData`) to prevent memory exhaustion on user devices.
+
+**Resources:**
+- https://wavesurfer.xyz/docs/
+- research/proposals/2026-04-07-advanced-waveform-navigation.md
