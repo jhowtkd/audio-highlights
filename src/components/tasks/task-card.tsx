@@ -208,7 +208,7 @@ export function TaskCard({ task }: TaskCardProps) {
                                 variant="ghost"
                                 onClick={() => removeTask(task.id)}
                                 className="text-slate-500 hover:text-red-600"
-                                title="Excluir projeto"
+                                title="Excluir permanentemente"
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>
