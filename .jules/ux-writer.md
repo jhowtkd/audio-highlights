@@ -32,3 +32,14 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2026-01-24 - Empty State and Tooltip Tone Decision
+
+**Copy Type:** Empty states and button tooltips
+
+**Original:** "Nenhum highlight gerado ainda", "Excluir projeto"
+
+**Changed To:** "Ainda não há highlights. Configure os parâmetros e clique em 'Gerar Highlights'.", "Excluir permanentemente"
+
+**Learning:** Vague empty states leave users without clear next steps. Vague tooltips on destructive actions don't convey the severity of the action.
+
+**Rule:** For empty states, always describe the situation and provide an actionable next step. For destructive actions, make the consequence clear in the label/tooltip.
