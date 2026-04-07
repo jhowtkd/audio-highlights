@@ -188,7 +188,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
       {/* Search Bar */}
       <div className="flex items-center gap-2 mb-4 pb-4 border-b border-slate-200 dark:border-slate-700">
         <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" aria-hidden="true" />
           <Input
             type="text"
             placeholder="Busca semântica... (ex: 'fale sobre dinheiro')"
@@ -205,7 +205,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
               className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
               aria-label="Limpar busca"
             >
-              <X className="h-4 w-4" />
+              <X className="h-4 w-4" aria-hidden="true" />
             </button>
           )}
         </div>
