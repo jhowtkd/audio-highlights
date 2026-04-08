@@ -238,7 +238,7 @@ async function transcribeSingleFile(
         data = JSON.parse(responseText);
     } catch {
         console.error('Response was not JSON:', responseText.substring(0, 200));
-        throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
+        throw new Error('Não foi possível conectar ao servidor. Tente novamente em alguns instantes.');
     }
 
     if (!response.ok) {
@@ -270,7 +270,7 @@ async function transcribeChunk(file: File, projectId: string, retries = 3): Prom
                 data = JSON.parse(responseText);
             } catch {
                 console.error('Response was not JSON:', responseText.substring(0, 200));
-                throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
+                throw new Error('Não foi possível conectar ao servidor. Tente novamente em alguns instantes.');
             }
 
             if (!response.ok) {

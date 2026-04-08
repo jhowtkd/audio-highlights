@@ -120,7 +120,7 @@ export function useTaskQueue() {
                     data = JSON.parse(responseText);
                 } catch {
                     // Fallback for non-JSON errors (like 403 Forbidden HTML)
-                    throw new Error(`Server Error (${response.status}): ${responseText.substring(0, 100)}...`);
+                    throw new Error('Não foi possível conectar ao servidor. Tente novamente em alguns instantes.');
                 }
 
                 if (!response.ok) {
