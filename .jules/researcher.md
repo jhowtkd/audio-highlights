@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-04-08 - Client-Side Bulk ZIP Export
+
+**Research Topic:** UX and architectural patterns for multi-file export in browser
+
+**Finding:** Evaluated `jszip` for client-side generation of ZIP archives containing media files (Blobs) and generated text files (Strings).
+- Using `generateAsync({ type: "blob" })` handles memory decently by not blocking the main thread entirely, though heavy compression on already-compressed media (mp4/mp3) is CPU intensive for negligible gains.
+
+**Decision:** Proposed implementing `jszip` using the "STORE" method (no extra compression) to bundle exported highlights (media + transcript + subtitles).
+- Simplifies UX significantly (one click instead of three for related assets).
+- Avoids server-side zipping which would drain Vercel bandwidth and execution time.
+
+**Learning:** When exporting collections of media files in modern web apps, client-side ZIP packing is highly preferred over server-side, but it's critical to disable compression (DEFLATE) for already-compressed media files to avoid unnecessary CPU spin-ups and browser crashes on mobile.
+
+**Resources:**
+- https://stuk.github.io/jszip/
