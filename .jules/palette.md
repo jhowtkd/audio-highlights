@@ -42,3 +42,11 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2026-04-09 - Redundant Icon Announcements
+
+**UX Problem:** Screen readers were announcing both the `aria-label` of icon-only buttons and the SVG elements inside them (e.g., 'Voltar 10 segundos, SkipBack'), causing redundant and confusing feedback.
+**Learning:** SVG icons inside elements with an `aria-label` are still reachable by screen readers unless explicitly hidden, especially when using third-party icon libraries like `lucide-react` that may add default titles or roles.
+**Solution:** Added `aria-hidden="true"` to all `lucide-react` icon elements inside icon-only buttons across the application (e.g., `AudioPlayer`, `ThemeToggle`, `CopyButton`).
+**Pattern:** For this design system, ALL icon-only buttons must have:
+1. A descriptive `aria-label` on the `<Button>` or `<button>` element.
+2. `aria-hidden="true"` on the internal SVG/icon element to prevent redundant announcements.
