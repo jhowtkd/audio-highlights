@@ -63,13 +63,32 @@ function generateCMX3600(segments: DecupageSegment[], fps: number = 24): string 
 }
 
 /**
+ * Sanitizes a field for CSV export to prevent Formula Injection (CSV Injection).
+ */
+function sanitizeCSVField(field: string): string {
+    if (!field) return '';
+    // Characters that trigger formula execution in spreadsheet software
+    const dangerousChars = ['=', '+', '-', '@', '\t', '\r'];
+    if (dangerousChars.includes(field.charAt(0))) {
+        // Prepend a single quote to force spreadsheet software to treat the field as text
+        return `'${field}`;
+    }
+    return field;
+}
+
+/**
  * Generates a simple CSV for manual review
  */
 function generateCSV(segments: DecupageSegment[]): string {
     let csv = 'Start Time,End Time,Duration,Text,Problem,Suggestion,Reason\n';
 
     segments.forEach(seg => {
-        csv += `${seg.startTime.toFixed(3)},${seg.endTime.toFixed(3)},${(seg.endTime - seg.startTime).toFixed(3)},"${seg.text.replace(/"/g, '""')}","${seg.problemType}","${seg.suggestion}","${seg.reason}"\n`;
+        const text = sanitizeCSVField(seg.text).replace(/"/g, '""');
+        const problemType = sanitizeCSVField(seg.problemType).replace(/"/g, '""');
+        const suggestion = sanitizeCSVField(seg.suggestion).replace(/"/g, '""');
+        const reason = sanitizeCSVField(seg.reason).replace(/"/g, '""');
+
+        csv += `${seg.startTime.toFixed(3)},${seg.endTime.toFixed(3)},${(seg.endTime - seg.startTime).toFixed(3)},"${text}","${problemType}","${suggestion}","${reason}"\n`;
     });
 
     return csv;
