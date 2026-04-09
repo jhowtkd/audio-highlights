@@ -32,3 +32,18 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-05-18 - Error Message Tone Decision
+
+**Copy Type:** Error message for generic processing failures
+
+**Original:** "Tivemos um problema técnico. Por favor, tente novamente."
+
+**Changed To:** "Não foi possível processar seu arquivo. Tente novamente em alguns minutos."
+
+**Learning:** Vague technical language and immediate retry prompts for processing errors are unhelpful. Giving a specific reason (couldn't process file) and a realistic next step (try again in a few minutes) sets better user expectations and reduces frustration.
+
+**Rule:** For generic processing errors, ALWAYS:
+1. Avoid technical jargon (like "problema técnico").
+2. Explain what failed in user terms.
+3. Provide a realistic timeline for retrying if applicable.
