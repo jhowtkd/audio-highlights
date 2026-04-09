@@ -33,3 +33,19 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2025-02-18 - Optimized Multiple Array Passes for Status Counts
+
+**Bottleneck:** In `useTaskQueue`, deriving counts for `pending`, `completed`, and `error` task statuses was done using three separate `state.tasks.filter(t => t.status === '...').length` calls. This causes array iterations of O(3N).
+**Learning:** Multiple array traversals can be replaced with a single `reduce` pass to minimize looping overhead, particularly when recalculating counts on status change. Combining this with `useMemo` avoids redundant iteration and array creation during re-renders.
+**Action:** When extracting multiple statistics (counts, sums) based on conditional items in a list, utilize a single `reduce` traversal wrapping the counts in an accumulator object.
+**Code:**
+```typescript
+const counts = useMemo(() => {
+    return state.tasks.reduce((acc, t) => {
+        if (t.status === 'pending') acc.pending++;
+        else if (t.status === 'completed') acc.completed++;
+        else if (t.status === 'error') acc.error++;
+        return acc;
+    }, { pending: 0, completed: 0, error: 0 });
+}, [state.tasks]);
+```
