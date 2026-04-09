@@ -102,3 +102,24 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Audiogram Export Feature
+
+**Research Topic:** Generating video audiograms (waveforms) from audio highlights
+
+**Finding:**
+Evaluated client-side Canvas recording vs. server-side FFmpeg generation. Client-side approach is unreliable on mobile and suffers from A/V sync issues.
+FFmpeg's `showwaves` complex filter can generate high-quality video waveforms server-side directly from audio inputs.
+POC confirmed successful generation of a 9:16 mobile-friendly video with a synced waveform.
+
+**Decision:**
+Propose adding a `/generate-audiogram` endpoint to the `ffmpeg-service`.
+This ensures high-quality output compatible with social media (TikTok/Reels) without relying on third-party apps, at the cost of server CPU for video encoding.
+
+**Learning:**
+FFmpeg complex filtergraphs (`-filter_complex`) are extremely powerful for composing visuals. The `showwaves` filter is efficient enough for short clips.
+Always use a dependency like `ffmpeg-static` in Node POCs to guarantee the binary is available.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#showwaves
+- research/proposals/2026-03-01-audiogram-export.md
