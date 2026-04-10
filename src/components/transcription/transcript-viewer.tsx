@@ -178,7 +178,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
   if (segments.length === 0) {
     return (
       <div className={cn('flex items-center justify-center h-64 text-slate-500', className)}>
-        Nenhuma transcrição disponível
+        Sua transcrição aparecerá aqui.
       </div>
     );
   }
