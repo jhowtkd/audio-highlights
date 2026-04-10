@@ -42,3 +42,12 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-01-24 - Screen Reader Redundancy on Icon-only Theme Toggle
+
+**UX Problem:** The theme toggle button had an `aria-label` but the internal `Sun` and `Moon` SVG icons lacked `aria-hidden="true"`. Screen readers could potentially announce both the button's descriptive label and generic SVG content, creating a confusing or redundant auditory experience. Additionally, the initial loading (disabled) state lacked an `aria-label` entirely.
+**Learning:** Even when using robust UI libraries (like shadcn/ui or lucide-react), raw SVGs inside icon-only buttons aren't automatically hidden from the accessibility tree. We must explicitly opt them out. Loading states of buttons also need to be accessible.
+**Solution:** Added `aria-label="Carregando tema"` to the initially disabled state and `aria-hidden="true"` to both `Sun` and `Moon` icon components.
+**Pattern:** For this design system, ALL icon-only buttons must have:
+1. An `aria-label` on the parent `<button>` (including disabled/loading states).
+2. `aria-hidden="true"` applied to the internal SVG or Icon component.
