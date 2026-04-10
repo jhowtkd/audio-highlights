@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-05 - Empty State Refinement
+
+**Copy Type:** Empty states for Highlights and Transcription
+**Original:** "Nenhum highlight gerado ainda" / "Configure os parâmetros e clique em \"Gerar Highlights\"" and "Nenhuma transcrição disponível"
+**Changed To:** "Nenhum highlight gerado" / "Configure a duração e clique em \"Gerar Highlights\" para começar." and "Sua transcrição aparecerá aqui."
+**Learning:** "Ainda" in "Nenhum highlight gerado ainda" implies the user is waiting, which is incorrect if they haven't started an action. "Parâmetros" is technical jargon. In the transcript viewer, "Nenhuma transcrição disponível" is passive and unhelpful. Replacing it with "Sua transcrição aparecerá aqui." tells the user what will happen in this space.
+**Rule:** For empty states, replace technical terms with specific actionable ones ("parâmetros" -> "duração") and provide context for what will appear in the empty space rather than just stating it's empty.
