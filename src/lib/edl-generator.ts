@@ -63,13 +63,32 @@ function generateCMX3600(segments: DecupageSegment[], fps: number = 24): string 
 }
 
 /**
+ * Sanitizes a field to prevent CSV Formula Injection.
+ * Checks for leading dangerous characters and prepends a single quote if necessary.
+ * Also escapes existing double quotes.
+ */
+function sanitizeCSVField(field: string | undefined | null): string {
+    if (!field) return '';
+    let sanitized = String(field).replace(/"/g, '""');
+    if (/^[=+\-@\t\r]/.test(sanitized)) {
+        sanitized = "'" + sanitized;
+    }
+    return `"${sanitized}"`;
+}
+
+/**
  * Generates a simple CSV for manual review
  */
 function generateCSV(segments: DecupageSegment[]): string {
     let csv = 'Start Time,End Time,Duration,Text,Problem,Suggestion,Reason\n';
 
     segments.forEach(seg => {
-        csv += `${seg.startTime.toFixed(3)},${seg.endTime.toFixed(3)},${(seg.endTime - seg.startTime).toFixed(3)},"${seg.text.replace(/"/g, '""')}","${seg.problemType}","${seg.suggestion}","${seg.reason}"\n`;
+        const text = sanitizeCSVField(seg.text);
+        const problemType = sanitizeCSVField(seg.problemType);
+        const suggestion = sanitizeCSVField(seg.suggestion);
+        const reason = sanitizeCSVField(seg.reason);
+
+        csv += `${seg.startTime.toFixed(3)},${seg.endTime.toFixed(3)},${(seg.endTime - seg.startTime).toFixed(3)},${text},${problemType},${suggestion},${reason}\n`;
     });
 
     return csv;
