@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-04-11 - Client-Side Audio Enhancement via Web Audio API
+
+**Research Topic:** Client-Side Audio Processing and Enhancement
+
+**Finding:** Evaluated the native Web Audio API to implement client-side audio effects (like Voice Clarity EQ and Gain) directly in the browser before sending the audio for transcription.
+- The POC confirmed that applying basic equalizer filters (e.g., boosting vocal frequencies and reducing background hum) is highly performant and requires zero external dependencies.
+- It significantly improves the listening experience for low-quality recordings.
+
+**Decision:** Proposed implementing a client-side "Voice Enhance" toggle in the upload/player flow.
+- Using native browser APIs ensures no additional bundle size or backend processing cost.
+- This directly addresses user pain points with quiet or muffled podcast recordings, potentially improving Whisper's transcription accuracy as a side effect.
+
+**Learning:** Modern browsers have incredibly powerful native media processing capabilities. For simple audio enhancements like EQ and Gain, introducing heavy external libraries or server-side FFmpeg processing is overkill; the Web Audio API is more than sufficient and provides instant user feedback.
+
+**Resources:**
+- https://developer.mozilla.org/en-US/docs/Web/API/Web_Audio_API
