@@ -33,3 +33,20 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-04-12 - Replacing multiple filter passes with a single reduce
+
+**Bottleneck:** Multiple `.filter().length` iterations on the tasks array to count status.
+**Learning:** Using `useMemo` with `.reduce()` minimizes array iterations from O(3N) to O(N) when deriving multiple counts from state.
+**Action:** Replace multiple `.filter()` passes on state arrays with a single `.reduce()`.
+**Code:**
+```typescript
+const counts = useMemo(() => {
+    return state.tasks.reduce((acc, t) => {
+        if (t.status === 'pending') acc.pending++;
+        else if (t.status === 'completed') acc.completed++;
+        else if (t.status === 'error') acc.error++;
+        return acc;
+    }, { pending: 0, completed: 0, error: 0 });
+}, [state.tasks]);
+```
