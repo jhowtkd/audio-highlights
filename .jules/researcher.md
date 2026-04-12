@@ -102,3 +102,12 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-04-12 - Server-Side Subtitle Burn-In Research
+
+**Research Topic:** Automating subtitle burn-in (hardsubs) using FFmpeg for generated clips.
+**Finding:** Evaluated using FFmpeg's `subtitles` filter vs client-side canvas rendering. The `subtitles` filter provides robust, styled text rendering that perfectly syncs with the output video, while client-side canvas rendering is error-prone and requires complex syncing logic during export.
+**Decision:** Propose implementing subtitle burn-in server-side via the ffmpeg-service.
+**Learning:** Using `ffmpeg-static` locally enables consistent POC development without relying on the system's `ffmpeg` binary. The `-vf subtitles` filter requires the subtitle file to exist on the filesystem.
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
