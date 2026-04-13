@@ -192,25 +192,27 @@ export function TaskCard({ task }: TaskCardProps) {
 
                         {(task.status === 'completed' || task.status === 'error' || task.status === 'pending') && (
                             <Button
-                                size="sm"
+                                size="icon-sm"
                                 variant="ghost"
                                 onClick={handleRetranscribe}
                                 className="text-slate-500 hover:text-blue-600"
                                 title="Retranscrever arquivo"
+                                aria-label="Retranscrever arquivo"
                             >
-                                <RefreshCw className="h-4 w-4" />
+                                <RefreshCw className="h-4 w-4" aria-hidden="true" />
                             </Button>
                         )}
 
                         {(task.status === 'completed' || task.status === 'error' || task.status === 'pending') && (
                             <Button
-                                size="sm"
+                                size="icon-sm"
                                 variant="ghost"
                                 onClick={() => removeTask(task.id)}
                                 className="text-slate-500 hover:text-red-600"
                                 title="Excluir projeto"
+                                aria-label="Excluir projeto"
                             >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" aria-hidden="true" />
                             </Button>
                         )}
 
