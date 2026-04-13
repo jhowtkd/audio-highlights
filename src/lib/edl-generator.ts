@@ -63,13 +63,30 @@ function generateCMX3600(segments: DecupageSegment[], fps: number = 24): string 
 }
 
 /**
+ * Sanitizes fields for CSV to prevent CSV Formula Injection
+ */
+function sanitizeCSV(value: string): string {
+    if (!value) return value;
+    const dangerousChars = ['=', '+', '-', '@', '\t', '\r'];
+    if (dangerousChars.includes(value.charAt(0))) {
+        return "'" + value;
+    }
+    return value;
+}
+
+/**
  * Generates a simple CSV for manual review
  */
 function generateCSV(segments: DecupageSegment[]): string {
     let csv = 'Start Time,End Time,Duration,Text,Problem,Suggestion,Reason\n';
 
     segments.forEach(seg => {
-        csv += `${seg.startTime.toFixed(3)},${seg.endTime.toFixed(3)},${(seg.endTime - seg.startTime).toFixed(3)},"${seg.text.replace(/"/g, '""')}","${seg.problemType}","${seg.suggestion}","${seg.reason}"\n`;
+        const safeText = sanitizeCSV(seg.text).replace(/"/g, '""');
+        const safeProblemType = sanitizeCSV(seg.problemType);
+        const safeSuggestion = sanitizeCSV(seg.suggestion);
+        const safeReason = sanitizeCSV(seg.reason);
+
+        csv += `${seg.startTime.toFixed(3)},${seg.endTime.toFixed(3)},${(seg.endTime - seg.startTime).toFixed(3)},"${safeText}","${safeProblemType}","${safeSuggestion}","${safeReason}"\n`;
     });
 
     return csv;
