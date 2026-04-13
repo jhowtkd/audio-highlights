@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Improved Video Format Error Message
+
+**Copy Type:** Error message for video upload
+**Original:** "Por favor, selecione um arquivo de vídeo (MP4, MOV)"
+**Changed To:** "Formato inválido. Selecione um vídeo MP4 ou MOV."
+**Learning:** "Por favor" is polite but adds unnecessary words to an error message. Starting with "Formato inválido" immediately tells the user what went wrong, and "Selecione um vídeo MP4 ou MOV" clearly states the solution in fewer words.
+**Rule:** For file format errors, state the problem first ("Formato inválido") and then the required formats directly, avoiding filler words like "Por favor".
