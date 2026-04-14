@@ -33,3 +33,17 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-04-14 - Single Reduce Pass for Multiple Counts
+
+**Bottleneck:** Calculating `pendingCount`, `completedCount`, and `errorCount` from `state.tasks` array using three separate `.filter(condition).length` calls (O(3N)).
+**Learning:** Multiple filters iterate over the array multiple times and create intermediate arrays. A single `.reduce()` pass can compute all counts simultaneously (O(N)), avoiding intermediate array allocations.
+**Action:** Replace multiple `.filter(condition).length` calls with a single `useMemo` using `.reduce()` to compute aggregated counts based on item status.
+**Code:**
+```typescript
+const counts = useMemo(() => state.tasks.reduce((acc, t) => {
+    if (t.status === 'pending') acc.pending++;
+    if (t.status === 'completed') acc.completed++;
+    if (t.status === 'error') acc.error++;
+    return acc;
+}, { pending: 0, completed: 0, error: 0 }), [state.tasks]);
+```
