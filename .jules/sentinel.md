@@ -31,3 +31,21 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-04-14 - CSV Formula Injection in EDL Exports
+
+**Vulnerability:** The application generates CSV files from user-controlled input (transcript text, problem types, reasons) without sanitizing the data. If an attacker injects text starting with `=, +, -, @`, spreadsheet applications like Excel could execute formulas or arbitrary code when a user opens the downloaded file.
+**Root Cause:** The `generateCSV` function in `src/lib/edl-generator.ts` directly concatenated object properties into the CSV format without checking for formula injection vectors.
+**Learning:** Always sanitize user input before rendering it into CSV or similar formats that can be opened by rich client applications. A common and robust mitigation for Formula Injection is prepending a single quote (`'`) to any string that begins with a dangerous character.
+**Prevention:** For any CSV generation, implement a sanitize function that checks for the first character of each field and prepends a quote if it belongs to the dangerous list (`['=', '+', '-', '@', '\t', '\r']`).
+**Code:**
+```typescript
+function sanitizeCSVField(field: string): string {
+    if (!field) return '';
+    const dangerousChars = ['=', '+', '-', '@', '\t', '\r'];
+    if (dangerousChars.some(char => field.startsWith(char))) {
+        return `'${field}`;
+    }
+    return field;
+}
+```
