@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-01 - Burnt-in Subtitles with FFmpeg
+
+**Research Topic:** Burning subtitles into video clips server-side using FFmpeg
+
+**Finding:**
+While ffmpeg-service currently uses fast stream copying (-c copy) for cuts and concatenation, adding subtitles via the -vf subtitles=subs.srt filter strictly requires re-encoding the video track (e.g., -c:v libx264).
+
+**Decision:**
+Propose adding a dedicated /burn-subtitles endpoint. We must accept the performance trade-off (re-encoding takes significantly longer and uses more CPU) because social media managers consider burnt-in captions a mandatory feature.
+
+**Learning:**
+You cannot use -c copy when applying any video filters (-vf) in FFmpeg. Architectural planning for video microservices must account for this dichotomy: fast/cheap operations (cutting/muxing) vs. slow/expensive operations (filtering/transcoding), as they have vastly different resource requirements and potential concurrency limits.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/burnt-in-subtitles.md
