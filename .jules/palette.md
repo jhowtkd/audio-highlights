@@ -42,3 +42,15 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-04-15 - Decorative Icons in Icon-Only Buttons
+
+**UX Problem:** Icon-only buttons with `aria-label` contained inline SVG icons without `aria-hidden="true"`.
+
+**Learning:** When a button already has an `aria-label`, the screen reader announces it correctly. However, if the internal SVG or icon element is not explicitly hidden, it might be redundantly announced or cause confusion depending on the screen reader verbosity settings.
+
+**Solution:** Added `aria-hidden="true"` to all decorative icon components (e.g., from `lucide-react`) when they are the primary visual content of an icon-only button that already provides accessibility via `aria-label`.
+
+**Pattern:** For icon-only buttons:
+1. Always use `aria-label` on the parent `<button>` or `<Button>`.
+2. Always add `aria-hidden="true"` to the internal `<Icon>` component.
