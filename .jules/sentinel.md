@@ -31,3 +31,24 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2026-04-15 - CSV Formula Injection in EDL Generator
+
+**Vulnerability:** The application generated CSV exports (`generateCSV` in `src/lib/edl-generator.ts`) containing user-controlled text (`seg.text`, `seg.problemType`, `seg.suggestion`, `seg.reason`) without sanitizing leading characters. This could allow an attacker to inject malicious formulas (like `=cmd|' /C calc'!A0`) that would execute when a user opens the CSV in a spreadsheet application like Microsoft Excel.
+**Root Cause:** The CSV generator correctly escaped double quotes (`""`) but failed to account for characters that trigger formula evaluation (`=`, `+`, `-`, `@`, `\t`, `\r`) at the beginning of a cell value.
+**Learning:** Standard CSV escaping (RFC 4180) is not sufficient for spreadsheet applications. Any data starting with formula indicators must be neutralized.
+**Prevention:** Always prepend a single quote (`'`) to CSV fields that start with dangerous formula characters before exporting.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+csv += `"${seg.text.replace(/"/g, '""')}"`
+
+// Secure pattern to use:
+const sanitizeCSVField = (field: string | undefined): string => {
+    if (!field) return '';
+    const str = String(field);
+    if (/^[=+\-@\t\r]/.test(str)) return "'" + str;
+    return str;
+};
+csv += `"${sanitizeCSVField(seg.text).replace(/"/g, '""')}"`
+```
