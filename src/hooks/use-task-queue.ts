@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useRef } from 'react';
+import { useCallback, useEffect, useRef, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 import { useTaskQueueContext } from '@/contexts/task-context';
@@ -229,14 +229,26 @@ export function useTaskQueue() {
         return taskId;
     }, [addTask, router]);
 
+    // ✅ Performance: Optimize task counts calculation
+    // Replaced 3 separate filter().length calls (O(3n)) with a single reduce pass (O(n)).
+    // Memoized to prevent recalculation unless state.tasks changes.
+    const { pendingCount, completedCount, errorCount } = useMemo(() => {
+        return state.tasks.reduce((acc, task) => {
+            if (task.status === 'pending') acc.pendingCount++;
+            else if (task.status === 'completed') acc.completedCount++;
+            else if (task.status === 'error') acc.errorCount++;
+            return acc;
+        }, { pendingCount: 0, completedCount: 0, errorCount: 0 });
+    }, [state.tasks]);
+
     return {
         // Estado
         tasks: state.tasks,
         currentTaskId: state.currentTaskId,
         isProcessing: state.isProcessing,
-        pendingCount: state.tasks.filter(t => t.status === 'pending').length,
-        completedCount: state.tasks.filter(t => t.status === 'completed').length,
-        errorCount: state.tasks.filter(t => t.status === 'error').length,
+        pendingCount,
+        completedCount,
+        errorCount,
 
         // Ações
         addTask,
