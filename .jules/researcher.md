@@ -102,3 +102,12 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2025-02-24 - Offline Persistence Validation
+
+**Research Topic:** Offline persistence validation.
+**Finding:** Evaluated IndexedDB for client-side persistence of large files.
+**Decision:** Adopt IndexedDB via `idb-keyval` instead of `localStorage` to avoid quota limits and data loss.
+**Learning:** `localStorage` is completely inadequate for large media files.
+**Resources:**
+- https://developer.mozilla.org/en-US/docs/Web/API/IndexedDB_API
