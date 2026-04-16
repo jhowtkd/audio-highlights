@@ -31,3 +31,24 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-04-16 - CSV Formula Injection in Exports
+
+**Vulnerability:** User-provided text (transcription segments, reasoning) was exported directly to CSV files without sanitization. If opened in spreadsheet applications like Excel, fields starting with `=`, `+`, `-`, or `@` could be interpreted as formulas, leading to arbitrary command execution (DDE Injection).
+
+**Root Cause:** The `generateCSV` function concatenated user-controlled strings into a CSV format, only escaping double quotes but failing to prevent spreadsheet software from interpreting the leading characters as executable formulas.
+
+**Learning:** When generating CSV files from user-generated or external data, always sanitize fields to prevent CSV Formula Injection. The standard defense is to prepend a single quote (`'`) to any field starting with dangerous characters (`=`, `+`, `-`, `@`, `\t`, `\r`).
+
+**Prevention:** Implement a `sanitizeForCSV` function that checks for the dangerous leading characters and prepends a single quote. Apply this function to all text fields before inserting them into the CSV row.
+
+**Code:**
+```typescript
+function sanitizeForCSV(value: string): string {
+    if (!value) return '';
+    if (/^[=+\-@\t\r]/.test(value)) {
+        return `'${value}`;
+    }
+    return value;
+}
+```
