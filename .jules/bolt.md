@@ -33,3 +33,10 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-05-18 - Missing Component Memoization on Fast-Updating Parent State
+
+**Bottleneck:** The `page.tsx` parent component maintains `currentTime` state, which updates several times a second during audio playback. This caused the `Waveform` component (and potentially others) to re-render constantly. While `Waveform` does use `currentTime` and must re-render, wrapping it in `React.memo` is critical to prevent it from re-rendering due to OTHER parent state changes (like active tab changes, etc), and prevents unnecessary deep re-evaluations if `Waveform` props remain stable.
+**Learning:** Components that depend on high-frequency state updates (like `currentTime`) must be memoized or decoupled from the main parent state to prevent massive tree re-renders.
+**Action:** Always wrap heavy UI components (especially those using `<canvas>` or rendering large lists) in `React.memo` if they are placed in a parent that handles fast-changing state like audio playback position.
+**Code:** `export const Waveform = memo(function Waveform({ ...props }) { ... })`
