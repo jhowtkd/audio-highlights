@@ -42,3 +42,14 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2025-02-28 - Replacing window.confirm
+
+**UX Problem:** Native browser `window.confirm()` dialogs block the main thread and lack styling consistency with the rest of the application, leading to a jarring user experience for destructive actions like resetting a project or retranscribing an audio file.
+**Learning:** Destructive actions require explicit confirmation, but native confirm dialogs are an anti-pattern in modern web apps built with cohesive design systems.
+**Solution:** Replaced `window.confirm()` calls with a custom `AlertDialog` component (from Radix/shadcn) that matches the application's design system and provides a non-blocking, accessible confirmation flow.
+**Pattern:** For destructive actions (e.g., delete, reset, overwrite):
+1. Never use `window.confirm()`.
+2. Always use a custom, accessible `AlertDialog` component.
+3. Clearly state the action and its consequences in the dialog description.
+4. Ensure the confirmation action is distinctly styled (e.g., destructive color) if the action is permanent.
