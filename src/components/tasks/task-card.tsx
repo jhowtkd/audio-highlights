@@ -3,7 +3,17 @@
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useRef, ChangeEvent } from 'react';
+import { useRef, ChangeEvent, useState } from 'react';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import {
     FileAudio,
     Trash2,
@@ -69,6 +79,7 @@ export function TaskCard({ task }: TaskCardProps) {
     const router = useRouter();
     const { removeTask, retryTask } = useTaskQueue();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showRetranscribeDialog, setShowRetranscribeDialog] = useState(false);
 
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
@@ -78,17 +89,18 @@ export function TaskCard({ task }: TaskCardProps) {
         router.push(`/tasks/${task.id}`);
     };
 
-    const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
+    const confirmRetranscribe = () => {
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
             // Arquivo não está na memória, abrir seletor
             fileInputRef.current?.click();
         }
+        setShowRetranscribeDialog(false);
+    };
+
+    const handleRetranscribe = () => {
+        setShowRetranscribeDialog(true);
     };
 
     const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -97,6 +109,7 @@ export function TaskCard({ task }: TaskCardProps) {
 
         // Opcional: Verificar se o nome bate (pode ser restritivo demais se usuário renomeou)
         // if (file.name !== task.filename) {
+        //     // TODO: Replace with custom dialog if implemented
         //     if (!confirm(`O arquivo selecionado (${file.name}) parece diferente do original (${task.filename}). Deseja continuar?`)) {
         //         return;
         //     }
@@ -225,6 +238,23 @@ export function TaskCard({ task }: TaskCardProps) {
                     </div>
                 </div>
             </div>
+
+            <AlertDialog open={showRetranscribeDialog} onOpenChange={setShowRetranscribeDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Retranscrever arquivo?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmRetranscribe} className="bg-blue-600 hover:bg-blue-700 text-white focus:ring-blue-600">
+                            Retranscrever
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
