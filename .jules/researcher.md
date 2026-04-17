@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-25 - Vertical Video Conversion (9:16)
+
+**Research Topic:** Automated vertical video conversion for highlights
+
+**Finding:** Evaluated FFmpeg strategies for converting 16:9 video to 9:16.
+1. Center Crop (`crop=ih*9/16:ih`): Fast, but risky if the speaker isn't perfectly centered.
+2. Blurred Background (`boxblur` + `overlay`): More robust for wide shots, retains full context, but requires a complex filter graph (`[0:v]scale=-1:1280,crop=720:1280,boxblur=20:20[bg];[0:v]scale=720:-1[fg];[bg][fg]overlay=0:(H-h)/2`).
+3. ML-based active speaker tracking: Too computationally expensive for the current architecture.
+
+**Decision:** Proposed implementing both "Center Crop" and "Blurred Background" as selectable options in the `ffmpeg-service`. This avoids the complexity of ML tracking while still providing massive UX improvements over manual editing.
+
+**Learning:** Server-side FFmpeg is highly capable of video reframing without needing heavy external dependencies. Copying the audio stream (`-c:a copy`) during these transformations is critical to save processing time.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#crop
+- https://ffmpeg.org/ffmpeg-filters.html#boxblur
