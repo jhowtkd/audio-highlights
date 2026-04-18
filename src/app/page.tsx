@@ -253,16 +253,6 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      setShowResetConfirm(true);
-      return;
-    }
-
-    executeReset();
-  }, [transcription, highlights, executeReset]);
-
   const executeReset = useCallback(() => {
     setShowResetConfirm(false);
     if (audioUrl) {
@@ -281,6 +271,16 @@ export default function Home() {
     setErrorMessage(null);
     setActiveTab('transcription');
   }, [audioUrl]);
+
+  const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      setShowResetConfirm(true);
+      return;
+    }
+
+    executeReset();
+  }, [transcription, highlights, executeReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
