@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
+import React, { useRef, useEffect, useState, useMemo, useCallback } from 'react';
 import { cn } from '@/lib/utils';
 import { formatDuration } from '@/lib/format-utils';
 import type { GeneratedHighlight, TranscriptionSegment } from '@/types';
@@ -27,7 +27,11 @@ const HIGHLIGHT_COLORS = [
 const DEFAULT_HIGHLIGHTS: GeneratedHighlight[] = [];
 const DEFAULT_SEGMENTS: TranscriptionSegment[] = [];
 
-export function Waveform({
+// Memoize Waveform to prevent unnecessary re-renders when parent state updates
+// (e.g., currentTime changes 60Hz during playback). Heavy canvas operations
+// are only re-run when necessary props (like duration or highlights) change.
+// Performance: Reduces heavy child UI component tree re-renders significantly.
+export const Waveform = React.memo(function Waveform({
     audioUrl,
     duration,
     currentTime,
@@ -359,4 +363,4 @@ export function Waveform({
             )}
         </div>
     );
-}
+});
