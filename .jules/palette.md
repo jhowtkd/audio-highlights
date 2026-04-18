@@ -42,3 +42,14 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2024-04-18 - Destructive Native Browser Confirmations
+
+**UX Problem:** The application used native `window.confirm` dialogs for destructive actions (e.g., resetting a project or retranscribing an audio file). This resulted in a blocking, unstyled, and non-cohesive user experience.
+**Learning:** Native confirmations are often perceived as errors or system alerts by users and disrupt the visual flow of the application. The system's prompt actually suggests using custom confirmation dialogs for these scenarios.
+**Solution:** Replaced `window.confirm` with custom, state-driven `AlertDialog` components from `shadcn/ui`.
+**Pattern:** For this design system, ALL destructive actions must:
+1. Use the `AlertDialog` component (or similar custom modal).
+2. Clearly explain the consequences of the action.
+3. Require explicit user confirmation through a clearly labeled button (e.g., 'Descartar Projeto', 'Retranscrever').
+4. Avoid native `window.confirm()` or `window.prompt()`.

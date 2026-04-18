@@ -7,13 +7,86 @@
 - Network:       http://192.168.0.2:3000
 
 ✓ Starting...
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
-
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1603ms
-○ Compiling /verify-config ...
- GET /verify-config 200 in 6.5s (compile: 5.9s, proxy.ts: 154ms, render: 427ms)
- GET /verify-config 200 in 159ms (compile: 6ms, proxy.ts: 5ms, render: 147ms)
+✓ Ready in 1483ms
+○ Compiling /test-tasks ...
+⨯ ./src/app/test-tasks/page.tsx:3:10
+Ecmascript file had an error
+[0m [90m 1 |[39m [36mimport[39m { [33mTask[39m } [36mfrom[39m [32m'@/types/task-types'[39m[33m;[39m
+ [90m 2 |[39m [36mimport[39m { useTaskQueue } [36mfrom[39m [32m'@/hooks/use-task-queue'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m { useEffect } [36mfrom[39m [32m'react'[39m[33m;[39m
+ [90m   |[39m          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 4 |[39m
+ [90m 5 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mTestPage[39m() {
+ [90m 6 |[39m     [36mconst[39m { addTask } [33m=[39m useTaskQueue()[33m;[39m[0m
+
+You're importing a component that needs `useEffect`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+
+
+
+ GET /test-tasks 500 in 4.9s (compile: 4.6s, proxy.ts: 101ms, render: 279ms)
+ GET /tasks 200 in 3.5s (compile: 2.8s, proxy.ts: 5ms, render: 717ms)
+⨯ ./src/app/test-tasks/page.tsx:3:10
+Ecmascript file had an error
+[0m [90m 1 |[39m [36mimport[39m { [33mTask[39m } [36mfrom[39m [32m'@/types/task-types'[39m[33m;[39m
+ [90m 2 |[39m [36mimport[39m { useTaskQueue } [36mfrom[39m [32m'@/hooks/use-task-queue'[39m[33m;[39m
+[31m[1m>[22m[39m[90m 3 |[39m [36mimport[39m { useEffect } [36mfrom[39m [32m'react'[39m[33m;[39m
+ [90m   |[39m          [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 4 |[39m
+ [90m 5 |[39m [36mexport[39m [36mdefault[39m [36mfunction[39m [33mTestPage[39m() {
+ [90m 6 |[39m     [36mconst[39m { addTask } [33m=[39m useTaskQueue()[33m;[39m[0m
+
+You're importing a component that needs `useEffect`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+
+
+
+ GET /test-tasks 500 in 37ms (compile: 13ms, proxy.ts: 5ms, render: 19ms)
+ GET /tasks 200 in 187ms (compile: 11ms, proxy.ts: 4ms, render: 172ms)
+✓ Compiled in 79ms
+⨯ Error: Attempted to call useTaskQueue() from the server but useTaskQueue is on the client. It's not possible to invoke a client function from the server, it can only be rendered as a Component or passed to props of a Client Component.
+    at TestPage (src/app/test-tasks/page.tsx:4:37)
+  2 |
+  3 | export default function TestPage() {
+> 4 |     const { addTask } = useTaskQueue();
+    |                                     ^
+  5 |
+  6 |     return (
+  7 |         <div> {
+  digest: '4220700677'
+}
+ GET /test-tasks 500 in 280ms (compile: 73ms, proxy.ts: 4ms, render: 202ms)
+✓ Compiled in 84ms
+ GET /test-tasks 200 in 272ms (compile: 128ms, proxy.ts: 5ms, render: 139ms)
+ GET /tasks 200 in 174ms (compile: 4ms, proxy.ts: 4ms, render: 165ms)
+2026-04-18T22:26:20.186Z [Transcription API] TypeError: Failed to parse body as FormData.
+TypeError: Failed to parse body as FormData.
+    at node:internal/deps/undici/undici:5789:27
+    at successSteps (node:internal/deps/undici/undici:5833:27)
+    at consumeBody (node:internal/deps/undici/undici:5839:9)
+    at NextRequest.formData (node:internal/deps/undici/undici:5782:18)
+    at POST (/app/.next/dev/server/chunks/[root-of-the-server]__7e19a00c._.js:574:40)
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:80:14)
+    at AppRouteRouteModule.do (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:37945)
+    at /app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:47941
+    at /app/node_modules/next/dist/server/lib/trace/tracer.js:185:36
+    at NoopContextManager.with (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NoopTracer.startActiveSpan (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18093)
+    at ProxyTracer.startActiveSpan (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:18854)
+    at /app/node_modules/next/dist/server/lib/trace/tracer.js:154:103
+    at NoopContextManager.with (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:7062)
+    at ContextAPI.with (/app/node_modules/next/dist/compiled/@opentelemetry/api/index.js:1:518)
+    at NextTracerImpl.trace (/app/node_modules/next/dist/server/lib/trace/tracer.js:154:28)
+    at /app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:47780
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at /app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45275
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at /app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45232
+    at AsyncLocalStorage.run (node:internal/async_local_storage/async_hooks:91:14)
+    at AppRouteRouteModule.handle (/app/node_modules/next/dist/compiled/next-server/app-route-turbo.runtime.dev.js:5:45186)
