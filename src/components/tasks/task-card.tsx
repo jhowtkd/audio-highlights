@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useRef, ChangeEvent } from 'react';
+import { useRef, ChangeEvent, useState } from 'react';
 import {
     FileAudio,
     Trash2,
@@ -17,6 +17,16 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import type { Task } from '@/types/task-types';
@@ -69,6 +79,7 @@ export function TaskCard({ task }: TaskCardProps) {
     const router = useRouter();
     const { removeTask, retryTask } = useTaskQueue();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showRetranscribeDialog, setShowRetranscribeDialog] = useState(false);
 
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
@@ -78,17 +89,18 @@ export function TaskCard({ task }: TaskCardProps) {
         router.push(`/tasks/${task.id}`);
     };
 
-    const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
+    const confirmRetranscribe = () => {
+        setShowRetranscribeDialog(false);
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
             // Arquivo não está na memória, abrir seletor
             fileInputRef.current?.click();
         }
+    };
+
+    const handleRetranscribe = () => {
+        setShowRetranscribeDialog(true);
     };
 
     const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -225,6 +237,24 @@ export function TaskCard({ task }: TaskCardProps) {
                     </div>
                 </div>
             </div>
+
+            {/* Retranscribe Confirmation Dialog */}
+            <AlertDialog open={showRetranscribeDialog} onOpenChange={setShowRetranscribeDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Retranscrever {task.filename}?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Os resultados atuais serão apagados e isso gastará créditos novamente.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={confirmRetranscribe} className="bg-red-600 text-white hover:bg-red-700">
+                            Retranscrever
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
