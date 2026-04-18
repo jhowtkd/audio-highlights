@@ -15,6 +15,16 @@ import { Waveform } from '@/components/audio/waveform';
 import { DecupagemView } from '@/components/decupagem/decupagem-view';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Progress } from '@/components/ui/progress';
 import { ERROR_MESSAGES } from '@/lib/constants';
 import { formatDuration } from '@/lib/format-utils';
@@ -48,6 +58,7 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('transcription');
   const [statusMessage] = useState<string>('');
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
   // Timer states
   const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -245,14 +256,15 @@ export default function Home() {
   const handleReset = useCallback(() => {
     // Confirm before resetting if there's content
     if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
+      setShowResetConfirm(true);
+      return;
     }
 
+    executeReset();
+  }, [transcription, highlights, executeReset]);
+
+  const executeReset = useCallback(() => {
+    setShowResetConfirm(false);
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +280,7 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -594,6 +606,21 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      <AlertDialog open={showResetConfirm} onOpenChange={setShowResetConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Descartar projeto atual?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Todo o seu progresso será perdido. Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={executeReset}>Descartar projeto</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

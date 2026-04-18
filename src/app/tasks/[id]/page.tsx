@@ -26,6 +26,16 @@ import { EpisodeSummary } from '@/components/highlights/episode-summary';
 import { Waveform } from '@/components/audio/waveform';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import { useTaskQueueContext } from '@/contexts/task-context';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
@@ -50,16 +60,18 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const { updateResult } = useTaskQueueContext();
     const { cutVideo, cutMixVideo } = useFFmpeg();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showConfirm, setShowConfirm] = useState(false);
 
     const [task, setTask] = useState(() => getTask(id));
 
     const handleRetranscribe = () => {
         if (!task) return;
+        setShowConfirm(true);
+    };
 
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
+    const executeRetranscribe = () => {
+        if (!task) return;
+        setShowConfirm(false);
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -506,6 +518,21 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                     </p>
                 </div>
             </footer>
+
+            <AlertDialog open={showConfirm} onOpenChange={setShowConfirm}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Retranscrever &quot;{task?.filename}&quot;?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Os resultados atuais serão apagados e você gastará créditos novamente. Esta ação não pode ser desfeita.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={executeRetranscribe}>Retranscrever</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }

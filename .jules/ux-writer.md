@@ -32,3 +32,14 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-05-30 - Confirmation Dialog Copy
+
+**Copy Type:** Confirmation Dialogs for destructive actions
+**Original:** "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+**Changed To:** Title: "Retranscrever '[filename]'?", Description: "Os resultados atuais serão apagados e você gastará créditos novamente. Esta ação não pode ser desfeita." Button: "Retranscrever"
+**Learning:** Native `window.confirm` dialogues provide a poor, blocking UX and force generic "OK/Cancel" buttons. Vague questions like "Are you sure..." should be replaced with the specific action name, and button labels must match the action being taken.
+**Rule:** For this app, ALWAYS:
+1. Avoid `window.confirm` in favor of a custom UI `AlertDialog`.
+2. Start the dialog title with the specific action and item (e.g., "Retranscrever 'video.mp4'?").
+3. Make the primary action button label match the action (e.g., "Retranscrever", "Descartar projeto", not "OK" or "Sim").
