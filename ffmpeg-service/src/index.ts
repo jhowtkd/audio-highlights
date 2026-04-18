@@ -50,7 +50,7 @@ const limiter = rateLimit({
 });
 app.use(limiter);
 
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 // Configure multer for file uploads
 const upload = multer({
