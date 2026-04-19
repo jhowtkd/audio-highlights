@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-04-19 - Hardcoded Subtitles (Karaoke Mode) Research
+
+**Research Topic:** Burning subtitles directly into video exports using FFmpeg
+
+**Finding:**
+The FFmpeg `subtitles` filter (using libass) allows for text to be directly burned into the video stream during encoding. The POC showed this filter works reliably when provided with a valid SRT file.
+
+**Decision:**
+Propose adding a feature to burn SRT subtitles directly into the video file when exporting highlights. This avoids the need for a separate third-party app to add subtitles.
+
+**Learning:**
+While burning subtitles is highly desirable for social media clips, it fundamentally requires re-encoding the video stream (`-c:v libx264`), meaning we can no longer use the fast `stream copy` (`-c copy`) method. This adds a performance tradeoff for the backend.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles
+- research/proposals/2026-04-19-hardcoded-subtitles.md
