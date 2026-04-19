@@ -31,3 +31,21 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-04-19 - CSV Formula Injection in EDL Generator
+
+**Vulnerability:** Untrusted text fields (`text`, `problemType`, `suggestion`, `reason`) generated from potentially user-controlled or AI-generated strings were exported to CSV without sanitization, leading to potential CSV Formula Injection / DDE vulnerabilities if the resulting file was opened in Excel.
+**Root Cause:** The `generateCSV` function in `src/lib/edl-generator.ts` correctly escaped double quotes but did not sanitize strings starting with dangerous characters (`=`, `+`, `-`, `@`, `\t`, `\r`) which spreadsheet software interprets as formulas.
+**Learning:** Always sanitize fields exported to CSV by checking the first character, even if double quotes are escaped.
+**Prevention:** Add a helper `sanitizeCSVField` function that prepends a single quote (`'`) to any string starting with `=`, `+`, `-`, `@`, `\t`, or `\r`.
+**Code:**
+```typescript
+function sanitizeCSVField(value: string | undefined): string {
+    if (!value) return '';
+    const valStr = String(value);
+    if (/^[=+\-@\t\r]/.test(valStr)) {
+        return "'" + valStr;
+    }
+    return valStr;
+}
+```
