@@ -46,9 +46,9 @@ export function CopyButton({
       {...props}
     >
       {hasCopied ? (
-        <Check className={cn("h-4 w-4", children ? "mr-2" : "")} />
+        <Check className={cn("h-4 w-4", children ? "mr-2" : "")} aria-hidden="true" />
       ) : (
-        <Copy className={cn("h-4 w-4", children ? "mr-2" : "")} />
+        <Copy className={cn("h-4 w-4", children ? "mr-2" : "")} aria-hidden="true" />
       )}
       {children}
     </Button>
