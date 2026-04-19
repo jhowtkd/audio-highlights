@@ -32,3 +32,14 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-05 - Confirmation Dialog Copy Update
+
+**Copy Type:** Confirmation dialogs (window.confirm)
+**Original:** "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente." / "Deseja realmente descartar este projeto? Todo o progresso será perdido."
+**Changed To:** "Retranscrever '{filename}'? Os resultados atuais serão apagados e você gastará créditos novamente." / "Descartar '{filename}'? Todo o progresso será perdido."
+**Learning:** Vague phrasing like "Tem certeza que deseja..." or "Deseja realmente..." is an anti-pattern. Confirmation dialogs should start directly with the specific action and item name, followed by clear consequences.
+**Rule:** For confirmation dialogs, always:
+1. Start with the specific action and item name (e.g., "Descartar 'Projeto'?").
+2. Follow immediately with clear consequences.
+3. Avoid vague preambles like "Are you sure you want to...".

@@ -246,7 +246,7 @@ export default function Home() {
     // Confirm before resetting if there's content
     if (transcription || highlights.length > 0) {
       const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
+        `Descartar '${audioFile?.name || 'projeto'}'? Todo o progresso será perdido.`
       );
       if (!confirmed) {
         return;
@@ -268,7 +268,7 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl, transcription, highlights, audioFile?.name]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
