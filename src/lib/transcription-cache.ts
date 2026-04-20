@@ -127,9 +127,21 @@ function cleanOldCacheEntries(): void {
         const key = localStorage.key(i);
         if (key?.startsWith(CACHE_PREFIX)) {
             try {
-                const data = JSON.parse(localStorage.getItem(key) || '{}');
+                const rawData = localStorage.getItem(key) || '{}';
                 const expiryMs = CACHE_EXPIRY_DAYS * 24 * 60 * 60 * 1000;
-                if (Date.now() - data.timestamp > expiryMs / 2) {
+
+                // Optimization: Avoid full JSON.parse for large transcriptions
+                const match = rawData.match(/"timestamp":\s*(\d+)/);
+                let timestamp = 0;
+
+                if (match && match[1]) {
+                    timestamp = parseInt(match[1], 10);
+                } else {
+                    const data = JSON.parse(rawData);
+                    timestamp = data.timestamp || 0;
+                }
+
+                if (Date.now() - timestamp > expiryMs / 2) {
                     keysToRemove.push(key);
                 }
             } catch {
