@@ -32,3 +32,21 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-03-24 - Retranscribe Confirmation Dialog
+
+**Copy Type:** Confirmation Dialog
+
+**Original:** `confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')`
+
+**Changed To:**
+`Title: Retranscrever '{filename}'?`
+`Description: Os resultados atuais serão apagados e você gastará créditos novamente.`
+
+**Learning:** Native `window.confirm` dialogs are a UX anti-pattern for destructive actions. By using a custom `AlertDialog`, we provide a more cohesive and non-blocking user experience. Also, instead of vague "Are you sure you want to...", starting the title with the specific action and item name (e.g., "Retranscrever '{filename}'?") and moving the consequences to the description improves clarity and reduces alarm.
+
+**Rule:** For confirmation dialogs, ALWAYS:
+1. Avoid vague phrasing like 'Are you sure you want to...'.
+2. Start the title with the specific action and item name.
+3. Place the clear consequences in the description.
+4. Avoid native `window.confirm` in favor of custom UI dialog components like `AlertDialog`.
