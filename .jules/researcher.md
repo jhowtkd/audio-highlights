@@ -102,3 +102,15 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2026-02-25 - NLE Export Support
+
+**Research Topic:** Exporting highlight sequences to Non-Linear Editors (Premiere Pro, DaVinci Resolve)
+
+**Finding:** Generating CMX 3600 EDL and FCPXML files is highly feasible client-side. Both are text-based formats (plain text and XML) that require no external dependencies. FCPXML is more robust as it uses rational time fractions (e.g., `100/2400s`) which avoids frame-rounding errors common in standard EDLs.
+
+**Decision:** Propose adding NLE exports (EDL/FCPXML) to the Mix Mode. It adds massive value for professional editors with minimal implementation cost.
+
+**Learning:** When generating timecodes for NLEs, handling frame rates correctly is critical. CMX 3600 EDLs require strict `HH:MM:SS:FF` format, meaning we need to know or assume the video's FPS. FCPXML handles time natively in seconds with rational fractions, which is more forgiving and mathematically precise.
+
+**Resources:**
+- Apple FCPXML Reference: https://developer.apple.com/documentation/professional_video_applications/fcpxml_reference
