@@ -32,3 +32,15 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Destructive Actions Copy Improvement
+
+**Copy Type:** Confirmation Dialog
+**Original:** "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente." using window.confirm()
+**Changed To:** "Retranscrever '${filename}'? Os resultados atuais serão apagados e isso gastará créditos novamente." using AlertDialog.
+**Learning:** Native `window.confirm()` dialogs are a UX anti-pattern for destructive actions, and phrasing like "Are you sure you want to..." is vague. Starting with the specific action and item name followed by clear consequences is much more effective and cohesive.
+**Rule:** For confirmation dialogs:
+1. Never use `window.confirm()`. Use `AlertDialog`.
+2. Avoid vague phrasing like "Are you sure you want to...".
+3. Start with the specific action and item name.
+4. Follow with clear consequences.

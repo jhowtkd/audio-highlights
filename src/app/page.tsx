@@ -15,6 +15,16 @@ import { Waveform } from '@/components/audio/waveform';
 import { DecupagemView } from '@/components/decupagem/decupagem-view';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { Progress } from '@/components/ui/progress';
 import { ERROR_MESSAGES } from '@/lib/constants';
 import { formatDuration } from '@/lib/format-utils';
@@ -242,15 +252,13 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
+  const [showResetDialog, setShowResetDialog] = useState(false);
+
   const handleReset = useCallback(() => {
     // Confirm before resetting if there's content
     if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
+      setShowResetDialog(true);
+      return;
     }
 
     if (audioUrl) {
@@ -268,7 +276,26 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl, transcription, highlights.length]);
+
+  const confirmReset = useCallback(() => {
+    setShowResetDialog(false);
+    if (audioUrl) {
+      URL.revokeObjectURL(audioUrl);
+    }
+    setStep('upload');
+    setAudioFile(null);
+    setAudioUrl(null);
+    setAudioDuration(0);
+    setTranscription(null);
+    setHighlights([]);
+    setHighlightStats(null);
+    setCurrentTime(0);
+    setSeekTo(undefined);
+    setTranscriptionProgress(0);
+    setErrorMessage(null);
+    setActiveTab('transcription');
+  }, [audioUrl]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -594,6 +621,23 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      <AlertDialog open={showResetDialog} onOpenChange={setShowResetDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Descartar projeto &apos;{audioFile?.name || 'Atual'}&apos;?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Todo o progresso deste projeto será permanentemente perdido.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmReset} className="bg-red-600 hover:bg-red-700 text-white">
+              Descartar
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

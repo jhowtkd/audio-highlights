@@ -16,6 +16,17 @@ import {
     RefreshCw
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
+import { useState } from 'react';
 import { Progress } from '@/components/ui/progress';
 import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { useTaskQueue } from '@/hooks/use-task-queue';
@@ -78,11 +89,14 @@ export function TaskCard({ task }: TaskCardProps) {
         router.push(`/tasks/${task.id}`);
     };
 
-    const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
+    const [showRetranscribeDialog, setShowRetranscribeDialog] = useState(false);
 
+    const handleRetranscribe = () => {
+        setShowRetranscribeDialog(true);
+    };
+
+    const confirmRetranscribe = () => {
+        setShowRetranscribeDialog(false);
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -223,6 +237,23 @@ export function TaskCard({ task }: TaskCardProps) {
                             accept="audio/*,video/*"
                         />
                     </div>
+
+                    <AlertDialog open={showRetranscribeDialog} onOpenChange={setShowRetranscribeDialog}>
+                        <AlertDialogContent>
+                            <AlertDialogHeader>
+                                <AlertDialogTitle>Retranscrever &apos;{task.filename}&apos;?</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                    Os resultados atuais serão apagados e isso gastará créditos novamente.
+                                </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                                <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                <AlertDialogAction onClick={confirmRetranscribe} className="bg-amber-600 hover:bg-amber-700 text-white">
+                                    Retranscrever
+                                </AlertDialogAction>
+                            </AlertDialogFooter>
+                        </AlertDialogContent>
+                    </AlertDialog>
                 </div>
             </div>
         </div>
