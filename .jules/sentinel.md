@@ -31,3 +31,26 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-04-21 - CSV Formula Injection
+
+**Vulnerability:** User-controlled strings were written directly into CSV exports without sanitizing leading formula characters (`=`, `+`, `-`, `@`), enabling CSV Formula Injection.
+
+**Root Cause:** The `generateCSV` function concatenated strings directly. When opened in spreadsheet software, these strings could be executed as formulas.
+
+**Learning:** Always sanitize fields before exporting to CSV. A common mitigation is to prepend a single quote (`'`) to strings that begin with formula execution triggers.
+
+**Prevention:** Create and use a `sanitizeCSVField` helper for all string fields in CSV exports.
+
+**Code:**
+```typescript
+// Vulnerable:
+csv += `"${seg.text}"`
+
+// Secure:
+function sanitizeCSVField(field: string) {
+    if (/^[=+\-@\t\r]/.test(field)) return "'" + field;
+    return field;
+}
+csv += `"${sanitizeCSVField(seg.text)}"`
+```
