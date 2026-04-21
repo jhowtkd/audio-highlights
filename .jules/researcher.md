@@ -102,3 +102,18 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-28 - Audio Loudness Normalization
+
+**Research Topic:** Standardizing clip volume using FFmpeg's `loudnorm` filter.
+
+**Finding:** Evaluated FFmpeg's `loudnorm` filter (EBU R128) vs standard volume scaling.
+- POC verified that `loudnorm=I=-16:TP=-1.5:LRA=11` successfully normalizes quiet/loud audio to a broadcast standard without clipping.
+- Requires re-encoding the audio track, meaning it cannot be used with `-c copy` stream copying.
+
+**Decision:** Proposed adding `loudnorm` as an optional parameter to `ffmpeg-service` endpoints to improve final clip quality.
+
+**Learning:** When generating clips for social media, perceived loudness (LUFS) is far more important than peak normalization. The `loudnorm` filter handles this intelligently, though it introduces a slight performance penalty due to mandatory re-encoding.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#loudnorm
