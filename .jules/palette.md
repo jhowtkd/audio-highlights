@@ -42,3 +42,10 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-04-22 - Replacing Native Confirm with Accessible AlertDialog
+
+**UX Problem:** The application used native browser `window.confirm()` dialogs for destructive actions like discarding a project or retranscribing a file. This is a UX anti-pattern as it blocks the main thread, feels unpolished, and breaks the application's cohesive design system (shadcn/ui).
+**Learning:** Destructive actions need clear, non-blocking confirmation dialogs that fit the application's styling and provide a smooth experience. `window.confirm()` provides no styling control and creates a jarring transition.
+**Solution:** Replaced all instances of `window.confirm()` with custom controlled and uncontrolled `AlertDialog` components from shadcn/ui.
+**Pattern:** For destructive actions in this application, never use `window.confirm()`. Instead, always use a custom React dialog component like `AlertDialog` to provide an accessible, cohesive, and non-blocking user experience. Ensure proper state management is used if the action is triggered outside the immediate dialog scope.
