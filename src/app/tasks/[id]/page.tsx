@@ -25,6 +25,17 @@ import { HighlightList } from '@/components/highlights/highlight-list';
 import { EpisodeSummary } from '@/components/highlights/episode-summary';
 import { Waveform } from '@/components/audio/waveform';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import { useTaskQueueContext } from '@/contexts/task-context';
@@ -55,10 +66,6 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
 
     const handleRetranscribe = () => {
         if (!task) return;
-
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
 
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
@@ -274,16 +281,31 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                             </div>
 
                             <div className="flex items-center gap-2">
-                                <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={handleRetranscribe}
-                                    className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
-                                    title="Retranscrever arquivo"
-                                >
-                                    <RefreshCw className="h-4 w-4 mr-2" />
-                                    Retranscrever
-                                </Button>
+                                <AlertDialog>
+                                    <AlertDialogTrigger asChild>
+                                        <Button
+                                            variant="ghost"
+                                            size="sm"
+                                            className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
+                                            title="Retranscrever arquivo"
+                                        >
+                                            <RefreshCw className="h-4 w-4 mr-2" />
+                                            Retranscrever
+                                        </Button>
+                                    </AlertDialogTrigger>
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>Retranscrever &apos;{task?.filename}&apos;?</AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                Isso irá apagar os resultados atuais e gastar créditos novamente.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                            <AlertDialogAction onClick={handleRetranscribe}>Retranscrever</AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
                                 <ThemeToggle />
 
                                 {/* Hidden file input for restoration */}
