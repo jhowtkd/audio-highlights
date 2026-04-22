@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Speaker Diarization Integration
+
+**Research Topic:** Adding speaker identification to transcripts
+
+**Finding:** Evaluated 2 approaches for adding diarization:
+1. Native API (e.g., Deepgram) - Fast, built-in, but requires replacing free Groq Whisper.
+2. Separate Model (`pyannote/speaker-diarization-3.1` via Replicate/HF) - Allows keeping Groq, but requires complex timestamp alignment.
+
+**Decision:** Proposed adding diarization, recommending a POC to test timestamp alignment between Groq Whisper and Pyannote before deciding to switch providers.
+
+**Learning:** When combining models from different providers (e.g., Whisper for text, Pyannote for speakers), the primary challenge is robust timestamp alignment algorithm to assign speakers to words accurately, as their segment boundaries rarely match perfectly.
+
+**Resources:**
+- https://github.com/pyannote/pyannote-audio
+- https://developers.deepgram.com/docs/diarization
