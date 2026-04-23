@@ -102,3 +102,17 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-04-23 - Speaker Diarization API Research
+
+**Research Topic:** Integrating Speaker Identification (Diarization) into the transcription pipeline.
+
+**Finding:** Evaluated Deepgram Nova-2 vs AssemblyAI for adding speaker diarization. Deepgram's `diarize=true` flag provides extremely fast word-level speaker IDs that map cleanly to our existing segment structure. Groq's standard Whisper API does not natively support this without complex post-processing or using specialized models like WhisperX.
+
+**Decision:** Proposed integrating Deepgram API as an alternative transcription engine specifically for multi-speaker audio.
+
+**Learning:** When building podcast tools, speaker context is as important as the text itself for downstream LLM tasks (like highlight generation). Relying purely on text without speaker bounds limits the quality of automated editing.
+
+**Resources:**
+- https://developers.deepgram.com/docs/diarization
+- research/proposals/2026-04-23-speaker-diarization.md
