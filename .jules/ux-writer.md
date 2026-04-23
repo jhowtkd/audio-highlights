@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Button Copy Focuses on User Goal
+
+**Copy Type:** Button Label
+**Original:** "Iniciar Transcrição"
+**Changed To:** "Processar áudio"
+**Learning:** "Transcrição" is a technical intermediate step. The user's ultimate goal is getting highlights and analysis. Focusing the button text on the broader action ("Processar") or the user's goal is clearer and less technical.
+**Rule:** Focus button copy on the user's broader goal rather than specific technical sub-steps.
