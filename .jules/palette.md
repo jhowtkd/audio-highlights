@@ -42,3 +42,16 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-04-23 - Custom Interactive Elements Keyboard Focus
+
+**UX Problem:** Several custom interactive elements, such as dropdown menu items, toggle buttons for expanding sections, and clear search inputs, lacked keyboard focus visibility. Keyboard users were unable to discern which element was currently focused, causing navigation confusion.
+
+**Learning:** Tailwind CSS resets default browser focus rings on buttons. If a `<button>` element does not use a base component like `shadcn/ui Button` (which handles its own focus states), it will appear completely invisible to keyboard navigation unless explicitly styled.
+
+**Solution:** Added `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500` (and `rounded` if necessary) to the affected `<button>` elements.
+
+**Pattern:** For custom `<button>` elements that bypass the design system's Button component:
+1. Always apply explicit focus styles using `focus-visible:ring-2` and `focus-visible:ring-blue-500` (or appropriate primary color).
+2. Ensure the element has a `rounded` class, as focus rings on sharp corners can look jagged.
+3. Test by tabbing through the interface to ensure every interactive element clearly indicates focus.
