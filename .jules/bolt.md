@@ -33,3 +33,22 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-04-23 - `React.memo` Busted by Inline Arrow Functions
+
+**Bottleneck:** `Waveform` component re-rendered on every state update of `TaskDetailPage` despite being seemingly simple or previously intended to be optimized. The parent component updates high-frequency state like audio `currentTime` continuously.
+
+**Learning:** `React.memo`'s shallow comparison completely fails if *any* prop changes reference on every render. Inline arrow functions (e.g., `onSeek={(time) => setSeekTo(time)}`) create a new function instance on *every* parent render, bypassing the memoization cache and causing the heavy child component to recalculate/redraw.
+
+**Action:**
+1. Wrapped the target child component in `React.memo()`.
+2. Passed the stable reference of the state setter directly to the component (e.g., `onSeek={setSeekTo}`) instead of an inline arrow function.
+
+**Code:**
+```typescript
+// BAD: Breaks memoization
+<Waveform onSeek={(time) => setSeekTo(time)} />
+
+// GOOD: Preserves memoization using stable state setter
+<Waveform onSeek={setSeekTo} />
+```
