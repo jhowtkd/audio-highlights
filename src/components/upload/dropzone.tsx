@@ -183,7 +183,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
         <div className="mt-6 flex justify-end">
           <Button onClick={handleSubmit} size="lg" className="w-full sm:w-auto">
             <Upload className="mr-2 h-4 w-4" />
-            Iniciar Transcrição
+            Processar áudio
           </Button>
         </div>
       </div>
