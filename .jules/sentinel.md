@@ -31,3 +31,27 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2026-04-23 - CSV Formula Injection in EDL Generator
+
+**Vulnerability:** The application exports transcription segments to a CSV file (`src/lib/edl-generator.ts`) but failed to sanitize user-controlled text (transcription text, problem type, suggestion, and reason). If a transcription contained segments starting with characters like `=`, `+`, `-`, or `@`, opening the exported CSV in spreadsheet software like Excel could execute arbitrary formulas (CSV Injection / Macro Injection).
+**Root Cause:** The `generateCSV` function concatenated user-controlled data directly into the CSV structure. While double quotes were escaped for `seg.text`, it did not prefix malicious formula triggers with a safe character (like `'`) or apply escaping to the other text fields (`problemType`, `suggestion`, `reason`).
+**Learning:** Always sanitize user input when generating CSVs, especially in applications processing unstructured text (like transcriptions or LLM outputs) that might inadvertently or maliciously begin with formula triggers. Furthermore, ensure all string fields, not just the primary text body, are escaped against double quotes.
+**Prevention:**
+- Prefix any CSV field starting with `=`, `+`, `-`, `@`, `\t`, or `\r` with a single quote (`'`).
+- Ensure all string fields pass through the sanitization function, not just the "main" text field.
+**Code:**
+```typescript
+// Vulnerable pattern
+csv += `"${seg.text.replace(/"/g, '""')}","${seg.problemType}"\n`;
+
+// Secure pattern
+function sanitizeCSVField(field: string): string {
+    if (!field) return '';
+    let sanitized = field.replace(/"/g, '""');
+    if (/^[=+\-@\t\r]/.test(sanitized)) {
+        sanitized = "'" + sanitized;
+    }
+    return sanitized;
+}
+csv += `"${sanitizeCSVField(seg.text)}","${sanitizeCSVField(seg.problemType)}"\n`;
+```
