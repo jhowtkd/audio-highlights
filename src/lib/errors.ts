@@ -73,7 +73,7 @@ export function createErrorResponse(error: unknown, context?: string): NextRespo
 
   // Default error response
   return NextResponse.json(
-    { error: 'Ocorreu um erro inesperado. Tente novamente.' },
+    { error: 'Não foi possível completar a ação. Tente novamente em alguns minutos.' },
     { status: 500 }
   );
 }
