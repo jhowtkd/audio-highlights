@@ -33,3 +33,17 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-02-05 - Inline Functions Break Memoization
+
+**Bottleneck:** High-frequency state updates (60Hz for `currentTime`) managed in parent components caused massive tree re-renders because heavy child components like `Waveform` were missing `React.memo`, and their callback props were using inline arrow functions.
+**Learning:** Passing inline arrow functions as callback props (`onSeek={(time) => setSeekTo(time)}`) creates a new reference on every render. Even if the child component is wrapped in `React.memo`, the new reference will completely break memoization and trigger unnecessary re-renders.
+**Action:** When passing callbacks to heavy components, always use stable references like direct state setters (e.g., `onSeek={setSeekTo}`) or `useCallback`. Ensure the child is properly wrapped in `React.memo`.
+**Code:**
+```tsx
+// ❌ BAD: Breaks memoization
+<Waveform onSeek={(time) => setSeekTo(time)} />
+
+// ✅ GOOD: Stable reference preserves memoization
+<Waveform onSeek={setSeekTo} />
+```

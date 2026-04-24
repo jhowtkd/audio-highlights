@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
+import { useRef, useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { cn } from '@/lib/utils';
 import { formatDuration } from '@/lib/format-utils';
 import type { GeneratedHighlight, TranscriptionSegment } from '@/types';
@@ -27,7 +27,7 @@ const HIGHLIGHT_COLORS = [
 const DEFAULT_HIGHLIGHTS: GeneratedHighlight[] = [];
 const DEFAULT_SEGMENTS: TranscriptionSegment[] = [];
 
-export function Waveform({
+export const Waveform = memo(function Waveform({
     audioUrl,
     duration,
     currentTime,
@@ -359,4 +359,4 @@ export function Waveform({
             )}
         </div>
     );
-}
+});
