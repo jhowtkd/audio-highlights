@@ -102,3 +102,23 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-04-24 - Video Hardsubbing Support
+
+**Research Topic:** Adding burned-in subtitles (hardsubs) using FFmpeg.
+
+**Finding:**
+Evaluated using FFmpeg's `subtitles` filter with `ffmpeg-static`.
+- Verified that `ffmpeg-static` includes `--enable-libass`, allowing it to burn VTT files directly into the video stream.
+- The process requires writing the VTT data to a temporary file.
+- Crucially, applying video filters requires video re-encoding (`-c:v libx264`), which cannot be combined with fast stream copying (`-c copy`).
+
+**Decision:**
+Propose adding hardsubbing support by modifying the `ffmpeg-service` to accept VTT data and apply the `subtitles` filter during export/mix generation.
+
+**Learning:**
+While stream copying (`-c copy`) is fast for simple cutting/concatenation, any visual modification (like hardsubbing) forces a full re-encode. We must carefully manage user expectations regarding processing time when they enable "Burn Subtitles", as it will be significantly slower than standard clipping.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/YYYY-MM-DD-video-hardsubbing.md
