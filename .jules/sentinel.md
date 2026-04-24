@@ -31,3 +31,25 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-04-24 - CSV Formula Injection in EDL Export
+
+**Vulnerability:** User-controlled text fields (`text`, `reason`) from transcriptions were exported directly to CSV without sanitization. An attacker could craft a transcription containing spreadsheet formulas (e.g., `=cmd|' /C calc'!A0`) that would execute when opened in Excel.
+**Root Cause:** The `generateCSV` function only escaped quotes but did not check for characters that trigger formula execution (`=`, `+`, `-`, `@`).
+**Learning:** Always sanitize text fields exported to CSV to prevent Formula Injection.
+**Prevention:** Prefix cells that begin with `=`, `+`, `-`, `@`, `\t`, or `\r` with a single quote (`'`).
+**Code:**
+```typescript
+// Vulnerable:
+csv += `"${seg.text.replace(/"/g, '""')}"\n`;
+
+// Secure:
+function sanitizeCSVField(field: string): string {
+    const text = field.replace(/"/g, '""');
+    if (/^[=+\-@\t\r]/.test(text)) {
+        return \`'\${text}\`;
+    }
+    return text;
+}
+csv += \`"\${sanitizeCSVField(seg.text)}"\n\`;
+```
