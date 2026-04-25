@@ -33,3 +33,17 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2025-02-21 - Waveform Re-renders Blocked Main Thread
+
+**Bottleneck:** The heavy `Waveform` component (using Canvas and complex math) was re-rendering unnecessarily whenever parent components (like `page.tsx`) updated their state (e.g., changing tabs or updating minor UI elements).
+**Learning:** React re-renders child components by default if the parent renders. Additionally, passing inline arrow functions (like `onSeek={(time) => setSeekTo(time)}`) creates a new function reference on *every* render, completely breaking `React.memo` even if it is applied.
+**Action:** Wrap heavy components like `Waveform` in `React.memo()` and ensure that callback props (like `onSeek`) use stable references (e.g., passing the state setter directly `onSeek={setSeekTo}` or using `useCallback`).
+**Code:**
+```typescript
+// Component:
+export const Waveform = memo(function Waveform({ ... }) { ... });
+
+// Usage:
+<Waveform onSeek={setSeekTo} />
+```
