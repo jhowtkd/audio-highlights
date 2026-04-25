@@ -31,3 +31,26 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2025-04-25 - CSV Injection in EDL Generator
+
+**Vulnerability:** CSV exports generated user-controlled content (`Text`, `Problem`, `Suggestion`, `Reason`) without sanitization. If the text starts with `=, +, -, @`, spreadsheet programs (like Excel) can execute the content as formulas when opened, which is a CSV injection vulnerability.
+**Root Cause:** The system only escaped double quotes to handle valid CSV formatting, but forgot to sanitize fields that start with formula characters.
+**Learning:** Always sanitize user-provided text in CSV exports by prefixing fields that start with dangerous characters (`=`, `+`, `-`, `@`, `\t`, `\r`) with a single quote (`'`).
+**Prevention:** Ensure any text field that gets inserted into a CSV string is sanitized.
+**Code:**
+```typescript
+// Vulnerable:
+csv += `"${seg.text.replace(/"/g, '""')}"\n`;
+
+// Secure:
+function sanitizeCSVField(field: string): string {
+    if (!field) return '';
+    if (['=', '+', '-', '@', '\t', '\r'].some(char => field.startsWith(char))) {
+        return "'" + field;
+    }
+    return field;
+}
+const safeText = sanitizeCSVField(seg.text).replace(/"/g, '""');
+csv += `"${safeText}"\n`;
+```
