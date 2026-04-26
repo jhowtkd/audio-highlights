@@ -202,7 +202,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
             <button
               type="button"
               onClick={clearSearch}
-              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded"
               aria-label="Limpar busca"
             >
               <X className="h-4 w-4" />
@@ -258,7 +258,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                   type="button"
                   role="menuitem"
                   onClick={() => handleExportTranscript('txt')}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 focus-visible:bg-slate-100 dark:focus-visible:bg-slate-700 focus-visible:outline-none"
                 >
                   <FileText className="h-4 w-4" />
                   Texto simples (.txt)
@@ -267,7 +267,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                   type="button"
                   role="menuitem"
                   onClick={() => handleExportTranscript('txt-timestamps')}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 focus-visible:bg-slate-100 dark:focus-visible:bg-slate-700 focus-visible:outline-none"
                 >
                   <FileText className="h-4 w-4" />
                   Com timestamps (.txt)
@@ -276,7 +276,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                   type="button"
                   role="menuitem"
                   onClick={() => handleExportTranscript('srt')}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 focus-visible:bg-slate-100 dark:focus-visible:bg-slate-700 focus-visible:outline-none"
                 >
                   <FileCode className="h-4 w-4" />
                   Legendas (.srt)
@@ -285,7 +285,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                   type="button"
                   role="menuitem"
                   onClick={() => handleExportTranscript('md')}
-                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 focus-visible:bg-slate-100 dark:focus-visible:bg-slate-700 focus-visible:outline-none"
                 >
                   <FileCode className="h-4 w-4" />
                   Markdown (.md)

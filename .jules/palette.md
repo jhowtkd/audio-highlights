@@ -42,3 +42,10 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-02-27 - Native button keyboard navigation focus
+
+**UX Problem:** Native `<button>` elements outside of our UI design system components lack focus visibility when navigating via keyboard, making it difficult for keyboard-only users to discern the active element.
+**Learning:** Using raw `<button>` elements instead of the design system `<Button>` component results in losing the globally defined focus-visible styles, negatively impacting accessibility.
+**Solution:** Explicitly added `focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500` classes to raw `<button>` elements across the application to provide clear visual feedback during keyboard navigation. For dropdown menu items, a background color change was used instead of an outline.
+**Pattern:** When using raw native `<button>` elements, always manually apply `focus-visible` classes to ensure keyboard accessibility. Ensure consistency with the design system focus indicators.

@@ -299,7 +299,7 @@ export default function Home() {
               {step !== 'upload' && (
                 <button
                   onClick={handleReset}
-                  className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+                  className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded px-1 -ml-1"
                 >
                   Novo projeto
                 </button>
