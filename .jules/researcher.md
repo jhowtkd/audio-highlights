@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-04-26 - Speaker Diarization Integration
+
+**Research Topic:** Speaker Diarization (Identification) in Transcripts
+
+**Finding:** Evaluated approaches for adding speaker diarization:
+- Native Groq Whisper: Does not support diarization out-of-the-box.
+- Pyannote.audio: Powerful but requires heavy GPU infrastructure, unsuitable for serverless/Next.js.
+- Deepgram API: Extremely fast, supports `diarize=true` directly, though slightly more expensive than Groq.
+
+**Decision:** Propose migrating to or adding Deepgram API as an option for transcription with diarization, to support multi-speaker podcasts effectively.
+
+**Learning:** Implementing custom diarization over existing Whisper transcripts is too complex and resource-intensive. Using an integrated speech-to-text + diarization API (like Deepgram) is the most pragmatic approach for this stack.
+
+**Resources:**
+- https://developers.deepgram.com/docs/diarization
+- research/proposals/2026-04-26-speaker-diarization.md
