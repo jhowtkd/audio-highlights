@@ -174,7 +174,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
             <div className="text-sm text-amber-800 dark:text-amber-200">
               <p className="font-medium">Áudio curto ({formatDuration(audioFile.duration)})</p>
               <p className="mt-0.5 text-amber-700 dark:text-amber-300">
-                A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto.
+                Para melhores resultados, use áudios com mais de 1 minuto.
               </p>
             </div>
           </div>

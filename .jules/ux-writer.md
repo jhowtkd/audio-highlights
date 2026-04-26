@@ -32,3 +32,13 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-04-26 - Empty State Improvements
+
+**Copy Type:** Empty states
+**Original:**
+- "Comece seu primeiro projeto" / "Envie um arquivo de áudio ou vídeo para transcrever e gerar cortes virais automaticamente." / "Criar novo projeto"
+**Changed To:**
+- "Nenhum projeto ainda" / "Crie seu primeiro projeto para começar a gerar cortes virais." / "Criar projeto"
+**Learning:** The old text felt too long, wordy and less actionable for users. Making it more concise and specific to what the user needs to do right now, improves scanability and actionability.
+**Rule:** When writing empty states, always prioritize a clear headline describing the current state ("Nenhum projeto ainda"), a brief subtext explaining what action to take, and a concise call-to-action button ("Criar projeto").
