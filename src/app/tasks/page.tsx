@@ -124,14 +124,14 @@ export default function TasksPage() {
                             <Mic className="h-8 w-8 text-slate-400" />
                         </div>
                         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                            Comece seu primeiro projeto
+                            Nenhum projeto ainda
                         </h2>
                         <p className="text-slate-600 dark:text-slate-400 mb-6">
-                            Envie um arquivo de áudio ou vídeo para transcrever e gerar cortes virais automaticamente.
+                            Crie seu primeiro projeto para começar a gerar cortes virais.
                         </p>
                         <Button onClick={() => setUploadDialogOpen(true)}>
                             <Plus className="h-4 w-4 mr-2" />
-                            Criar novo projeto
+                            Criar projeto
                         </Button>
                     </div>
                 ) : (
