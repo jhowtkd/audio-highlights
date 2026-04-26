@@ -374,7 +374,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                 currentTime={currentTime}
                                 highlights={highlights}
                                 segments={transcription?.segments}
-                                onSeek={(time) => setSeekTo(time)}
+                                onSeek={setSeekTo}
                             />
                         </div>
                     )}
