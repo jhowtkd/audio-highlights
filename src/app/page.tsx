@@ -461,7 +461,8 @@ export default function Home() {
                   currentTime={currentTime}
                   highlights={highlights}
                   segments={transcription?.segments}
-                  onSeek={(time) => setSeekTo(time)}
+                  // Performance: Pass stable setSeekTo reference directly to prevent Waveform re-renders
+                  onSeek={setSeekTo}
                 />
               </div>
             )}
