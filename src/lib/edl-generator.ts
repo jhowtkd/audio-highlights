@@ -65,11 +65,28 @@ function generateCMX3600(segments: DecupageSegment[], fps: number = 24): string 
 /**
  * Generates a simple CSV for manual review
  */
+/**
+ * Sanitizes a CSV cell to prevent CSV Formula Injection
+ */
+function sanitizeCsvCell(value: string): string {
+    if (!value) return '';
+    const str = String(value);
+    if (/^[=+\-@\t\r]/.test(str)) {
+        return "'" + str;
+    }
+    return str;
+}
+
 function generateCSV(segments: DecupageSegment[]): string {
     let csv = 'Start Time,End Time,Duration,Text,Problem,Suggestion,Reason\n';
 
     segments.forEach(seg => {
-        csv += `${seg.startTime.toFixed(3)},${seg.endTime.toFixed(3)},${(seg.endTime - seg.startTime).toFixed(3)},"${seg.text.replace(/"/g, '""')}","${seg.problemType}","${seg.suggestion}","${seg.reason}"\n`;
+        const text = sanitizeCsvCell(seg.text).replace(/"/g, '""');
+        const problem = sanitizeCsvCell(seg.problemType);
+        const suggestion = sanitizeCsvCell(seg.suggestion);
+        const reason = sanitizeCsvCell(seg.reason || '');
+
+        csv += `${seg.startTime.toFixed(3)},${seg.endTime.toFixed(3)},${(seg.endTime - seg.startTime).toFixed(3)},"${text}","${problem}","${suggestion}","${reason}"\n`;
     });
 
     return csv;
