@@ -31,3 +31,31 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-02-14 - CSV Formula Injection in EDL Exports
+
+**Vulnerability:** User-controlled text segments in Decupagem could be exported to a CSV file. If a segment began with formula characters (like `=`), it could be executed by spreadsheet applications (CSV Formula Injection / CWE-1236).
+
+**Root Cause:** The `generateCSV` function in `src/lib/edl-generator.ts` appended raw text from `DecupageSegment` objects directly into CSV rows without checking for formula prefixes.
+
+**Learning:** When exporting data to CSV formats, any field potentially controlled by users (even partially, such as transcriptions) must be sanitized. Escaping quotes (`"`) prevents escaping the cell, but does not prevent formula execution if the cell text starts with formula triggers.
+
+**Prevention:** Prefix any cell that begins with `=`, `+`, `-`, `@`, `\t`, or `\r` with a single quote (`'`) to force spreadsheet programs to interpret the content as plain text rather than an executable formula.
+
+**Code:**
+```typescript
+// Vulnerable:
+csv += `"${seg.text.replace(/"/g, '""')}"`;
+
+// Secure:
+function sanitizeCsvCell(value: string): string {
+    if (!value) return '';
+    const str = String(value);
+    if (/^[=+\-@\t\r]/.test(str)) {
+        return "'" + str;
+    }
+    return str;
+}
+const text = sanitizeCsvCell(seg.text).replace(/"/g, '""');
+csv += `"${text}"`;
+```
