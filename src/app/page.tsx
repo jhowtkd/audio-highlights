@@ -169,7 +169,7 @@ export default function Home() {
       setVideoFile(file);
       toast.success(`Vídeo "${file.name}" anexado!`);
     } else if (file) {
-      toast.error('Por favor, selecione um arquivo de vídeo (MP4, MOV)');
+      toast.error('Formato não suportado. Selecione um vídeo MP4 ou MOV.');
     }
   }, []);
 
