@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-04-27 - FFmpeg Subtitle Burn-in Limitations
+
+**Research Topic:** Adding hardcoded subtitles to video exports using FFmpeg.
+
+**Finding:**
+Using FFmpeg's `-vf subtitles` filter requires re-encoding the video track (`-c:v libx264`) and cannot be combined with our fast stream copying approach (`-c copy`). Additionally, processing VTT/SRT files successfully with this filter requires FFmpeg to be compiled with `--enable-libass`. Fortunately, the `ffmpeg-static` package used in our Node.js environment provides a compatible binary.
+
+**Decision:**
+Propose adding a subtitle burn-in endpoint, but explicitly document the performance trade-off between stream copying and re-encoding.
+
+**Learning:**
+Applying any media filters in FFmpeg strictly precludes the use of stream copying. Furthermore, specific filters often have hidden compilation dependencies (like `libass` for subtitles).
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
