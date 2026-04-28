@@ -102,3 +102,22 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-04-28 - Hardsubbing Export Research
+
+**Research Topic:** Server-side subtitle burn-in (Hardsubbing) using FFmpeg.
+
+**Finding:**
+Evaluated burning exported SRT/VTT subtitles directly into video highlights to allow users to download ready-to-publish social media clips.
+Using the `ffmpeg-static` package, which is compiled with `--enable-libass`, the `subtitles` video filter (`-vf subtitles=file.srt`) works reliably in a Node.js environment.
+
+**Decision:**
+Propose adding a `/burn-subtitles` endpoint to the `ffmpeg-service` microservice.
+This provides a massive UX win by offering an "all-in-one" workflow, preventing users from needing external editors like CapCut just to add text to their clips.
+
+**Learning:**
+Unlike the fast stream copy (`-c copy`) used for cutting videos, applying any media filter like `subtitles` strictly requires re-encoding the video track (`-c:v libx264`). This introduces a performance trade-off (higher CPU load and processing time) that is acceptable for a final export step.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/2026-04-28-hardsubbing-export.md
