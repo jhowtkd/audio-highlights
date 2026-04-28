@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-05 - Confirmation Dialog Improvement
+
+**Copy Type:** Confirmation Dialog
+**Original:** "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+**Changed To:** "Retranscrever o arquivo? Os resultados atuais serão apagados e um novo custo será gerado."
+**Learning:** "Tem certeza que..." is vague and slightly alarming. The original copy also used "gastar créditos", which is confusing since the app calculates costs in USD, not a virtual currency. The new copy states the action clearly in the prompt and uses specific consequences.
+**Rule:** Avoid "Tem certeza..." in confirmation dialogs. Start with the action being confirmed, and explicitly list the consequences (e.g., "Retranscrever o arquivo? [Consequence]").
