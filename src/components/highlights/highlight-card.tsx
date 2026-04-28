@@ -180,7 +180,7 @@ export function HighlightCard({
                 onClick={() => setShowDetails(!showDetails)}
                 aria-expanded={showDetails}
                 aria-controls={`suggested-titles-${highlight.id}`}
-                className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
+                className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 rounded-sm"
               >
                 {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}
                 {showDetails ? 'Ocultar opções' : 'Ver títulos alternativos'}
@@ -193,7 +193,7 @@ export function HighlightCard({
                       type="button"
                       onClick={() => setSelectedTitle(title)}
                       className={cn(
-                        'block w-full text-left text-xs p-2 rounded border transition-all',
+                        'block w-full text-left text-xs p-2 rounded border transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500',
                         selectedTitle === title
                           ? 'border-blue-500 bg-blue-50 dark:bg-blue-950'
                           : 'border-slate-200 dark:border-slate-700 hover:border-slate-300'
