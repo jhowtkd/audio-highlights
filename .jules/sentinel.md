@@ -31,3 +31,18 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-04-29 - Missing Timeout on External API Calls
+
+**Vulnerability:** External API requests (e.g., to Gemini API via `fetch`) did not have a timeout configured, which could lead to Denial of Service (DoS) from hanging connections if the external service stops responding.
+**Root Cause:** The `fetch` API does not have a default timeout, so requests can theoretically hang indefinitely, tying up server resources.
+**Learning:** Always explicitly configure a timeout for external HTTP requests to prevent resource exhaustion and ensure the system fails fast.
+**Prevention:** Use `AbortSignal.timeout(ms)` when making external network requests using `fetch`.
+**Code:**
+```typescript
+// Vulnerable:
+fetch(url, { method: 'POST', body })
+
+// Secure:
+fetch(url, { method: 'POST', body, signal: AbortSignal.timeout(60000) })
+```
