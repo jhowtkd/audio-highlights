@@ -102,3 +102,17 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-28 - FFmpeg Subtitle Burn-in (Hardsubbing)
+
+**Research Topic:** Adding subtitle burn-in (hardsubbing) to exported videos using FFmpeg in Node.js.
+
+**Finding:** The `ffmpeg-static` package already includes a binary compiled with `--enable-libass`, which is strictly required for the `subtitles` filter to process VTT or SRT files successfully.
+When applying the `subtitles` filter (e.g., `-vf subtitles=file.vtt`), the video track *must* be re-encoded (e.g., `-c:v libx264`). It cannot be combined with fast stream copying (`-c copy`) for the video, though the audio can still be copied (`-c:a copy`).
+
+**Decision:** Proposed adding a hardsubbing feature for video export.
+
+**Learning:** Path escaping for the `subtitles` filter in FFmpeg is notoriously tricky, especially on Windows or when dealing with absolute paths. The safest cross-platform approach in Node.js is to construct an absolute path and escape backslashes and colons: `path.resolve(vttFile).replace(/\\/g, '/').replace(/:/g, '\\:')`.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
