@@ -33,3 +33,17 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-02-06 - Inline Callbacks Breaking React.memo
+
+**Bottleneck:** `Waveform` component was re-rendering 60 times/second during audio playback despite parent optimizations.
+**Learning:** The parent component passed an inline arrow function `onSeek={(time) => setSeekTo(time)}` to the child. This created a new function reference on every single render of the parent, completely bypassing `React.memo` and causing unnecessary re-renders of the heavy canvas-based `Waveform` component.
+**Action:** When using `React.memo` on heavy components, ensure all callback props are stable references. Use direct state setters (`onSeek={setSeekTo}`) or `useCallback` to prevent breaking memoization.
+**Code:**
+```typescript
+// ❌ BAD: Breaks memoization
+<Waveform onSeek={(time) => setSeekTo(time)} />
+
+// ✅ GOOD: Stable reference preserves memoization
+<Waveform onSeek={setSeekTo} />
+```
