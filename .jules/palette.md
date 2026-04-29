@@ -42,3 +42,15 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-04-29 - Icon-only Buttons Missing ARIA Labels
+
+**UX Problem:** Several icon-only `<Button>` elements (like delete, refresh, confirm, cut) lacked `aria-label` attributes, making their purpose ambiguous or completely hidden to screen reader users.
+
+**Learning:** When using shadcn/ui `<Button>` with `size="icon"` or similar variants, the visual icon provides context for sighted users, but without text content, screen readers announce generic or unhelpful labels (e.g., just "button").
+
+**Solution:** Added explicit `aria-label` attributes to all icon-only action buttons across various components (`TaskCard`, `CutSuggestionCard`, `TranscriptViewer`) and updated size variants for consistency.
+
+**Pattern:** For any icon-only button:
+1. Always include an explicit `aria-label` describing the action (e.g., `aria-label="Excluir projeto"`).
+2. Use `title` attributes alongside `aria-label` for visual tooltips where helpful, but do not rely on `title` alone for accessibility.

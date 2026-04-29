@@ -310,7 +310,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
               <>Nenhum resultado para &ldquo;{searchQuery}&rdquo;</>
             )}
           </span>
-          <Button variant="ghost" size="sm" onClick={clearSearch}>
+          <Button variant="ghost" size="sm" onClick={clearSearch} aria-label="Limpar busca">
             Limpar
           </Button>
         </div>

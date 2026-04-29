@@ -197,6 +197,7 @@ export function TaskCard({ task }: TaskCardProps) {
                                 onClick={handleRetranscribe}
                                 className="text-slate-500 hover:text-blue-600"
                                 title="Retranscrever arquivo"
+                                aria-label="Retranscrever arquivo"
                             >
                                 <RefreshCw className="h-4 w-4" />
                             </Button>
@@ -209,6 +210,7 @@ export function TaskCard({ task }: TaskCardProps) {
                                 onClick={() => removeTask(task.id)}
                                 className="text-slate-500 hover:text-red-600"
                                 title="Excluir projeto"
+                                aria-label="Excluir projeto"
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>
