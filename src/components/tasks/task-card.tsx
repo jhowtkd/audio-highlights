@@ -17,6 +17,17 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import type { Task } from '@/types/task-types';
@@ -79,10 +90,6 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -191,27 +198,61 @@ export function TaskCard({ task }: TaskCardProps) {
                         )}
 
                         {(task.status === 'completed' || task.status === 'error' || task.status === 'pending') && (
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={handleRetranscribe}
-                                className="text-slate-500 hover:text-blue-600"
-                                title="Retranscrever arquivo"
-                            >
-                                <RefreshCw className="h-4 w-4" />
-                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="text-slate-500 hover:text-blue-600"
+                                        title="Retranscrever arquivo"
+                                    >
+                                        <RefreshCw className="h-4 w-4" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Retranscrever arquivo?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={handleRetranscribe}>
+                                            Retranscrever
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         )}
 
                         {(task.status === 'completed' || task.status === 'error' || task.status === 'pending') && (
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => removeTask(task.id)}
-                                className="text-slate-500 hover:text-red-600"
-                                title="Excluir projeto"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <AlertDialog>
+                                <AlertDialogTrigger asChild>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="text-slate-500 hover:text-red-600"
+                                        title="Excluir projeto"
+                                    >
+                                        <Trash2 className="h-4 w-4" />
+                                    </Button>
+                                </AlertDialogTrigger>
+                                <AlertDialogContent>
+                                    <AlertDialogHeader>
+                                        <AlertDialogTitle>Excluir projeto?</AlertDialogTitle>
+                                        <AlertDialogDescription>
+                                            Tem certeza que deseja excluir o projeto e todos os dados associados a ele? Esta ação não pode ser desfeita.
+                                        </AlertDialogDescription>
+                                    </AlertDialogHeader>
+                                    <AlertDialogFooter>
+                                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                                        <AlertDialogAction onClick={() => removeTask(task.id)}>
+                                            Excluir
+                                        </AlertDialogAction>
+                                    </AlertDialogFooter>
+                                </AlertDialogContent>
+                            </AlertDialog>
                         )}
 
                         {/* Hidden file input for restoration */}
