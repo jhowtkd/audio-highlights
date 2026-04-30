@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Specific Confirmation Dialogs
+
+**Copy Type:** Confirmation dialog for destructive action
+**Original:** "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+**Changed To:** "Retranscrever o áudio apagará a transcrição atual e consumirá novos créditos. Continuar?"
+**Learning:** The phrase "Are you sure?" ("Tem certeza que deseja...") is a vague anti-pattern. Specifying the exact consequence ("apagará a transcrição atual e consumirá novos créditos") instead of the vague "resultados atuais" and removing passive voice helps users make informed decisions quickly.
+**Rule:** For confirmation dialogs, always specify the exact consequences of the action and avoid asking "Are you sure?". Start with the action and follow with the outcome.
