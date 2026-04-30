@@ -42,3 +42,18 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2025-05-01 - Native Confirm Dialogs for Destructive Actions
+
+**UX Problem:** Destructive actions like "Excluir projeto" (Delete project) and "Retranscrever arquivo" (Retranscribe file) were using native browser `confirm()` dialogues, or firing immediately without warning. Native dialogs are jarring, block the main thread, and look disconnected from the application's design system.
+
+**Learning:** Users need a clear, non-blocking, visually consistent confirmation step before irreversible actions to prevent accidental data loss. Using `AlertDialog` provides context, accessible focus management, and consistent styling.
+
+**Solution:** Wrapped destructive actions in `AlertDialog` components from Radix UI, providing clear titles, descriptions, and explicit Cancel/Confirm actions. Removed native `confirm()` calls.
+
+**Pattern:** For destructive or irreversible actions:
+1. NEVER use the native browser `confirm()` function.
+2. ALWAYS use the `AlertDialog` component.
+3. Provide a clear title (e.g., "Excluir projeto?").
+4. Provide a descriptive body explaining the consequences (e.g., "Esta ação não pode ser desfeita").
+5. Map actions to `AlertDialogCancel` and `AlertDialogAction`.
