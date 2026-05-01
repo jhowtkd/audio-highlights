@@ -33,3 +33,18 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-05-01 - Waveform Component Re-renders
+
+**Bottleneck:** `Waveform` component was re-rendering unnecessarily on every state change in `TaskDetailPage` and `page.tsx` because it wasn't memoized and received an inline arrow function for `onSeek`.
+**Learning:** Heavy visual components like `Waveform` (which uses canvas and resize observers) must be memoized. Furthermore, passing inline arrow functions (e.g., `onSeek={(time) => setSeekTo(time)}`) breaks `React.memo`. Always pass stable references like direct state setters (`onSeek={setSeekTo}`).
+**Action:** Wrapped `Waveform` in `React.memo` and passed `setSeekTo` directly to `onSeek` prop.
+**Code:**
+```tsx
+// BEFORE
+<Waveform onSeek={(time) => setSeekTo(time)} />
+
+// AFTER
+export const Waveform = memo(function Waveform({...}) {...});
+<Waveform onSeek={setSeekTo} />
+```
