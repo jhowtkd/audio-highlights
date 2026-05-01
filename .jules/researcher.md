@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2024-05-02 - Subtitle Burn-in (Hardsubbing) Research
+
+**Research Topic:** Hardcoding subtitles into video exports for social media
+
+**Finding:**
+Users currently need external tools to combine our exported MP4s and SRTs. FFmpeg's `subtitles` filter (via `libass`) can burn subtitles directly into the video stream during processing. `ffmpeg-static` in our environment is compiled with `--enable-libass`.
+
+**Decision:**
+Propose adding a `/burn-subtitles` endpoint to `ffmpeg-service`.
+
+**Learning:**
+While client-side export (WebCodecs/Canvas) offers better animation control, server-side FFmpeg is the most pragmatic and stable MVP for providing hardsubbed viral clips, assuming we manage the CPU re-encoding costs.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/subtitle-burn-in.md
