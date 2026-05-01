@@ -31,3 +31,22 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2025-02-27 - Missing Timeout on External LLM API Call
+
+**Vulnerability:** External API requests using `fetch` (e.g., to Gemini API) lacked a timeout, making the application vulnerable to Denial of Service (DoS) if the connection hangs indefinitely.
+**Root Cause:** The `fetch` call to the external service was implemented without specifying a `signal` with a timeout, allowing requests to block indefinitely if the server is unresponsive.
+**Learning:** Always include a timeout using `AbortSignal.timeout(ms)` when making external API calls, especially to LLM services, to prevent connections from hanging. A longer timeout (e.g., 60 seconds) is appropriate for LLM generation tasks.
+**Prevention:** Always add `signal: AbortSignal.timeout(60000)` to `fetch` options for external APIs.
+**Code:**
+```typescript
+// Vulnerable pattern:
+const response = await fetch(url, { method: 'POST', ... });
+
+// Secure pattern:
+const response = await fetch(url, {
+  method: 'POST',
+  ...
+  signal: AbortSignal.timeout(60000),
+});
+```
