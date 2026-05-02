@@ -429,7 +429,7 @@ export default function Home() {
               Não foi possível processar
             </h2>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
-              {errorMessage || 'Tivemos um problema técnico. Por favor, tente novamente.'}
+              {errorMessage || 'Não foi possível processar o arquivo. Tente novamente em alguns instantes.'}
             </p>
             <div className="flex gap-3 justify-center">
               <Button onClick={handleRetry} variant="default">

@@ -439,7 +439,7 @@ export async function POST(request: NextRequest) {
       throw new AppError(
         'Empty response from GPT',
         500,
-        'Resposta vazia do GPT'
+        'Não foi possível gerar os highlights. Tente novamente.'
       );
     }
 
@@ -467,7 +467,7 @@ export async function POST(request: NextRequest) {
       throw new AppError(
         'Invalid JSON response from GPT',
         500,
-        'Resposta inválida do GPT. Tente novamente.'
+        'Não foi possível processar os resultados. Tente novamente.'
       );
     }
 
