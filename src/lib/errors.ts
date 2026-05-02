@@ -45,7 +45,7 @@ export function createErrorResponse(error: unknown, context?: string): NextRespo
     const issues = error.issues.map((issue) => `${issue.path.join('.')}: ${issue.message}`).join(', ');
     return NextResponse.json(
       {
-        error: 'Dados inválidos',
+        error: 'Verifique as informações preenchidas.',
         details: issues,
       },
       { status: 400 }
@@ -73,7 +73,7 @@ export function createErrorResponse(error: unknown, context?: string): NextRespo
 
   // Default error response
   return NextResponse.json(
-    { error: 'Ocorreu um erro inesperado. Tente novamente.' },
+    { error: 'Não foi possível completar a ação. Tente novamente em alguns instantes.' },
     { status: 500 }
   );
 }

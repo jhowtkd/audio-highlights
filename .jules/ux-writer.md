@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Refinement of Technical Jargon in Error Messages
+
+**Copy Type:** Error message (Highlights generation & generic processing)
+**Original:** "Resposta vazia do GPT" / "Resposta inválida do GPT. Tente novamente." / "Ocorreu um erro inesperado. Tente novamente." / "Tivemos um problema técnico. Por favor, tente novamente."
+**Changed To:** "Não foi possível gerar os highlights. Tente novamente." / "Não foi possível processar os resultados. Tente novamente." / "Não foi possível completar a ação. Tente novamente em alguns instantes." / "Não foi possível processar o arquivo. Tente novamente em alguns instantes."
+**Learning:** Exposing technical jargon like "GPT" or internal component names confuses users and can induce anxiety, as they don't know what it means for them or what to do about it. Vague messages like "Ocorreu um erro inesperado" are similarly unhelpful. Explaining the *outcome* in user terms ("Não foi possível gerar...") and providing a next step reduces friction.
+**Rule:** Always translate technical errors into user-friendly terms. Avoid exposing service names (like GPT) and instead focus on what failed from the user's perspective.
