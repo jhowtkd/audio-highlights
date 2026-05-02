@@ -31,3 +31,22 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-05-02 - CSV Formula Injection in Exports
+
+**Vulnerability:** User-provided text segments were exported to CSV format without sanitizing formula trigger characters (`=`, `+`, `-`, `@`, `\t`, `\r`), allowing potential CSV Formula Injection when opened in spreadsheet applications.
+**Root Cause:** The `generateCSV` function only escaped quotes (`""`) but did not consider spreadsheet software behavior where fields starting with specific characters are evaluated as macros or formulas.
+**Learning:** Always sanitize user-generated content exported to CSV by checking for and prefixing formula characters with a single quote (`'`), even if the data seems innocuous.
+**Prevention:** Implement a dedicated `sanitizeCSVField` function for any CSV export functionality.
+**Code:**
+```typescript
+// Vulnerable:
+const field = `"${text.replace(/"/g, '""')}"`;
+
+// Secure:
+let sanitized = text.replace(/"/g, '""');
+if (/^[=+\-@\t\r]/.test(sanitized)) {
+    sanitized = "'" + sanitized;
+}
+const field = `"${sanitized}"`;
+```
