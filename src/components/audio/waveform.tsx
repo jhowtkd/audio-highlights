@@ -149,6 +149,37 @@ export function Waveform({
         return () => observer.disconnect();
     }, []);
 
+    // Pre-calculate paths for better performance
+    const { waveformPath, highlightPaths } = useMemo(() => {
+        const width = dimensions.width;
+        const height = dimensions.height;
+        const paths = {
+            waveformPath: new Path2D(),
+            highlightPaths: highlights.map(() => new Path2D())
+        };
+
+        if (waveformData.length === 0 || width === 0 || height === 0 || duration === 0) return paths;
+
+        const barWidth = width / waveformData.length;
+
+        // Pre-calculate highlights
+        highlights.forEach((highlight, index) => {
+            const startX = (highlight.startTime / duration) * width;
+            const endX = (highlight.endTime / duration) * width;
+            paths.highlightPaths[index].rect(startX, 0, endX - startX, height);
+        });
+
+        // Pre-calculate waveform bars
+        waveformData.forEach((value, index) => {
+            const x = index * barWidth;
+            const barHeight = value * (height * 0.8);
+            const y = (height - barHeight) / 2;
+            paths.waveformPath.rect(x, y, barWidth - 1, barHeight);
+        });
+
+        return paths;
+    }, [waveformData, dimensions, duration, highlights]);
+
     // Draw waveform on canvas
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -172,42 +203,39 @@ export function Waveform({
 
         const width = dimensions.width;
         const height = dimensions.height;
-        const barWidth = width / waveformData.length;
         const playedPosition = duration > 0 ? (currentTime / duration) * width : 0;
 
         // Clear canvas
         ctx.clearRect(0, 0, width, height);
 
         // Draw highlight regions
-        highlights.forEach((highlight, index) => {
-            const startX = (highlight.startTime / duration) * width;
-            const endX = (highlight.endTime / duration) * width;
-
+        highlightPaths.forEach((path, index) => {
             ctx.fillStyle = HIGHLIGHT_COLORS[index % HIGHLIGHT_COLORS.length];
-            ctx.fillRect(startX, 0, endX - startX, height);
+            ctx.fill(path);
         });
 
-        // Draw waveform bars
-        waveformData.forEach((value, index) => {
-            const x = index * barWidth;
-            const barHeight = value * (height * 0.8);
-            const y = (height - barHeight) / 2;
+        // Draw unplayed waveform
+        ctx.fillStyle = '#cbd5e1'; // slate-300
+        ctx.fill(waveformPath);
 
-            // Color based on played position
-            if (x < playedPosition) {
-                ctx.fillStyle = '#3b82f6'; // blue-500
-            } else {
-                ctx.fillStyle = '#cbd5e1'; // slate-300
-            }
+        // Draw played waveform with clipping
+        if (playedPosition > 0) {
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, playedPosition, height);
+            ctx.clip();
 
-            ctx.fillRect(x, y, barWidth - 1, barHeight);
-        });
+            ctx.fillStyle = '#3b82f6'; // blue-500
+            ctx.fill(waveformPath);
+
+            ctx.restore();
+        }
 
         // Draw playhead
         ctx.fillStyle = '#ef4444'; // red-500
         ctx.fillRect(playedPosition - 1, 0, 2, height);
 
-    }, [waveformData, currentTime, duration, highlights, dimensions]);
+    }, [waveformData, currentTime, duration, dimensions, waveformPath, highlightPaths]);
 
     // Handle click to seek
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {

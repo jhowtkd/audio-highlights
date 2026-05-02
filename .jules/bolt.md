@@ -33,3 +33,10 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-05-02 - Canvas Path2D Rendering Optimization
+
+**Bottleneck:** High CPU usage when drawing thousands of audio waveform rectangles on every frame during playback (`currentTime` updates frequently).
+**Learning:** Calling `fillRect()` for hundreds of bars inside the main `useEffect` drawing loop causes unnecessary performance overhead, as the bars' geometry is static once the audio is loaded.
+**Action:** Use `Path2D` to pre-calculate and cache the paths for all waveform bars and highlight regions inside a `useMemo` hook. In the `useEffect` drawing loop, use a single `ctx.fill(path)` call for the unplayed bars, and then use `ctx.save()`, `ctx.rect()`, `ctx.clip()`, and `ctx.fill(path)` for the played portion.
+**Code:** Use `new Path2D()`, `path.rect(...)` inside `useMemo`, then `ctx.fill(path)` and `ctx.clip()` in `useEffect`.
