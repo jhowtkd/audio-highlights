@@ -292,7 +292,7 @@ export function HighlightCard({
             className="flex-1 sm:flex-none"
             aria-label={`Reproduzir highlight ${index + 1}`}
           >
-            <Play className="h-3.5 w-3.5 mr-1.5" />
+            <Play className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" />
             Play
           </Button>
 
@@ -313,7 +313,7 @@ export function HighlightCard({
             className="flex-1 sm:flex-none"
             aria-label={`Baixar legenda SRT do highlight ${index + 1}`}
           >
-            <Download className="h-3.5 w-3.5 mr-1.5" />
+            <Download className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" />
             SRT
           </Button>
 
@@ -324,7 +324,7 @@ export function HighlightCard({
             className="flex-1 sm:flex-none"
             aria-label={`Baixar texto do highlight ${index + 1}`}
           >
-            <Download className="h-3.5 w-3.5 mr-1.5" />
+            <Download className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" />
             TXT
           </Button>
 
@@ -336,7 +336,7 @@ export function HighlightCard({
               onClick={() => onDownloadVideo(highlight)}
               aria-label={`Baixar vídeo clip do highlight ${index + 1}`}
             >
-              <Film className="h-3.5 w-3.5 mr-1.5" />
+              <Film className="h-3.5 w-3.5 mr-1.5" aria-hidden="true" />
               Baixar Clip
             </Button>
           )}
