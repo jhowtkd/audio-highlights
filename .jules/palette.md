@@ -42,3 +42,17 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2025-03-05 - Accessible Confirmation for Destructive Actions
+
+**UX Problem:** Destructive actions like deleting a project or retranscribing (which overwrites data and uses credits) were implemented either without confirmation or using native browser `confirm()` dialogs. Native dialogs are often poorly styled, can block the main thread, and lack consistent accessibility support across screen readers.
+
+**Learning:** Users need a clear, accessible, and consistent way to confirm irreversible actions without being subjected to jarring native browser dialogs or accidental immediate execution.
+
+**Solution:** Replaced native `confirm()` and unconfirmed `onClick` deletions with shadcn/ui's `AlertDialog` component. This provides a trapped focus, ARIA-described dialog with a clear title, description, and differentiated action buttons (e.g., red for delete).
+
+**Pattern:** For any destructive action (e.g., Delete, Overwrite):
+1. Never use native browser `confirm()`.
+2. Never execute immediately without warning.
+3. Always wrap the trigger in an accessible `AlertDialog`.
+4. Ensure the confirm action button visually indicates the danger (e.g., using destructive styling).
