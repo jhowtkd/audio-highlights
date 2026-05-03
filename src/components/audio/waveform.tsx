@@ -187,21 +187,32 @@ export function Waveform({
             ctx.fillRect(startX, 0, endX - startX, height);
         });
 
-        // Draw waveform bars
+        // Pre-calculate the waveform path to avoid drawing individual rectangles on every frame
+        const waveformPath = new Path2D();
         waveformData.forEach((value, index) => {
             const x = index * barWidth;
             const barHeight = value * (height * 0.8);
             const y = (height - barHeight) / 2;
-
-            // Color based on played position
-            if (x < playedPosition) {
-                ctx.fillStyle = '#3b82f6'; // blue-500
-            } else {
-                ctx.fillStyle = '#cbd5e1'; // slate-300
-            }
-
-            ctx.fillRect(x, y, barWidth - 1, barHeight);
+            waveformPath.rect(x, y, barWidth - 1, barHeight);
         });
+
+        // Draw unplayed portion (slate-300)
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(playedPosition, 0, width - playedPosition, height);
+        ctx.clip();
+        ctx.fillStyle = '#cbd5e1'; // slate-300
+        ctx.fill(waveformPath);
+        ctx.restore();
+
+        // Draw played portion (blue-500)
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, playedPosition, height);
+        ctx.clip();
+        ctx.fillStyle = '#3b82f6'; // blue-500
+        ctx.fill(waveformPath);
+        ctx.restore();
 
         // Draw playhead
         ctx.fillStyle = '#ef4444'; // red-500
