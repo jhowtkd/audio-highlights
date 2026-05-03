@@ -32,3 +32,14 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Humanizing Unexpected Errors
+
+**Copy Type:** Default error message
+**Original:** "Ocorreu um erro inesperado. Tente novamente." / "Tivemos um problema técnico. Por favor, tente novamente."
+**Changed To:** "Algo deu errado do nosso lado. Por favor, tente novamente em alguns instantes."
+**Learning:** "Ocorreu um erro inesperado" is a classic anti-pattern that sounds robotic, vague, and scary. Saying "Algo deu errado do nosso lado" makes the system take responsibility and removes blame or uncertainty for the user. Adding "em alguns instantes" is more realistic for server errors than an immediate retry.
+**Rule:** For generic unexpected errors, ALWAYS:
+1. Use conversational language ("Algo deu errado").
+2. Clarify that it's a system issue ("do nosso lado").
+3. Give a realistic time frame for retrying ("em alguns instantes").
