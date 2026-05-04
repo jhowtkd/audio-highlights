@@ -33,3 +33,26 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-02-15 - HTML5 Canvas Draw Call Optimization
+
+**Bottleneck:** Drawing the audio waveform requires creating hundreds of rectangles per frame (for waveform bars and highlights) using `fillRect` within a high-frequency `useEffect` tied to `currentTime`. This results in expensive per-frame JS loop iterations and DOM operations, hurting performance during audio playback.
+**Learning:** Significant performance gains can be achieved by pre-calculating HTML5 Canvas paths (`Path2D`) using `useMemo` for static elements.
+**Action:** Pre-calculate `Path2D` objects for waveform bars and highlights. Instead of calculating individual bars on each frame, use `ctx.fill(path)` and implement `ctx.save()`, `ctx.clip()`, and `ctx.restore()` for the dynamic playback progress.
+**Code:**
+```typescript
+// Pre-calculate paths
+const canvasPaths = useMemo(() => {
+  const waveformPath = new Path2D();
+  // ... build path ...
+  return { waveformPath };
+}, [waveformData]);
+
+// In draw loop, use clip for dynamic progress
+ctx.save();
+ctx.beginPath();
+ctx.rect(0, 0, playedPosition, height);
+ctx.clip();
+ctx.fill(canvasPaths.waveformPath);
+ctx.restore();
+```
