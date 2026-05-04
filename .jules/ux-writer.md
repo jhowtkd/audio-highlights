@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Empty State Engagement
+
+**Copy Type:** Empty State (Highlights List)
+**Original:** "Nenhum highlight gerado ainda" / "Configure os parâmetros e clique em 'Gerar Highlights'"
+**Changed To:** "Pronto para encontrar os melhores momentos?" / "Ajuste as configurações ao lado e clique em 'Gerar Highlights'"
+**Learning:** "Nenhum highlight gerado" is a factual but dead-end statement. "Parâmetros" is technical jargon. Changing to a question builds anticipation ("Pronto para encontrar os melhores momentos?"), and "configurações" is a more familiar term than "parâmetros". Adding directional cues ("ao lado") helps users know where to look next.
+**Rule:** For empty states preceding user action, use engaging questions instead of factual "nothing here" statements. Avoid technical jargon like "parameters" in favor of "settings" or "options."
