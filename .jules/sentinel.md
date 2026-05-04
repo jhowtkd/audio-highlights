@@ -31,3 +31,22 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-05-04 - CSV Formula Injection in EDL Exports
+
+**Vulnerability:** User-controlled strings exported into CSV files allowed CSV Formula Injection. Malicious inputs could execute arbitrary code when opened in spreadsheet applications like Excel.
+**Root Cause:** The `generateCSV` function concatenated segment texts and metadata directly without checking for dangerous starting characters.
+**Learning:** Always sanitize user-controlled fields before including them in CSV exports by prefixing cells that begin with `=`, `+`, `-`, `@`, `\t`, or `\r` with a single quote (`'`).
+**Prevention:** Implement a `sanitizeCSVField` function to escape double quotes and prefix dangerous characters.
+**Code:**
+```typescript
+// Vulnerable:
+"${seg.text.replace(/\"/g, '\"\"')}"
+
+// Secure:
+function sanitizeCSVField(field: string): string {
+    const str = String(field || '');
+    if (/^[=+\-@\\t\\r]/.test(str)) return "'" + str.replace(/\"/g, '\"\"');
+    return str.replace(/\"/g, '\"\"');
+}
+```
