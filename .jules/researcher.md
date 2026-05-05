@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-05 - Karaoke Mode (Word-level synchronization) Research
+
+**Research Topic:** Word-level transcription highlighting (Karaoke Mode)
+
+**Finding:** Evaluated word-level synchronization using existing Whisper timestamps.
+- POC (`KaraokeTranscriptPOC`) showed that highlighting individual words based on `currentTime` provides highly precise navigation.
+- Frequent state updates (~50ms) are required, but performance is manageable if rendering is carefully memoized at the segment level.
+
+**Decision:** Propose integrating "Karaoke Mode" into the main transcript viewer.
+- It leverages existing data and significantly improves the precision editing UX, bringing it to parity with tools like Descript.
+
+**Learning:** When implementing high-frequency UI updates (like audio sync), isolating state to the smallest possible component and aggressive memoization (`useMemo`, `React.memo`) are critical to prevent full-tree re-renders and maintain 60fps.
+
+**Resources:**
+- `src/components/transcription/karaoke-transcript-poc.tsx`
