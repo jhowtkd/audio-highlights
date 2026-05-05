@@ -92,7 +92,11 @@ export async function POST(request: NextRequest) {
 
         const content = completion.choices[0].message.content;
         if (!content) {
-            throw new AppError('Empty response from LLM', 500);
+            throw new AppError(
+                'Empty response from LLM',
+                500,
+                'Não foi possível analisar o áudio. Tente novamente.'
+            );
         }
 
         const llmResult = JSON.parse(content);

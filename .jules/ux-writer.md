@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-05 - AI Empty Response Error Messages
+
+**Copy Type:** Error message (Empty AI Response)
+**Original:** "Resposta vazia do GPT" / "Empty response from LLM"
+**Changed To:** "A IA não retornou resultados. Tente gerar novamente." / "Não foi possível analisar o áudio. Tente novamente."
+**Learning:** Default technical errors ("Empty response from LLM", "Resposta vazia do GPT") confuse users as they mention internal jargon like "GPT" or "LLM" and don't provide next steps. Updating them to human-readable terms ("IA", "analisar") and offering a clear next step ("Tente gerar novamente") improves the UX significantly.
+**Rule:** When handling empty or failed AI responses, use plain language ("IA não retornou resultados") and provide an actionable solution (e.g., "Tente novamente").

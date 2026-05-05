@@ -439,7 +439,7 @@ export async function POST(request: NextRequest) {
       throw new AppError(
         'Empty response from GPT',
         500,
-        'Resposta vazia do GPT'
+        'A IA não retornou resultados. Tente gerar novamente.'
       );
     }
 
