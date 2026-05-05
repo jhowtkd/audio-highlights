@@ -97,12 +97,15 @@ export class GeminiClient {
             console.log(`[Gemini] Calling ${GEMINI_MODEL} (attempt ${attempt}/${maxRetries})...`);
 
             try {
+                // SECURITY: Add timeout to external LLM API call to prevent hanging connections (DoS prevention).
+                // Using 60000ms (60s) as LLM generation tasks frequently take longer to complete.
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(requestBody),
+                    signal: AbortSignal.timeout(60000),
                 });
 
                 if (!response.ok) {
