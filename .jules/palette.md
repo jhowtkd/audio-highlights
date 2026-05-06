@@ -42,3 +42,18 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-05-06 - Missing ARIA Labels on Icon-Only Buttons
+
+**UX Problem:** Several icon-only buttons across components (e.g., `CutSuggestionCard`, `TaskCard`) lacked `aria-label` attributes.
+Screen readers would read the `title` attribute or generic button text, which is suboptimal for accessibility.
+
+**Learning:** When using Lucide icons or SVGs inside a `<Button>` without visible text, developers often rely solely on the `title` attribute.
+While `title` provides a tooltip, `aria-label` is crucial for explicit, reliable screen reader announcements.
+
+**Solution:** Added explicit `aria-label` attributes to the buttons and `aria-hidden="true"` to the inner icons.
+This ensures the screen reader announces the intended action clearly without redundantly reading the icon's raw markup or SVG title.
+
+**Pattern:** For this design system, ALL icon-only buttons must have:
+1. An explicit `aria-label` attribute on the `<button>` element describing the action.
+2. `aria-hidden="true"` on the inner icon component (e.g., `<Trash2 aria-hidden="true" />`).
