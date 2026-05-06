@@ -149,6 +149,24 @@ export function Waveform({
         return () => observer.disconnect();
     }, []);
 
+    // Pre-calculate the Path2D for the waveform to avoid recalculating on every frame
+    const waveformPath = useMemo(() => {
+        if (typeof window === 'undefined' || !window.Path2D || waveformData.length === 0 || dimensions.width === 0 || dimensions.height === 0) return null;
+
+        const path = new Path2D();
+        const barWidth = dimensions.width / waveformData.length;
+        const height = dimensions.height;
+
+        waveformData.forEach((value, index) => {
+            const x = index * barWidth;
+            const barHeight = value * (height * 0.8);
+            const y = (height - barHeight) / 2;
+            path.rect(x, y, barWidth - 1, barHeight);
+        });
+
+        return path;
+    }, [waveformData, dimensions]);
+
     // Draw waveform on canvas
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -172,8 +190,7 @@ export function Waveform({
 
         const width = dimensions.width;
         const height = dimensions.height;
-        const barWidth = width / waveformData.length;
-        const playedPosition = duration > 0 ? (currentTime / duration) * width : 0;
+                const playedPosition = duration > 0 ? (currentTime / duration) * width : 0;
 
         // Clear canvas
         ctx.clearRect(0, 0, width, height);
@@ -187,27 +204,27 @@ export function Waveform({
             ctx.fillRect(startX, 0, endX - startX, height);
         });
 
-        // Draw waveform bars
-        waveformData.forEach((value, index) => {
-            const x = index * barWidth;
-            const barHeight = value * (height * 0.8);
-            const y = (height - barHeight) / 2;
+        // Draw waveform bars optimized with Path2D
+        if (waveformPath) {
+            // Draw unplayed background
+            ctx.fillStyle = '#cbd5e1'; // slate-300
+            ctx.fill(waveformPath);
 
-            // Color based on played position
-            if (x < playedPosition) {
-                ctx.fillStyle = '#3b82f6'; // blue-500
-            } else {
-                ctx.fillStyle = '#cbd5e1'; // slate-300
-            }
-
-            ctx.fillRect(x, y, barWidth - 1, barHeight);
-        });
+            // Draw played foreground using clip
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, playedPosition, height);
+            ctx.clip();
+            ctx.fillStyle = '#3b82f6'; // blue-500
+            ctx.fill(waveformPath);
+            ctx.restore();
+        }
 
         // Draw playhead
         ctx.fillStyle = '#ef4444'; // red-500
         ctx.fillRect(playedPosition - 1, 0, 2, height);
 
-    }, [waveformData, currentTime, duration, highlights, dimensions]);
+    }, [waveformPath, waveformData, currentTime, duration, highlights, dimensions]);
 
     // Handle click to seek
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {

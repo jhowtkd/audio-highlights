@@ -33,3 +33,25 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-05-06 - Canvas Waveform Loop Bottleneck
+
+**Bottleneck:** Rendering the audio waveform involved calling `ctx.fillRect()` up to 200 times per frame inside a `forEach` loop within the `useEffect` drawing cycle.
+**Learning:** For static waveform data, redrawing the individual bars every frame is highly inefficient. Instead, HTML5 Canvas `Path2D` can be pre-calculated using `useMemo` for the entire waveform. The played and unplayed segments can then be drawn in just two `ctx.fill()` operations by leveraging `ctx.clip()` for the played portion.
+**Action:** Always check canvas rendering loops for static geometries that can be cached into a `Path2D` object to reduce draw calls per frame.
+**Code:**
+```typescript
+const waveformPath = useMemo(() => {
+    const path = new Path2D();
+    waveformData.forEach((value, index) => {
+        path.rect(x, y, w, h);
+    });
+    return path;
+}, [waveformData, dimensions]);
+
+// Inside draw loop
+ctx.save();
+ctx.rect(0, 0, playedPosition, height);
+ctx.clip();
+ctx.fill(waveformPath);
+ctx.restore();
+```
