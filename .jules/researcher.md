@@ -102,3 +102,21 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-06 - Client-Side Video Subtitle Burning
+
+**Research Topic:** Burning subtitles into exported video clips entirely client-side.
+
+**Finding:**
+Evaluated using FFmpeg.wasm (`@ffmpeg/ffmpeg`) to burn SRT subtitles into video segments. It is fully possible by writing the generated SRT to the virtual filesystem and applying the `-vf subtitles=subs.srt` filter.
+The POC demonstrated successful generation of burned-in text. Re-encoding the video stream is necessary (cannot use `-c:v copy`), which increases processing time but produces a ready-to-share asset.
+
+**Decision:**
+Propose adding "Download with Subtitles" as an export option. The client-side approach is chosen to maintain zero server costs for video processing, aligning with the project's architecture.
+
+**Learning:**
+FFmpeg.wasm is powerful enough for basic video re-encoding and filtering tasks (like subtitles) for short clips (~60s), eliminating the need for expensive backend rendering infrastructure for this specific use case.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/2026-05-06-burn-subtitles.md
