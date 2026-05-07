@@ -149,6 +149,41 @@ export function Waveform({
         return () => observer.disconnect();
     }, []);
 
+    // Pre-calculate paths for static elements (waveform bars and highlights)
+    // Performance: Avoids recreating paths and executing JS loops 60 times per second during playback
+    const cachedPaths = useMemo(() => {
+        if (typeof window === 'undefined' || waveformData.length === 0 || dimensions.width === 0 || dimensions.height === 0 || duration === 0) {
+            return null;
+        }
+
+        const width = dimensions.width;
+        const height = dimensions.height;
+        const barWidth = width / waveformData.length;
+
+        // Create Path2D for all waveform bars
+        const waveformPath = new Path2D();
+        waveformData.forEach((value, index) => {
+            const x = index * barWidth;
+            const barHeight = value * (height * 0.8);
+            const y = (height - barHeight) / 2;
+            waveformPath.rect(x, y, barWidth - 1, barHeight);
+        });
+
+        // Create Path2D for highlights
+        const highlightPaths = highlights.map((highlight, index) => {
+            const path = new Path2D();
+            const startX = (highlight.startTime / duration) * width;
+            const endX = (highlight.endTime / duration) * width;
+            path.rect(startX, 0, endX - startX, height);
+            return {
+                path,
+                color: HIGHLIGHT_COLORS[index % HIGHLIGHT_COLORS.length]
+            };
+        });
+
+        return { waveformPath, highlightPaths };
+    }, [waveformData, highlights, duration, dimensions.width, dimensions.height]);
+
     // Draw waveform on canvas
     useEffect(() => {
         const canvas = canvasRef.current;
@@ -172,42 +207,37 @@ export function Waveform({
 
         const width = dimensions.width;
         const height = dimensions.height;
-        const barWidth = width / waveformData.length;
         const playedPosition = duration > 0 ? (currentTime / duration) * width : 0;
 
         // Clear canvas
         ctx.clearRect(0, 0, width, height);
 
-        // Draw highlight regions
-        highlights.forEach((highlight, index) => {
-            const startX = (highlight.startTime / duration) * width;
-            const endX = (highlight.endTime / duration) * width;
+        if (cachedPaths) {
+            // Draw highlight regions
+            cachedPaths.highlightPaths.forEach(({ path, color }) => {
+                ctx.fillStyle = color;
+                ctx.fill(path);
+            });
 
-            ctx.fillStyle = HIGHLIGHT_COLORS[index % HIGHLIGHT_COLORS.length];
-            ctx.fillRect(startX, 0, endX - startX, height);
-        });
+            // Draw unplayed waveform bars
+            ctx.fillStyle = '#cbd5e1'; // slate-300
+            ctx.fill(cachedPaths.waveformPath);
 
-        // Draw waveform bars
-        waveformData.forEach((value, index) => {
-            const x = index * barWidth;
-            const barHeight = value * (height * 0.8);
-            const y = (height - barHeight) / 2;
-
-            // Color based on played position
-            if (x < playedPosition) {
-                ctx.fillStyle = '#3b82f6'; // blue-500
-            } else {
-                ctx.fillStyle = '#cbd5e1'; // slate-300
-            }
-
-            ctx.fillRect(x, y, barWidth - 1, barHeight);
-        });
+            // Draw played waveform bars using clipping
+            ctx.save();
+            ctx.beginPath();
+            ctx.rect(0, 0, playedPosition, height);
+            ctx.clip();
+            ctx.fillStyle = '#3b82f6'; // blue-500
+            ctx.fill(cachedPaths.waveformPath);
+            ctx.restore();
+        }
 
         // Draw playhead
         ctx.fillStyle = '#ef4444'; // red-500
         ctx.fillRect(playedPosition - 1, 0, 2, height);
 
-    }, [waveformData, currentTime, duration, highlights, dimensions]);
+    }, [cachedPaths, currentTime, duration, dimensions, waveformData.length]);
 
     // Handle click to seek
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {

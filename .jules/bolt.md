@@ -33,3 +33,9 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-05-07 - Pre-calculating Path2D Objects for React Canvas
+
+**Bottleneck:** In Next.js/React applications rendering HTML5 Canvas elements, recreating paths (like waveform bars or highlights) and executing JS loops inside `useEffect` 60 times per second during playback causes severe main thread blocking and performance drops.
+**Learning:** Pre-calculating `Path2D` objects using `useMemo` avoids the per-frame overhead and delegates the drawing heavy-lifting to native browser implementations using `ctx.fill(path)`. To render dynamic play states, combine it with `ctx.save()`, `ctx.clip()`, and `ctx.restore()`. Remember to check `typeof window !== 'undefined'` to avoid Next.js SSR build errors because `Path2D` is a browser API.
+**Action:** Always pre-calculate static paths with `Path2D` inside `useMemo` for complex canvas renderings, and use clipping for progress bars or played indicators.
