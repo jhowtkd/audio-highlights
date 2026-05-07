@@ -152,7 +152,7 @@ export function useTaskQueue() {
             };
 
             completeTask(taskId, result);
-            toast.success(`"${task.filename}" processado com sucesso!`);
+            toast.success(`"${task.filename}" está pronto!`);
 
         } catch (error) {
             console.error('Erro no processamento:', error);
