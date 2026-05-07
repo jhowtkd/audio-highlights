@@ -142,7 +142,7 @@ export default function Home() {
           loading: `Processando mix com ${highlight.segments!.length} segmentos...`,
           success: (blob) => {
             downloadFile(blob, filename);
-            return 'Mix baixado com sucesso!';
+            return 'Mix baixado!';
           },
           error: (err) => `Erro ao criar mix: ${err.message}`
         }
@@ -155,7 +155,7 @@ export default function Home() {
           loading: 'Cortando vídeo...',
           success: (blob) => {
             downloadFile(blob, filename);
-            return 'Vídeo baixado com sucesso!';
+            return 'Vídeo baixado!';
           },
           error: 'Erro ao cortar vídeo'
         }
