@@ -102,3 +102,21 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-07 - Server-Side Subtitle Burn-In Research
+
+**Research Topic:** Hardcoding subtitles into videos for social media sharing
+
+**Finding:**
+Evaluated FFmpeg's `subtitles` filter for burning SRT content directly into video frames.
+While the stream copy (`-c copy`) method we currently use is extremely fast (~0.2s for a 5s clip), burning in subtitles strictly requires full video re-encoding (`-c:v libx264`), which is significantly slower (~2.6s for a 5s clip) and more CPU intensive.
+
+**Decision:**
+Propose adding a `/burn-subtitles` endpoint to the `ffmpeg-service` despite the performance regression, because it solves a critical user pain point (social media clips without manual editing). The longer processing time must be handled via UI feedback.
+
+**Learning:**
+When using the FFmpeg `subtitles` filter, the subtitle file path is notoriously strict. Ensure the file path is absolute and that colons and backslashes are properly escaped (e.g., `path.replace(/\\/g, '\\\\').replace(/:/g, '\\:')`) to prevent path resolution and parsing errors from the filter.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/2026-05-07-subtitle-burn-in.md
