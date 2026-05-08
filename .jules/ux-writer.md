@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Improve Video Upload Error Message
+
+**Copy Type:** Error Message (Toast)
+**Original:** "Por favor, selecione um arquivo de vídeo (MP4, MOV)"
+**Changed To:** "Formato inválido. Selecione um vídeo MP4 ou MOV."
+**Learning:** The original message sounded like a gentle instruction rather than an error context. Users benefit from knowing exactly *why* the action failed ("Formato inválido") and receiving clear, actionable next steps without being overly polite in an error context.
+**Rule:** For file type errors, explicitly state the problem (e.g., "Formato inválido") before providing the actionable instruction (e.g., "Selecione um vídeo MP4 ou MOV"), following the "Specific and actionable" guideline. Avoid conversational filler like "Por favor" in concise toast errors.
