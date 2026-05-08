@@ -102,3 +102,21 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2026-05-08 - Hardcoded Subtitles for Mix Videos
+
+**Research Topic:** Automatic subtitle burn-in for video clips
+
+**Finding:** Evaluated FFmpeg's `subtitles` filter for burning SRTs directly onto video.
+- POC confirmed it works reliably.
+- Burning subtitles requires full video re-encoding (`-c:v libx264`), and cannot be done with stream copy (`-c copy`), resulting in slower processing times.
+- Path escaping for the filter parameter is critical.
+
+**Decision:** Propose adding "Burn Subtitles" option to Mix generation.
+- It solves a massive user pain point (friction of external tools).
+- The slower processing time is acceptable for the final export step.
+
+**Learning:** When using the FFmpeg `subtitles` filter, ensure the subtitle file path is an absolute path and that colons and backslashes are properly escaped (e.g., `path.replace(/\\/g, '\\\\').replace(/:/g, '\\:')`) to prevent path resolution and parsing errors.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/2026-05-08-hardcoded-subtitles.md
