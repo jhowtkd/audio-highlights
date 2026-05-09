@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-09 - Server-Side Subtitle Burn-In (Hardsubs)
+
+**Research Topic:** Adding server-side FFmpeg processing to burn subtitles into video clips.
+
+**Finding:**
+FFmpeg's `subtitles` filter (via `libass`) is highly effective for burning SRT subtitles directly into video frames. However, unlike our current clip extraction which uses stream copy (`-c copy`), applying a visual filter strictly requires full video re-encoding (`-c:v libx264`).
+
+**Decision:**
+Propose adding a `/burn-subtitles` endpoint to `ffmpeg-service` to allow creators to download ready-to-publish social media clips directly.
+
+**Learning:**
+While burning subtitles improves UX significantly by removing the need for external editors, the tradeoff is a massive performance hit due to re-encoding. This operation will be much slower than existing fast stream copying and will increase server load. Path escaping is also critical for the `subtitles` filter.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/server-side-subtitle-burn-in.md
