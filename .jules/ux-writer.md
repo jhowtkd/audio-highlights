@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Empty State Transcription Viewer
+
+**Copy Type:** Empty State
+**Original:** "Nenhuma transcrição disponível"
+**Changed To:** "Nenhuma fala detectada. Não conseguimos identificar voz neste áudio. Verifique o arquivo e tente novamente."
+**Learning:** A generic "not available" message is a dead end and fails to explain *why* the data is missing. The transcription step ran, but returned no segments, which means the model didn't detect speech. Adding an icon, title, and descriptive text clarifies the issue and offers a path forward (try another file).
+**Rule:** When a processing step completes but returns empty results (e.g., no segments found), the empty state must explain the likely cause (e.g., "No speech detected") instead of generic "Not available" text.

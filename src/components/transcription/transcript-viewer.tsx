@@ -177,8 +177,12 @@ export const TranscriptViewer = memo(function TranscriptViewer({
 
   if (segments.length === 0) {
     return (
-      <div className={cn('flex items-center justify-center h-64 text-slate-500', className)}>
-        Nenhuma transcrição disponível
+      <div className={cn('flex flex-col items-center justify-center h-64 text-center px-4', className)}>
+        <FileText className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-3" />
+        <p className="text-slate-900 dark:text-slate-100 font-medium mb-1">Nenhuma fala detectada</p>
+        <p className="text-sm text-slate-500 dark:text-slate-400">
+          Não conseguimos identificar voz neste áudio. Verifique o arquivo e tente novamente.
+        </p>
       </div>
     );
   }
