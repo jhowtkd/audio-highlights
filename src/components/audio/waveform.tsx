@@ -149,10 +149,31 @@ export function Waveform({
         return () => observer.disconnect();
     }, []);
 
+    // Pre-calculate waveform Path2D for static elements
+    const waveformPath = useMemo(() => {
+        if (typeof window === 'undefined' || !window.Path2D || waveformData.length === 0 || dimensions.width === 0 || dimensions.height === 0) {
+            return null;
+        }
+
+        const path = new Path2D();
+        const width = dimensions.width;
+        const height = dimensions.height;
+        const barWidth = width / waveformData.length;
+
+        waveformData.forEach((value, index) => {
+            const x = index * barWidth;
+            const barHeight = value * (height * 0.8);
+            const y = (height - barHeight) / 2;
+            path.rect(x, y, barWidth - 1, barHeight);
+        });
+
+        return path;
+    }, [waveformData, dimensions]);
+
     // Draw waveform on canvas
     useEffect(() => {
         const canvas = canvasRef.current;
-        if (!canvas || waveformData.length === 0 || dimensions.width === 0 || dimensions.height === 0) return;
+        if (!canvas || waveformData.length === 0 || dimensions.width === 0 || dimensions.height === 0 || !waveformPath) return;
 
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
@@ -172,7 +193,6 @@ export function Waveform({
 
         const width = dimensions.width;
         const height = dimensions.height;
-        const barWidth = width / waveformData.length;
         const playedPosition = duration > 0 ? (currentTime / duration) * width : 0;
 
         // Clear canvas
@@ -187,27 +207,27 @@ export function Waveform({
             ctx.fillRect(startX, 0, endX - startX, height);
         });
 
-        // Draw waveform bars
-        waveformData.forEach((value, index) => {
-            const x = index * barWidth;
-            const barHeight = value * (height * 0.8);
-            const y = (height - barHeight) / 2;
+        // Draw unplayed waveform bars (fast single operation)
+        ctx.save();
+        ctx.fillStyle = '#cbd5e1'; // slate-300
+        ctx.fill(waveformPath);
+        ctx.restore();
 
-            // Color based on played position
-            if (x < playedPosition) {
-                ctx.fillStyle = '#3b82f6'; // blue-500
-            } else {
-                ctx.fillStyle = '#cbd5e1'; // slate-300
-            }
+        // Draw played waveform bars using clipping
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(0, 0, playedPosition, height);
+        ctx.clip();
 
-            ctx.fillRect(x, y, barWidth - 1, barHeight);
-        });
+        ctx.fillStyle = '#3b82f6'; // blue-500
+        ctx.fill(waveformPath);
+        ctx.restore();
 
         // Draw playhead
         ctx.fillStyle = '#ef4444'; // red-500
         ctx.fillRect(playedPosition - 1, 0, 2, height);
 
-    }, [waveformData, currentTime, duration, highlights, dimensions]);
+    }, [waveformData, currentTime, duration, highlights, dimensions, waveformPath]);
 
     // Handle click to seek
     const handleClick = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
