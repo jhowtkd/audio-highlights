@@ -31,3 +31,24 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2026-05-10 - Missing Timeout on External API Calls
+
+**Vulnerability:** The Gemini API client (`src/lib/gemini-client.ts`) lacked a timeout in its `fetch` configuration.
+**Root Cause:** The `fetch` API does not implement a default timeout, leaving it vulnerable to hanging indefinitely if the external service stops responding or experiences extreme latency, leading to possible resource exhaustion.
+**Learning:** Always use `AbortSignal.timeout()` when making external HTTP requests using native `fetch` in Node.js/Next.js to prevent Denial of Service (DoS) conditions through thread pool or connection starvation.
+**Prevention:**
+- Enforce timeouts on all external requests.
+- Configure `signal: AbortSignal.timeout(ms)` in all `fetch` options.
+
+**Code:**
+```typescript
+// Vulnerable
+const response = await fetch(url, { method: 'POST', body });
+
+// Secure
+const response = await fetch(url, {
+  method: 'POST',
+  body,
+  signal: AbortSignal.timeout(30000)
+});
+```
