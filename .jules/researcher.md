@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2024-05-30 - Client-Side Fuzzy Search Research
+
+**Research Topic:** Adding search functionality to virtualized transcripts.
+
+**Finding:**
+Native browser `Ctrl+F` breaks when using `react-virtuoso` because off-screen segments are unmounted. A POC using `fuse.js` confirmed that indexing the data array directly on the client allows for fast, typo-tolerant searching across the entire transcript without needing to render the DOM nodes.
+
+**Decision:**
+Propose implementing `fuse.js` within the `TranscriptViewer`. It provides immediate "search-as-you-type" functionality, has a tiny bundle footprint (~5kb), and requires zero server-side infrastructure, maintaining the app's offline capabilities.
+
+**Learning:**
+When implementing list virtualization, standard browser accessibility and search features are often broken. You must implement custom, data-level replacements (like a custom search bar) to restore this functionality for users.
+
+**Resources:**
+- https://www.fusejs.io/
+- research/proposals/2024-05-30-client-side-fuzzy-search.md
