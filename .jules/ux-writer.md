@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Specificity in File Format Validation Errors
+
+**Copy Type:** Error message (Invalid File Format)
+**Original:** "Por favor, selecione um arquivo de vídeo (MP4, MOV)"
+**Changed To:** "Formato de vídeo não suportado. Use MP4 ou MOV."
+**Learning:** When a user selects a file but it has the wrong format, telling them to "please select a file" implies they failed to perform the action or the system didn't register their selection. Being specific that the *format* is the issue reduces confusion.
+**Rule:** When a user provides invalid input (like an unsupported file), explicitly state *why* it's invalid rather than telling them to provide the input again as if they hadn't.
