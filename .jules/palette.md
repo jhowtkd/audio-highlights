@@ -42,3 +42,16 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2024-05-11 - Task Card Actions Keyboard Trap & Screen Reader Noise
+
+**UX Problem:** The `TaskCard` component featured icon-only buttons for critical actions ("Retranscrever arquivo" and "Excluir projeto") without `aria-label`s, rendering them inaccessible to screen reader users. Additionally, decorative icons within these buttons lacked `aria-hidden="true"`, causing screen readers to announce confusing font characters instead of meaningful action text. Finally, the "Excluir" (Delete) action was executed immediately upon click without any confirmation, leading to potential accidental data loss.
+
+**Learning:** When using icon libraries like `lucide-react` within interactive elements (buttons), the icons themselves must be hidden from screen readers (`aria-hidden="true"`) to prevent audio clutter, while the parent button *must* provide the accessible name via `aria-label`. Furthermore, destructive actions in list items or cards require immediate, explicit confirmation before execution to ensure user safety.
+
+**Solution:** Added `aria-label`s to all icon-only buttons in `TaskCard`. Added `aria-hidden="true"` to all decorative `lucide-react` icons within those buttons. Wrapped the `removeTask` call in a native browser `confirm()` dialog to provide a zero-dependency safety net against accidental deletions.
+
+**Pattern:** For this design system, ALL icon-only buttons must have:
+1. An explicit `aria-label` describing the action.
+2. `aria-hidden="true"` on the SVG/icon component.
+3. Destructive actions (like Delete/Remove) must include a confirmation step (e.g., `confirm()`).
