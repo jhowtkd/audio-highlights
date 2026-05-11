@@ -103,6 +103,7 @@ export class GeminiClient {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(requestBody),
+                    signal: AbortSignal.timeout(60000),
                 });
 
                 if (!response.ok) {
@@ -140,8 +141,8 @@ export class GeminiClient {
             } catch (error) {
                 lastError = error instanceof Error ? error : new Error(String(error));
 
-                // Only retry on network errors
-                if (attempt < maxRetries && (error as Error).message?.includes('fetch')) {
+                // Only retry on network errors or timeouts
+                if (attempt < maxRetries && ((error as Error).message?.includes('fetch') || (error as Error).name === 'TimeoutError')) {
                     const waitTime = 1000 * Math.pow(2, attempt - 1);
                     console.log(`[Gemini] Network error, retrying in ${waitTime}ms...`);
                     await new Promise((resolve) => setTimeout(resolve, waitTime));
