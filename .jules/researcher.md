@@ -102,3 +102,22 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-11 - Advanced Audio Visualization
+
+**Research Topic:** Integrating wavesurfer.js for audio visualization and region highlights
+
+**Finding:**
+Built a functional POC replacing custom canvas waveform with wavesurfer.js.
+Discovered that React Strict Mode causes double initialization if cleanup isn't perfect, leaving zombie audio nodes. Also, the `minPxPerSec` property handles zooming elegantly without needing manual canvas math.
+
+**Decision:**
+Propose replacing the custom waveform canvas with wavesurfer.js.
+It handles zoom and interactive regions out-of-the-box, providing a professional editing experience.
+
+**Learning:**
+When integrating direct DOM manipulation libraries like wavesurfer.js in React, it is critical to use `useRef` for the container and ensure the library instance is thoroughly destroyed in the `useEffect` cleanup block to prevent memory leaks and duplicate renders, especially in Next.js development mode.
+
+**Resources:**
+- https://wavesurfer.xyz/docs/
+- research/proposals/2026-05-11-wavesurfer-upgrade.md
