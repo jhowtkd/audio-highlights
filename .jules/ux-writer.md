@@ -32,3 +32,18 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2025-01-25 - Generic 500 Error Message Optimization
+
+**Copy Type:** Error message (Server Error)
+
+**Original:** "Ocorreu um erro inesperado. Tente novamente."
+
+**Changed To:** "Algo deu errado do nosso lado. Tente novamente em alguns instantes."
+
+**Learning:** The original message was somewhat formal and unhelpful. Saying "Algo deu errado do nosso lado" takes responsibility, which is friendlier and clearer. Adding "em alguns instantes" provides better next steps for users than simply "Tente novamente" which might make them try immediately, often encountering the same error.
+
+**Rule:** For generic/fallback errors in this app, ALWAYS:
+1. Accept responsibility if it's a server error ("do nosso lado").
+2. Provide a slight delay in the suggested action ("em alguns instantes") if it's a generic retry situation.
+3. Maintain a helpful and conversational tone.
