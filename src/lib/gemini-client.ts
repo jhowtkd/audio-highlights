@@ -103,6 +103,7 @@ export class GeminiClient {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(requestBody),
+                    signal: AbortSignal.timeout(60000), // 60s timeout to prevent hanging requests
                 });
 
                 if (!response.ok) {
