@@ -33,3 +33,16 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-05-12 - Optimized Merging of Transcription Segments
+
+**Bottleneck:** In `src/lib/audio-chunking.ts`, `results.reduce` combined thousands of segment objects by resizing and pushing to an initial empty array, leading to unnecessary garbage collection overhead when merging massive parallel transcription outputs.
+**Learning:** Pre-calculating total array sizes and instantiating large arrays once before using a standard indexed `for` loop provides significantly faster execution times over dynamic resizing with `push()` in `.reduce()` for heavy operations.
+**Action:** Replaced `.reduce` segment concatenation with explicitly sized `new Array<TranscriptionSegment>(totalSegments)` and flat `for` loops.
+**Code:**
+```typescript
+    let totalSegments = 0;
+    for (let i = 0; i < results.length; i++) {
+        totalSegments += results[i].segments.length;
+    }
+    const allSegments = new Array<TranscriptionSegment>(totalSegments);
+```
