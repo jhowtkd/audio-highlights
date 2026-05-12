@@ -102,3 +102,13 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2025-05-12 - Client-Side Fuzzy Search for Virtualized Transcripts
+
+**Research Topic:** Fixing native text search (`Ctrl+F`) in `react-virtuoso` lists for transcripts.
+**Finding:** Native browser search fails for virtualized lists because off-screen DOM nodes are unmounted. Server-side semantic search is too slow/costly for simple keyword searches.
+**Decision:** Propose implementing client-side fuzzy search using `fuse.js` directly on the `segments` array, intercepting search queries and scrolling to the target segment via `virtuosoRef.current.scrollToIndex()`.
+**Learning:** Virtualized UI components break browser accessibility and default search behaviors. We must explicitly implement search against the underlying data array to restore parity with standard web pages. `fuse.js` can index 5000+ items in <40ms, making it perfectly viable for client-side use even on the main thread for typical podcast lengths.
+**Resources:**
+- https://fusejs.io/
+- https://virtuoso.dev/virtuoso-api-reference/
