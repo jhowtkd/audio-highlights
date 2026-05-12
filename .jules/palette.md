@@ -42,3 +42,13 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2025-01-27 - Icon-only Destructive Action Without Confirmation
+
+**UX Problem:** The "Excluir projeto" button on the task card was icon-only (Trash2 icon), missing an `aria-label` for screen readers, and executed the destructive delete action immediately without user confirmation, potentially causing accidental data loss.
+**Learning:** Destructive actions, especially those easily triggered on repetitive elements like list items or cards, require both clear accessibility markers and a safety net to prevent accidental deletion. The existing pattern for the "Retranscrever arquivo" action included a confirmation prompt, but the delete action lacked this consistency.
+**Solution:** Added `aria-label` to the buttons, `aria-hidden="true"` to the icons within them, and implemented a standard browser `confirm()` dialog before executing `removeTask()`.
+**Pattern:** ALL icon-only buttons triggering destructive actions must have:
+1. `aria-label` explaining the action.
+2. `aria-hidden="true"` on the SVG/icon component.
+3. A confirmation dialog (browser default or custom Modal) before executing the action to prevent accidental data loss.
