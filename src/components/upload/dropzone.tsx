@@ -161,7 +161,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
             aria-label="Remover arquivo"
             title="Remover arquivo"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </Button>
         </div>
 

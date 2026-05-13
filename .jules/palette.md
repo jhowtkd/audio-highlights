@@ -42,3 +42,11 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2024-05-13 - Decorative SVG Icons in Icon-Only Buttons
+
+**UX Problem:** Screen readers were redundantly announcing SVG icons used inside icon-only buttons, confusing users relying on assistive technologies since these buttons already had an `aria-label`.
+**Learning:** React components returning SVGs (like `lucide-react` icons) don't automatically hide themselves from screen readers. When placed inside a button that is an icon-only button (which relies on `aria-label`), the screen reader can read both the `aria-label` and the SVG path, leading to duplication and noise.
+**Solution:** Explicitly append `aria-hidden="true"` to the SVG icon component (e.g., `<Sun aria-hidden="true" />`) when it serves a purely decorative purpose inside a button that handles accessibility via `aria-label` or `<span className="sr-only">`.
+**Pattern:** For this design system, ALL icon-only buttons must have:
+1. An `aria-label` attribute on the outer `<Button>` element OR an inner `<span className="sr-only">` element with the descriptive text.
+2. An `aria-hidden="true"` attribute on the inner SVG icon component to hide it from screen readers.
