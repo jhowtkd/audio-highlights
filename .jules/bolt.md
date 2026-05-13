@@ -33,3 +33,23 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-05-13 - Optimized Array Merging for Audio Chunks
+
+**Bottleneck:** When merging transcription chunks from concurrent workers, `results.reduce` dynamically appended arrays inside a loop (`acc.allSegments.push(...r.segments)` or `for` loop with `push`). For very long audio files with thousands of segments, this caused significant reallocation and resizing overhead in the V8 engine, and spread operators can even cause stack overflows.
+**Learning:** For performance-critical code paths that aggregate arrays whose size can be computed beforehand, pre-allocating the target array to its final capacity eliminates dynamic memory reallocation.
+**Action:** Replaced dynamic `push` inside a `reduce` with a loop that computes `totalSegments` first, allocates fixed-size arrays (`new Array(totalSegments)`), and populates them using a continuous index pointer.
+**Code:**
+```typescript
+let totalSegments = 0;
+for (let i = 0; i < results.length; i++) {
+    totalSegments += results[i].segments.length;
+}
+const allSegments = new Array<TranscriptionSegment>(totalSegments);
+let segmentIndex = 0;
+for (let i = 0; i < results.length; i++) {
+    for (let j = 0; j < results[i].segments.length; j++) {
+        allSegments[segmentIndex++] = results[i].segments[j];
+    }
+}
+```
