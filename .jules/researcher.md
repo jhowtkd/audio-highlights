@@ -102,3 +102,17 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-13 - Client-Side FFmpeg for Video Cutting
+
+**Research Topic:** Evaluating `@ffmpeg/ffmpeg` (WebAssembly) to replace the server-side FFmpeg microservice.
+
+**Finding:** WebAssembly FFmpeg natively supports `-c copy` for extremely fast stream copying without re-encoding. In a Node.js POC simulation, extracting a 3-second clip from audio using `-c copy` took ~8ms.
+
+**Decision:** The application can likely discard the entire `ffmpeg-service` microservice, significantly cutting infrastructure costs, by shifting the export workload to the client.
+
+**Learning:** When creating proofs of concept for FFmpeg that run in a Node.js environment (rather than a browser), `@ffmpeg/ffmpeg` cannot be used since v0.12 strictly targets the browser. Instead, native tools like `ffmpeg-static` via `child_process.execSync` must be used for testing concepts locally before translating them back to `@ffmpeg/ffmpeg` for the web.
+
+**Resources:**
+- https://ffmpegwasm.netlify.app/
+- https://ffmpeg.org/ffmpeg.html#Stream-copy
