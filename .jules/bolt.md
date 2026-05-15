@@ -33,3 +33,16 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-05-15 - Array Restructuring Overhead during Transcription Merging
+
+**Bottleneck:** the `reduce` array merging step taking up to 1+ second when merging 50,000+ segments.
+**Learning:** Destructuring and the `push()` call inside a `reduce()` was constantly forcing the JavaScript VM to dynamically resize and reallocate elements into the newly merged array, causing unnecessary garbage collection operations overhead for thousands of transcription segments. Pre-allocating an array with exact size eliminates this overhead.
+**Action:** When merging massive parallel task payloads, calculate total bounds and use pre-allocated static-size arrays with indexed insertion loops.
+**Code:**
+```typescript
+let totalSegments = 0;
+for (let i = 0; i < results.length; i++) { totalSegments += results[i].segments.length; }
+const allSegments = new Array(totalSegments);
+// Use simple loop rather than push() or destructuring
+```
