@@ -108,7 +108,7 @@ export default function TasksPage() {
                         {completedCount > 0 && (
                             <Button variant="outline" size="sm" onClick={clearCompleted}>
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Limpar concluídas
+                                Remover projetos concluídos
                             </Button>
                         )}
                     </div>
