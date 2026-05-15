@@ -32,3 +32,17 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2024-05-18 - Project Terminology Consistency
+
+**Copy Type:** Button labels and Dialog titles
+
+**Original:** Mixed terminology like "Limpar concluídas", "Ver Resultado", "Adicionar novo áudio", "Arraste seu áudio aqui".
+
+**Changed To:** Unified terminology using "Projeto" and "Arquivo" concepts: "Remover projetos concluídos", "Abrir projeto", "Criar novo projeto", "Arraste seu arquivo aqui".
+
+**Learning:** This app previously mixed "Áudio" and "Projeto" concepts in the UI. Users upload media (audio or video), but the app treats the processing and resulting transcription/highlights as a "Project" (as seen in the "Meus Projetos" header and "Novo projeto" button). Also, specifying "áudio" in the dropzone was misleading since the app accepts video files too. Unifying the language around "Projeto" and "Arquivo" makes the interface clearer and more cohesive.
+
+**Rule:** For this app, ALWAYS:
+1. Refer to the overall workflow/item as a "Projeto" (not just "Resultado" or generic "Concluídas").
+2. Refer to the uploaded media generally as "Arquivo" rather than strictly "Áudio", since video formats are also supported.
+3. Keep action verbs specific and related to the object (e.g., "Abrir projeto" instead of "Ver").
