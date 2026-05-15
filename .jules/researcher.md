@@ -102,3 +102,12 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-25 - AI Content Repurposing Feature
+
+**Research Topic:** Evaluating AI Content Repurposing for podcast transcripts.
+**Finding:** Generating written content (Twitter threads, LinkedIn posts) directly from transcripts is highly valuable for content creators and can be done efficiently using small models like GPT-4o-mini.
+**Decision:** Propose the "AI Content Repurposing Engine" as it adds significant value with low technical complexity.
+**Learning:** For this codebase, features that leverage existing AI integrations (OpenAI) to provide additional outputs (like text) are easy to implement and highly beneficial for the end user's workflow.
+**Resources:**
+- https://platform.openai.com/docs/guides/text-generation
