@@ -206,7 +206,11 @@ export function TaskCard({ task }: TaskCardProps) {
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => removeTask(task.id)}
+                                onClick={() => {
+                                    if (confirm('Tem certeza que deseja excluir este projeto?')) {
+                                        removeTask(task.id);
+                                    }
+                                }}
                                 className="text-slate-500 hover:text-red-600"
                                 title="Excluir projeto"
                             >

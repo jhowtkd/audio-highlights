@@ -42,3 +42,9 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2026-05-15 - Playwright Dialog Interception
+
+**UX Problem:** Cannot visually verify component state when a native browser dialog is open.
+**Learning:** When using Playwright to visually verify components that trigger native browser `confirm()` or `alert()` dialogs (e.g., delete confirmation buttons), the browser blocks execution.
+**Solution:** Attach a dialog handler using `page.on('dialog', handler)` to intercept and dismiss/accept it, allowing the script to continue.
+**Pattern:** For Playwright testing with native dialogs, always implement a dialog handler.
