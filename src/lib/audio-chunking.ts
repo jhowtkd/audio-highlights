@@ -135,11 +135,14 @@ export async function processLargeAudioWithFFmpeg(
                 // Adjust timestamps
                 // Optimize: In-place mutation since result is fresh from API
                 // Reduces memory allocation for thousands of segment/word objects
-                for (const s of result.segments) {
+                // Using classic for-loops avoids iterator overhead in V8 for large arrays
+                for (let i = 0; i < result.segments.length; i++) {
+                    const s = result.segments[i];
                     s.start += startTime;
                     s.end += startTime;
                     if (s.words) {
-                        for (const w of s.words) {
+                        for (let j = 0; j < s.words.length; j++) {
+                            const w = s.words[j];
                             w.start += startTime;
                             w.end += startTime;
                         }
@@ -185,25 +188,31 @@ export async function processLargeAudioWithFFmpeg(
     // Sort by original index to maintain order
     results.sort((a, b) => a.index - b.index);
 
-    // Optimize merging: Single pass reduce is faster than multiple iterations (flatMap + map + find)
-    const { allSegments, fullTextParts, detectedLanguage } = results.reduce((acc, r) => {
-        // Efficiently append segments
-        // Using a loop with push is faster and safer (avoids stack overflow) than spread operator for large arrays
-        for (const segment of r.segments) {
-            acc.allSegments.push(segment);
+    // Optimize merging: Pre-calculate total size and pre-allocate array to avoid dynamic resizing
+    let totalSegmentsCount = 0;
+    for (let i = 0; i < results.length; i++) {
+        totalSegmentsCount += results[i].segments.length;
+    }
+
+    const allSegments = new Array<TranscriptionSegment>(totalSegmentsCount);
+    const fullTextParts: string[] = [];
+    let detectedLanguage = '';
+    let currentSegmentIndex = 0;
+
+    for (let i = 0; i < results.length; i++) {
+        const r = results[i];
+
+        // Efficiently insert segments into pre-allocated array
+        for (let j = 0; j < r.segments.length; j++) {
+            allSegments[currentSegmentIndex++] = r.segments[j];
         }
 
-        acc.fullTextParts.push(r.fullText);
+        fullTextParts.push(r.fullText);
 
-        if (!acc.detectedLanguage && r.language) {
-            acc.detectedLanguage = r.language;
+        if (!detectedLanguage && r.language) {
+            detectedLanguage = r.language;
         }
-        return acc;
-    }, {
-        allSegments: [] as TranscriptionSegment[],
-        fullTextParts: [] as string[],
-        detectedLanguage: ''
-    });
+    }
 
     return {
         id: uuidv4(),
