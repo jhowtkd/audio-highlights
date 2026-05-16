@@ -79,7 +79,7 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
+        if (!confirm(`Retranscrever o projeto '${task.filename}'? Os resultados atuais serão substituídos.`)) {
             return;
         }
 
@@ -184,9 +184,9 @@ export function TaskCard({ task }: TaskCardProps) {
                     <div className="flex items-center gap-2 mt-4">
                         {task.status === 'completed' && (
                             <Button size="sm" onClick={handleViewResult}>
-                                <Play className="h-4 w-4 mr-1.5" />
+                                <Play className="h-4 w-4 mr-1.5" aria-hidden="true" />
                                 Ver Resultado
-                                <ArrowRight className="h-4 w-4 ml-1.5" />
+                                <ArrowRight className="h-4 w-4 ml-1.5" aria-hidden="true" />
                             </Button>
                         )}
 
@@ -196,9 +196,10 @@ export function TaskCard({ task }: TaskCardProps) {
                                 variant="ghost"
                                 onClick={handleRetranscribe}
                                 className="text-slate-500 hover:text-blue-600"
-                                title="Retranscrever arquivo"
+                                title="Retranscrever projeto"
+                                aria-label="Retranscrever projeto"
                             >
-                                <RefreshCw className="h-4 w-4" />
+                                <RefreshCw className="h-4 w-4" aria-hidden="true" />
                             </Button>
                         )}
 
@@ -206,11 +207,16 @@ export function TaskCard({ task }: TaskCardProps) {
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => removeTask(task.id)}
+                                onClick={() => {
+                                    if (confirm(`Excluir o projeto '${task.filename}'? Esta ação não pode ser desfeita.`)) {
+                                        removeTask(task.id);
+                                    }
+                                }}
                                 className="text-slate-500 hover:text-red-600"
                                 title="Excluir projeto"
+                                aria-label="Excluir projeto"
                             >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" aria-hidden="true" />
                             </Button>
                         )}
 
