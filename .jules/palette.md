@@ -42,3 +42,15 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2024-05-16 - Destructive Action Protection and ARIA Attributes in TaskCard
+
+**UX Problem:** Users could accidentally delete projects with a single click on an icon-only button, which lacked both confirmation and proper accessibility labels for screen readers.
+
+**Learning:** Destructive actions without confirmation dialogs lead to accidental data loss. Icon-only buttons without `aria-label` are inaccessible to screen readers, and decorative SVG icons without `aria-hidden="true"` can cause redundant or confusing announcements.
+
+**Solution:** Wrapped the deletion logic (`removeTask`) in a browser `confirm()` dialog via a `handleDelete` function. Added `aria-label` attributes to the "Excluir projeto" and "Retranscrever arquivo" buttons. Applied `aria-hidden="true"` to all decorative SVG icons (`FileAudio`, `StatusIcon`, `Play`, `ArrowRight`, `RefreshCw`, `Trash2`).
+
+**Pattern:** For this design system:
+1. Destructive actions triggered by buttons MUST be protected by a `confirm()` dialog.
+2. Icon-only buttons MUST include an `aria-label` attribute.
+3. Decorative SVG icons MUST set `aria-hidden="true"`.
