@@ -33,3 +33,24 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-05-16 - Audio Chunking Iterator and Array Resizing Overhead
+
+**Bottleneck:** High latency and potential memory pressure during the timestamp adjustment and result merging phases for large audio files containing thousands of transcription segments and words.
+**Learning:** Using `for...of` loops introduces iterator overhead in the V8 engine, which accumulates significantly in performance-critical code paths iterating over massive datasets. Similarly, iteratively pushing to a dynamic array (via `reduce` + `push`) causes frequent re-allocations and copying of the underlying memory buffer as the array grows.
+**Action:** Replace `for...of` loops with classic index-based `for` loops in hot paths (like `transcriber`). Pre-calculate the total required size and pre-allocate the final array (`new Array(totalSegmentsCount)`) before populating it to eliminate dynamic resizing overhead during array merging.
+**Code:**
+```typescript
+// Pre-calculate and pre-allocate
+let totalSegmentsCount = 0;
+for (let i = 0; i < results.length; i++) {
+    totalSegmentsCount += results[i].segments.length;
+}
+const allSegments = new Array<TranscriptionSegment>(totalSegmentsCount);
+let currentSegmentIndex = 0;
+for (let i = 0; i < results.length; i++) {
+    for (let j = 0; j < results[i].segments.length; j++) {
+        allSegments[currentSegmentIndex++] = results[i].segments[j];
+    }
+}
+```
