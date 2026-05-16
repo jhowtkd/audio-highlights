@@ -32,3 +32,22 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-05-16 - Confirmation Dialog Context Decision
+
+**Copy Type:** Browser `confirm()` dialogs for destructive actions (Retranscribe, Delete Project)
+
+**Original:**
+- "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+- Implicit generic delete or no confirmation for removeTask
+
+**Changed To:**
+- `Retranscrever o projeto '${task.filename}'? Os resultados atuais serão substituídos.`
+- `Excluir o projeto '${task.filename}'? Esta ação não pode ser desfeita.`
+
+**Learning:** Vague "Are you sure?" or generic warnings without context cause hesitation. Referencing the specific entity (`task.filename`) reassures the user they are acting on the correct item. Shorter, direct sentences about the consequence ("Os resultados atuais serão substituídos.") are less cognitive load than robotic/blame-y "Isso irá apagar...".
+
+**Rule:** For destructive actions, ALWAYS:
+1. Include the specific name of the item being affected.
+2. State the exact action and consequence directly.
+3. Avoid generic "Are you sure?" (Tem certeza?) phrases.
