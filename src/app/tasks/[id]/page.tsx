@@ -310,7 +310,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                         <p className="text-slate-600 dark:text-slate-400 mb-6">
                             {task.status === 'error'
                                 ? `Erro: ${task.error}`
-                                : 'Este projeto ainda não foi processado ou não existe.'}
+                                : 'Este projeto não existe ou ainda está na fila de processamento.'}
                         </p>
                         <Button onClick={() => router.push('/tasks')}>
                             <ArrowLeft className="h-4 w-4 mr-2" />
