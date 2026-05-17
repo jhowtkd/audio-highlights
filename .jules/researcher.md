@@ -102,3 +102,23 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Client-Side Fuzzy Search
+
+**Research Topic:** Client-Side Fuzzy Search using fuse.js
+
+**Finding:** Evaluated `fuse.js` for client-side fuzzy search to address native browser `Ctrl+F` limitations in virtualized transcript lists.
+-   POC confirmed fast indexing and querying (<10ms per search).
+-   Searching the underlying data structure directly provides a robust architectural workaround for off-screen DOM nodes unmounted by `react-virtuoso`.
+-   Saves OpenAI API costs and increases search responsiveness compared to the server-side `/api/search` route.
+
+**Decision:** Proposed replacing or complementing the server-side search with client-side fuzzy search using `fuse.js`.
+-   Provides instant search-as-you-type feedback.
+-   Works completely offline and eliminates API latency/cost.
+-   Directly resolves `Ctrl+F` limitations for virtualized list items.
+
+**Learning:** When using list virtualization libraries like `react-virtuoso` for large datasets, native browser `Ctrl+F` search is ineffective because off-screen DOM nodes are unmounted. Implementing a client-side fuzzy search library like `fuse.js` directly on the underlying data array is the recommended architectural workaround.
+
+**Resources:**
+-   https://www.fusejs.io/
+-   research/proposals/2026-03-01-client-side-fuzzy-search.md
