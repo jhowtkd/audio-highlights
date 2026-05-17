@@ -31,3 +31,30 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2025-02-27 - Denial of Service (DoS) via Missing Timeout in External API Calls
+
+**Vulnerability:** External API calls made using native `fetch` (like the Gemini client integration) lacked a timeout, making the application vulnerable to Denial of Service (DoS). If the external API hangs or takes a very long time to respond, it could consume server resources indefinitely or block execution.
+
+**Root Cause:** Native `fetch` in Node.js does not have a default timeout. The developer assumed the external API would always respond promptly, omitting the `signal` option.
+
+**Learning:** Always explicitly set timeouts for external HTTP requests to ensure they fail fast rather than hanging indefinitely, preventing resource exhaustion and improving application resilience.
+
+**Prevention:** Use `AbortSignal.timeout(ms)` to enforce a maximum wait time for all native `fetch` requests.
+- Add test: "API calls fail gracefully with timeout when external service hangs"
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+const response = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify(requestBody),
+});
+
+// Secure pattern to use:
+const response = await fetch(url, {
+    method: 'POST',
+    body: JSON.stringify(requestBody),
+    signal: AbortSignal.timeout(30000), // Enforce 30s timeout
+});
+```
