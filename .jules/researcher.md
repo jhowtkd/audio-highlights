@@ -102,3 +102,12 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-18 - Content Repurposing (Social Media Generation)
+
+**Research Topic:** Providing text-based content repurposing (Tweets, LinkedIn) from transcript segments.
+**Finding:** Evaluated approaches for text generation. Using the existing OpenAI SDK with `gpt-4o-mini` is extremely fast and cost-effective, eliminating the need to introduce heavy client-side NLP libraries for this specific task.
+**Decision:** Leverage server-side OpenAI integration for content repurposing.
+**Learning:** For text formatting tasks, reusing existing infrastructure (OpenAI) offers the highest ROI compared to adding new dependencies, keeping the application lightweight.
+**Resources:**
+- https://platform.openai.com/docs/guides/text-generation
