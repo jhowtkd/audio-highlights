@@ -33,3 +33,14 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-05-18 - Array `.reduce` and `.push` Overhead for Large Datasets
+
+**Bottleneck:** Merging large datasets (hundreds of thousands of segments) using `.reduce` with `.push` inside a `for...of` loop in `src/lib/audio-chunking.ts`.
+**Learning:** Dynamic array resizing via `.push` and iterator overhead in `for...of` loops incur significant performance penalties when dealing with high-volume nested data structures returned from APIs.
+**Action:** When merging massive arrays of structured data, pre-calculate the total size to pre-allocate an array with exact bounds using `new Array(size)`, and map elements directly by index rather than relying on iterative accumulation loops.
+**Code:**
+```typescript
+let totalSegments = 0;
+for (let i = 0; i < resultsLen; i++) totalSegments += results[i].segments.length;
+const allSegments = new Array<TranscriptionSegment>(totalSegments);
+```
