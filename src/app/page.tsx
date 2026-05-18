@@ -246,7 +246,7 @@ export default function Home() {
     // Confirm before resetting if there's content
     if (transcription || highlights.length > 0) {
       const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
+        'Descartar projeto? Esta ação não pode ser desfeita.'
       );
       if (!confirmed) {
         return;
