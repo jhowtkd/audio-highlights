@@ -42,3 +42,13 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-05-18 - Missing Aria Attributes and Confirm Dialog on Icon-Only Buttons
+
+**UX Problem:** Icon-only buttons for Retranscribe and Delete actions lacked `aria-label` attributes, making their purpose ambiguous to screen readers. The SVG icons lacked `aria-hidden="true"`, leading to redundant reading. Furthermore, the Delete action lacked a confirmation dialog, risking accidental data loss.
+
+**Learning:** Destructive actions must always be guarded. Icon-only buttons must have `aria-label` and `aria-hidden="true"` on the SVG for proper screen reader experience.
+
+**Solution:** Added `aria-label` and `aria-hidden="true"` to the buttons and SVGs respectively. Implemented a native `confirm()` dialog for the remove task action. Used the `icon-sm` size variant for proper squared sizing of small icon buttons.
+
+**Pattern:** For this design system, icon-only buttons must include an `aria-label` attribute and set `aria-hidden="true"` on their internal decorative SVG icons. Destructive actions triggered by buttons (like deleting items) must be protected by a standard browser `confirm()` dialog to prevent accidental data loss.
