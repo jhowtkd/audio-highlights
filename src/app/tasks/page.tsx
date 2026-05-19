@@ -9,9 +9,11 @@ import { Button } from '@/components/ui/button';
 import { TaskList } from '@/components/tasks/task-list';
 import { UploadDialog } from '@/components/tasks/upload-dialog';
 import { useTaskQueue } from '@/hooks/use-task-queue';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 export default function TasksPage() {
     const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+    const [isClearCompletedDialogOpen, setIsClearCompletedDialogOpen] = useState(false);
     const { tasks, pendingCount, completedCount, errorCount, isProcessing, clearCompleted } = useTaskQueue();
 
     const processingCount = tasks.filter(t =>
@@ -106,14 +108,24 @@ export default function TasksPage() {
 
                         {/* Actions */}
                         {completedCount > 0 && (
-                            <Button variant="outline" size="sm" onClick={clearCompleted}>
-                                <Trash2 className="h-4 w-4 mr-2" />
+                            <Button variant="outline" size="sm" onClick={() => setIsClearCompletedDialogOpen(true)}>
+                                <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
                                 Limpar concluídas
                             </Button>
                         )}
                     </div>
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={isClearCompletedDialogOpen}
+                onOpenChange={setIsClearCompletedDialogOpen}
+                title="Limpar projetos concluídos?"
+                description="Tem certeza que deseja remover todos os projetos concluídos da lista? Isso não apagará os arquivos originais, mas removerá o histórico e resultados daqui."
+                confirmText="Limpar"
+                onConfirm={clearCompleted}
+                variant="destructive"
+            />
 
             {/* Main Content */}
             <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
