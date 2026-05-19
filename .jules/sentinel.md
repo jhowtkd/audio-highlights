@@ -31,3 +31,33 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2026-05-19 - Resource Exhaustion via Unprotected Test Endpoints
+
+**Vulnerability:** A `/api/test-transcribe` endpoint was exposed globally without authentication or rate limiting. When called via a simple GET request, the endpoint executed an external API call to the Groq Whisper service using the server's API key. This allowed an attacker to drain the application's API quota/credits by repeatedly requesting the endpoint, causing financial loss and denial of service.
+
+**Root Cause:** Test endpoints are often committed to version control and deployed to production by mistake without proper environment checks, exposing potentially expensive logic.
+
+**Learning:** Any endpoint that initiates server-side actions, particularly ones involving third-party API keys or computational resources, must be protected against abuse, even if they are just for debugging or testing. If a test endpoint is not needed in production, it should be disabled or protected by environment checks.
+
+**Prevention:**
+- Add checks like `if (process.env.NODE_ENV === 'production') return 404;` to testing routes.
+- Use explicit rate limiting for all unauthenticated endpoints to prevent resource exhaustion.
+- Require authentication for administrative or debugging actions.
+
+**Code:**
+```typescript
+// Vulnerable pattern
+export async function GET() {
+    const client = getGroqClient();
+    const response = await client.audio.transcriptions.create({...});
+    // ...
+}
+
+// Secure pattern
+export async function GET() {
+    if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json({ error: 'Not found' }, { status: 404 });
+    }
+    // ... test logic
+}
+```
