@@ -42,3 +42,17 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2024-05-15 - Native Window Confirm on Destructive Actions
+
+**UX Problem:** Destructive actions (like retranscribing or deleting a project) were using the native browser `window.confirm()` or executing immediately without warning. Native dialogs block the main thread, can't be styled to match the app, and sometimes provide unclear contexts or poor accessibility on different devices. Immediate deletion can easily result in accidental data loss.
+
+**Learning:** When users trigger destructive actions (e.g., deleting a processed task, clearing the history), a styled, accessible confirmation dialog is necessary to match the design system and avoid accidental clicks, while allowing standard focus management and screen reader support that native browser dialogs lack contextually.
+
+**Solution:** Implemented a reusable `ConfirmDialog` component built on top of Radix UI's accessible Dialog component. Replaced all native `confirm()` calls and immediate destructive functions with state-driven confirmation dialogs.
+
+**Pattern:** For this design system, ALL destructive or cost-incurring actions must:
+1. Show a styled `ConfirmDialog` before proceeding.
+2. Provide a clear description of the consequences (e.g., "This action is irreversible").
+3. Use a destructive color scheme for the confirm button when applicable.
+4. Ensure the dialog manages focus correctly and is accessible via screen readers.
