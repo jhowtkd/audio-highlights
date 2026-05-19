@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-19 - Automated Show Notes Generation
+
+**Research Topic:** Utilizing existing OpenAI transcription data to generate automated show notes.
+
+**Finding:**
+By reusing the existing timestamped transcription data and routing it back to OpenAI with a structured prompt, we can easily generate professional show notes (summary, takeaways, timestamps).
+
+**Decision:**
+Propose implementing a `/api/show-notes` endpoint and UI to automate this process. It adds massive value for podcasters by saving them post-editing documentation time.
+
+**Learning:**
+Features that repurpose existing data through existing API integrations (like the OpenAI SDK) offer extremely high ROI. They add significant user value without introducing new architectural complexity or dependencies.
+
+**Resources:**
+- research/proposals/2026-05-19-automated-show-notes.md
+- https://platform.openai.com/docs/guides/text-generation
