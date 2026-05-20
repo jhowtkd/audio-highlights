@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2024-05-20 - Client-Side Semantic Search Research
+
+**Research Topic:** Replacing server-side OpenAI search with client-side inference using `@xenova/transformers`.
+
+**Finding:** Successfully built a Proof of Concept showing that `@xenova/transformers` can run `Xenova/all-MiniLM-L6-v2` locally in Node/browser to generate semantic embeddings. Using a simple dot-product/cosine similarity over these embeddings efficiently scores segments against a query, offering a viable zero-cost alternative to the server API.
+
+**Decision:** Propose migrating the semantic search to run completely client-side. The initial model download (~22MB) is a reasonable trade-off for eliminating recurring API costs and reducing search latency for long transcripts.
+
+**Learning:** `Transformers.js` is extremely easy to drop in and use for NLP tasks without complex Python backends. Running inferences locally is highly viable for application features like search, and shifts the compute burden entirely to the client device, making the application more scalable.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js/index
+- POC located at `research/pocs/client_side_search/semantic_search.js`
