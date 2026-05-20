@@ -33,3 +33,17 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-05-24 - Float32Array Audio Buffer Iteration Blocked Main Thread
+
+**Bottleneck:** Iterating over the entire `Float32Array` audio buffer to generate a waveform for large audio files blocked the main thread.
+**Learning:** For long audio files, the `decodeAudioData` result is massive. Calculating the average amplitude per bucket by iterating through every single sample (`for(let j=0; j<blockSize; j++)`) is unnecessary and extremely slow, causing a UI freeze.
+**Action:** When rendering waveforms from large audio buffers, calculate a `step` size based on the `blockSize` to sample a subset of data points per block (e.g., max 100 points per block) instead of processing every sample.
+**Code:**
+```typescript
+const step = Math.max(1, Math.floor(blockSize / 100));
+for (let j = 0; j < blockSize; j += step) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
