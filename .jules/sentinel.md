@@ -31,3 +31,20 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2025-02-18 - Unprotected Test Endpoint
+
+**Vulnerability:** The `/api/test-transcribe` endpoint was exposed in production. This endpoint allows anyone to trigger external API calls (Groq Whisper API) without authentication or rate limiting.
+
+**Root Cause:** The test endpoint was created to verify the Groq API integration during development but was left accessible without any environment checks or access controls.
+
+**Learning:** Test endpoints that trigger external API calls must be disabled in production environments to prevent resource exhaustion, unauthorized API usage, and potential denial-of-service via billing exhaustion.
+
+**Prevention:** Always verify the `NODE_ENV` in endpoints strictly meant for testing or development. Return a 404 Not Found if the environment is `production`.
+
+**Code:**
+```typescript
+if (process.env.NODE_ENV === 'production') {
+    return new NextResponse('Not Found', { status: 404 });
+}
+```
