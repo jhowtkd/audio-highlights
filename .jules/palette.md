@@ -42,3 +42,10 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-05-20 - ARIA Labels Hiding Button Content
+
+**UX Problem:** Adding an `aria-label` to a button that contains dynamic or descriptive text (like search results or file names) completely overrides the visible text for screen readers.
+**Learning:** In HTML/ARIA, an `aria-label` completely replaces the text content of the element for assistive technologies. Adding an `aria-label` to a button that renders dynamic text (like `result.text` in a search result) hides that text from visually impaired users, causing a severe accessibility regression. Additionally, `aria-label`s must strictly contain the visible text on the screen to avoid violating WCAG 2.5.3 (Label in Name), which can cause issues for voice-control users.
+**Solution:** Avoid adding `aria-label` to buttons that already have descriptive visible text. If context must be added, use visually hidden text (`<span className="sr-only">...</span>`) or `aria-describedby`. For buttons like export options, ensure the `aria-label` explicitly includes the full visible text (e.g., `aria-label="Exportar Texto simples (.txt)"` instead of just `"Exportar transcrição como texto simples"`).
+**Pattern:** For this design system, only use `aria-label` on icon-only buttons or when the visible text is insufficient on its own (and ensure the visible text is included in the label).

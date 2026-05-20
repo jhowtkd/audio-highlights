@@ -259,6 +259,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                   role="menuitem"
                   onClick={() => handleExportTranscript('txt')}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  aria-label="Exportar Texto simples (.txt)"
                 >
                   <FileText className="h-4 w-4" />
                   Texto simples (.txt)
@@ -268,6 +269,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                   role="menuitem"
                   onClick={() => handleExportTranscript('txt-timestamps')}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  aria-label="Exportar Com timestamps (.txt)"
                 >
                   <FileText className="h-4 w-4" />
                   Com timestamps (.txt)
@@ -277,6 +279,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                   role="menuitem"
                   onClick={() => handleExportTranscript('srt')}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  aria-label="Exportar Legendas (.srt)"
                 >
                   <FileCode className="h-4 w-4" />
                   Legendas (.srt)
@@ -286,6 +289,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                   role="menuitem"
                   onClick={() => handleExportTranscript('md')}
                   className="w-full flex items-center gap-2 px-3 py-2 text-sm text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700"
+                  aria-label="Exportar Markdown (.md)"
                 >
                   <FileCode className="h-4 w-4" />
                   Markdown (.md)
