@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Delete Confirmation Clarification
+
+**Copy Type:** Confirmation Dialog Description
+**Original:** "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente." / "O arquivo selecionado parece diferente do original. Deseja continuar?" / "Deseja realmente descartar este projeto? Todo o progresso será perdido." (native alerts without consistent voice or context display)
+**Changed To:** Replaced native browser `window.confirm()` and `confirm()` dialogs with the custom `<ConfirmDialog>` component, allowing for clearer, more descriptive, and accessible warning text tailored to the destructive action.
+**Learning:** Native `confirm()` dialogs are poorly styled, blocking, and often visually confusing for users, leading to accidental destructive actions. Using a custom dialog component ensures consistent voice, context, and clear specific actions ("Retranscrever", "Excluir", "Descartar") instead of generic "OK"/"Cancel" buttons.
+**Rule:** NEVER use native `confirm()` or `window.confirm()` for destructive actions. ALWAYS use the `<ConfirmDialog>` component with specific, actionable button labels matching the destructive action, and clearly state the consequence in the description.
