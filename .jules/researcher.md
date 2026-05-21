@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-27 - Automated Show Notes Research
+
+**Research Topic:** Generating structured Show Notes (Summaries, Chapters, Quotes) from transcripts.
+
+**Finding:**
+Because the application already extracts highly accurate transcript segments with timestamps, we can leverage the existing `gemini-client.ts` to perform "Text-to-text" processing. This approach is highly reliable and computationally cheap compared to audio/video manipulation.
+
+**Decision:**
+Propose adding a feature to automatically generate Markdown-based Show Notes. This turns the app into a more comprehensive content repurposing suite with very low technical overhead.
+
+**Learning:**
+Features that repurpose existing data (like transcripts) through text-based LLM prompts offer an outsized ROI. By using Gemini Flash, we can handle entire podcast transcripts within its massive context window, avoiding complex chunking logic required by older models.
+
+**Resources:**
+- research/proposals/2026-02-27-automated-show-notes.md
