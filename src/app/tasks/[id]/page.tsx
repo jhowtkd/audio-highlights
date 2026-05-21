@@ -26,6 +26,7 @@ import { EpisodeSummary } from '@/components/highlights/episode-summary';
 import { Waveform } from '@/components/audio/waveform';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import { useTaskQueueContext } from '@/contexts/task-context';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
@@ -50,15 +51,17 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const { updateResult } = useTaskQueueContext();
     const { cutVideo, cutMixVideo } = useFFmpeg();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isConfirmRetranscribeOpen, setIsConfirmRetranscribeOpen] = useState(false);
 
     const [task, setTask] = useState(() => getTask(id));
 
-    const handleRetranscribe = () => {
+    const handleRetranscribeClick = () => {
         if (!task) return;
+        setIsConfirmRetranscribeOpen(true);
+    };
 
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
+    const handleConfirmRetranscribe = () => {
+        if (!task) return;
 
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
@@ -277,7 +280,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={handleRetranscribe}
+                                    onClick={handleRetranscribeClick}
                                     className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                                     title="Retranscrever arquivo"
                                 >
@@ -285,6 +288,15 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                     Retranscrever
                                 </Button>
                                 <ThemeToggle />
+                                <ConfirmDialog
+                                    open={isConfirmRetranscribeOpen}
+                                    onOpenChange={setIsConfirmRetranscribeOpen}
+                                    title="Retranscrever Arquivo?"
+                                    description="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                                    confirmText="Retranscrever"
+                                    variant="destructive"
+                                    onConfirm={handleConfirmRetranscribe}
+                                />
 
                                 {/* Hidden file input for restoration */}
                                 <input

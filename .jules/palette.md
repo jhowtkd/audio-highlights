@@ -42,3 +42,12 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2024-05-21 - Replaced native confirm() dialogs with accessible ConfirmDialog component
+
+**UX Problem:** The application was using native `window.confirm()` dialogs for destructive actions like deleting projects or retranscribing files. These native dialogs block the main thread, are not accessible (screen reader issues, missing focus states), and cannot be styled to match the design system.
+
+**Learning:** Destructive actions need clear, accessible confirmations that fit into the application's UX without causing jarring thread blocks or accessibility barriers. Using `radix-ui/react-dialog` provides a robust foundation for building accessible dialogs.
+
+**Solution:** Created a new reusable `<ConfirmDialog>` component that wraps the existing Radix UI `<Dialog>`. Replaced all instances of `confirm()` and `window.confirm()` across `src/app/page.tsx`, `src/app/tasks/[id]/page.tsx`, and `src/components/tasks/task-card.tsx` with this new component, ensuring proper focus management and consistent styling.
+
+**Pattern:** For this design system, ALL destructive actions must use the `<ConfirmDialog>` component instead of native `confirm()` to ensure accessibility, consistent styling, and non-blocking interaction.
