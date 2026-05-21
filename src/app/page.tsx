@@ -21,6 +21,7 @@ import { formatDuration } from '@/lib/format-utils';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import { CostEstimator } from '@/components/upload/cost-estimator';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { downloadFile } from '@/lib/export';
 import { findActiveSegmentIndex } from '@/lib/transcription-utils';
 import type { Transcription, GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
@@ -48,6 +49,7 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('transcription');
   const [statusMessage] = useState<string>('');
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
   // Timer states
   const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -242,17 +244,7 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
+  const performReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +260,17 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
+
+  const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      setIsResetDialogOpen(true);
+      return;
+    }
+
+    performReset();
+  }, [transcription, highlights.length, performReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -594,6 +596,16 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      <ConfirmDialog
+        open={isResetDialogOpen}
+        onOpenChange={setIsResetDialogOpen}
+        title="Descartar projeto?"
+        description="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+        onConfirm={performReset}
+        confirmText="Descartar"
+        variant="destructive"
+      />
     </div>
   );
 }
