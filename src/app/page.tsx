@@ -16,6 +16,7 @@ import { DecupagemView } from '@/components/decupagem/decupagem-view';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ERROR_MESSAGES } from '@/lib/constants';
 import { formatDuration } from '@/lib/format-utils';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
@@ -58,6 +59,7 @@ export default function Home() {
 
   // Video state
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [isConfirmResetOpen, setIsConfirmResetOpen] = useState(false);
 
   const activeSegmentIndex = useMemo(() => {
     if (!transcription?.segments) return -1;
@@ -242,17 +244,7 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
+  const handleConfirmReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +260,15 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
+
+  const handleResetClick = useCallback(() => {
+    if (transcription || highlights.length > 0) {
+      setIsConfirmResetOpen(true);
+    } else {
+      handleConfirmReset();
+    }
+  }, [transcription, highlights.length, handleConfirmReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -298,7 +298,7 @@ export default function Home() {
               <ThemeToggle />
               {step !== 'upload' && (
                 <button
-                  onClick={handleReset}
+                  onClick={handleResetClick}
                   className="text-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
                 >
                   Novo projeto
@@ -435,7 +435,7 @@ export default function Home() {
               <Button onClick={handleRetry} variant="default">
                 Tentar novamente
               </Button>
-              <Button onClick={handleReset} variant="outline">
+              <Button onClick={handleResetClick} variant="outline">
                 Começar novo projeto
               </Button>
             </div>
@@ -585,6 +585,16 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      <ConfirmDialog
+        open={isConfirmResetOpen}
+        onOpenChange={setIsConfirmResetOpen}
+        title="Descartar Projeto?"
+        description="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+        confirmText="Descartar"
+        variant="destructive"
+        onConfirm={handleConfirmReset}
+      />
 
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mt-16">

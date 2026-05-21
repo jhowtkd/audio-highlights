@@ -15,8 +15,10 @@ import {
     ArrowRight,
     RefreshCw
 } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import type { Task } from '@/types/task-types';
@@ -69,6 +71,7 @@ export function TaskCard({ task }: TaskCardProps) {
     const router = useRouter();
     const { removeTask, retryTask } = useTaskQueue();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isConfirmRetranscribeOpen, setIsConfirmRetranscribeOpen] = useState(false);
 
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
@@ -78,11 +81,11 @@ export function TaskCard({ task }: TaskCardProps) {
         router.push(`/tasks/${task.id}`);
     };
 
-    const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
+    const handleRetranscribeClick = () => {
+        setIsConfirmRetranscribeOpen(true);
+    };
 
+    const handleConfirmRetranscribe = () => {
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -191,15 +194,26 @@ export function TaskCard({ task }: TaskCardProps) {
                         )}
 
                         {(task.status === 'completed' || task.status === 'error' || task.status === 'pending') && (
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={handleRetranscribe}
-                                className="text-slate-500 hover:text-blue-600"
-                                title="Retranscrever arquivo"
-                            >
-                                <RefreshCw className="h-4 w-4" />
-                            </Button>
+                            <>
+                                <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    onClick={handleRetranscribeClick}
+                                    className="text-slate-500 hover:text-blue-600"
+                                    title="Retranscrever arquivo"
+                                >
+                                    <RefreshCw className="h-4 w-4" />
+                                </Button>
+                                <ConfirmDialog
+                                    open={isConfirmRetranscribeOpen}
+                                    onOpenChange={setIsConfirmRetranscribeOpen}
+                                    title="Retranscrever Arquivo?"
+                                    description="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                                    confirmText="Retranscrever"
+                                    variant="destructive"
+                                    onConfirm={handleConfirmRetranscribe}
+                                />
+                            </>
                         )}
 
                         {(task.status === 'completed' || task.status === 'error' || task.status === 'pending') && (
