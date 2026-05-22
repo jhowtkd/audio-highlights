@@ -7,13 +7,24 @@
 - Network:       http://192.168.0.2:3000
 
 ✓ Starting...
-Attention: Next.js now collects completely anonymous telemetry regarding usage.
-This information is used to shape Next.js' roadmap and prioritize features.
-You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
-https://nextjs.org/telemetry
-
 ⚠ The "middleware" file convention is deprecated. Please use "proxy" instead. Learn more: https://nextjs.org/docs/messages/middleware-to-proxy
-✓ Ready in 1603ms
-○ Compiling /verify-config ...
- GET /verify-config 200 in 6.5s (compile: 5.9s, proxy.ts: 154ms, render: 427ms)
- GET /verify-config 200 in 159ms (compile: 6ms, proxy.ts: 5ms, render: 147ms)
+✓ Ready in 1442ms
+○ Compiling /test-confirm-dialog ...
+⨯ ./src/app/test-confirm-dialog/page.tsx:1:17
+Ecmascript file had an error
+[0m[31m[1m>[22m[39m[90m 1 |[39m [36mimport[39m [33mReact[39m[33m,[39m { useState } [36mfrom[39m [32m'react'[39m[33m;[39m
+ [90m   |[39m                 [31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m[31m[1m^[22m[39m
+ [90m 2 |[39m [36mimport[39m { [33mConfirmDialog[39m } [36mfrom[39m [32m'@/components/ui/confirm-dialog'[39m[33m;[39m
+ [90m 3 |[39m [36mimport[39m { [33mButton[39m } [36mfrom[39m [32m'@/components/ui/button'[39m[33m;[39m
+ [90m 4 |[39m[0m
+
+You're importing a component that needs `useState`. This React Hook only works in a Client Component. To fix, mark the file (or its parent) with the `"use client"` directive.
+
+ Learn more: https://nextjs.org/docs/app/api-reference/directives/use-client
+
+
+
+
+ GET /test-confirm-dialog 500 in 5.0s (compile: 4.6s, proxy.ts: 99ms, render: 296ms)
+✓ Compiled in 103ms
+ GET /test-confirm-dialog 200 in 633ms (compile: 271ms, proxy.ts: 4ms, render: 358ms)

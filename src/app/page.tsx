@@ -23,6 +23,7 @@ import { useTaskQueue } from '@/hooks/use-task-queue';
 import { CostEstimator } from '@/components/upload/cost-estimator';
 import { downloadFile } from '@/lib/export';
 import { findActiveSegmentIndex } from '@/lib/transcription-utils';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import type { Transcription, GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
 
 type AppStep = 'upload' | 'transcribing' | 'transcribed' | 'generating' | 'completed' | 'error';
@@ -48,6 +49,7 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('transcription');
   const [statusMessage] = useState<string>('');
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
   // Timer states
   const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -245,14 +247,14 @@ export default function Home() {
   const handleReset = useCallback(() => {
     // Confirm before resetting if there's content
     if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
+      setIsResetDialogOpen(true);
+      return;
     }
 
+    confirmReset();
+  }, [transcription, highlights]);
+
+  const confirmReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +270,7 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -594,6 +596,17 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      <ConfirmDialog
+        open={isResetDialogOpen}
+        onOpenChange={setIsResetDialogOpen}
+        title="Descartar projeto?"
+        message="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+        confirmLabel="Descartar"
+        cancelLabel="Cancelar"
+        confirmVariant="destructive"
+        onConfirm={confirmReset}
+      />
     </div>
   );
 }
