@@ -102,3 +102,11 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2024-05-22 - Client-Side Semantic Search with Transformers.js
+
+**Research Topic:** Evaluating `@xenova/transformers` for replacing server-side OpenAI semantic search.
+**Finding:** Transformers.js can effectively generate embeddings locally using small models like `all-MiniLM-L6-v2`, providing fast semantic search without server costs.
+**Decision:** Propose migrating semantic search from `src/app/api/search/route.ts` to a client-side Web Worker implementation.
+**Learning:** Client-side ML models have matured enough to replace basic server-side NLP tasks, trading initial download time for zero ongoing infrastructure costs and improved privacy.
+**Resources:**
+- https://huggingface.co/docs/transformers.js
