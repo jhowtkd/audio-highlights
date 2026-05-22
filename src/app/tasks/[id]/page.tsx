@@ -425,7 +425,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                                     <p className="text-xs text-slate-500">
                                                         {videoFile
                                                             ? `${(videoFile.size / (1024 * 1024)).toFixed(1)} MB`
-                                                            : 'Anexe o vídeo correspondente a este áudio para baixar os cortes'}
+                                                            : 'Anexe o vídeo correspondente a este arquivo para baixar os cortes'}
                                                     </p>
                                                 </div>
                                             </div>
