@@ -33,3 +33,17 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-05-22 - Waveform Float32Array Optimization
+
+**Bottleneck:** Rendering the waveform visualization involved iterating over every single sample in the decoded `Float32Array` audio buffer. For large audio files (e.g., 1 hour), this blocked the main thread for over ~500ms, causing UI jank and unresponsiveness.
+**Learning:** Iterating over massive arrays like audio data sample-by-sample is extremely expensive. High-fidelity audio data has way more data points than pixels available on the screen, meaning full resolution iteration is unnecessary for visualization.
+**Action:** Calculate a step size to sample a maximum subset of data points per block (e.g., max 100) instead of iterating over every single sample.
+**Code:**
+```typescript
+const step = Math.max(1, Math.floor(blockSize / 100)); // Sample max 100 points per block
+for (let j = 0; j < blockSize; j += step) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
