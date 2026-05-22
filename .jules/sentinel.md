@@ -31,3 +31,29 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-02-23 - Test Endpoints Exposed in Production
+
+**Vulnerability:** A test endpoint (`/api/test-transcribe`) that interacts with an external API (Groq) was accessible in production without any authentication or rate limiting. This allowed unauthorized users to exhaust the application's external API quotas or potentially cause a denial of service (DoS) by triggering repeated expensive requests.
+
+**Root Cause:** The endpoint was created for development/testing purposes to verify API integration but lacked a mechanism to restrict its execution to development or non-production environments.
+
+**Learning:** Ensure all non-essential test or debug endpoints are disabled or heavily protected in production environments to prevent unauthorized access and resource exhaustion.
+
+**Prevention:** Add environment checks (e.g., `process.env.NODE_ENV === 'production'`) at the beginning of test endpoints to immediately return a 404 or 403 response in production.
+
+**Code:**
+```typescript
+// Vulnerable:
+export async function GET() {
+    // ... test logic ...
+}
+
+// Secure:
+export async function GET() {
+    if (process.env.NODE_ENV === 'production') {
+        return new NextResponse(null, { status: 404 });
+    }
+    // ... test logic ...
+}
+```
