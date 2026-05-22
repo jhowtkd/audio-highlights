@@ -32,3 +32,10 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Consistent Project Terminology
+**Copy Type:** Upload Dropzone Labels
+**Original:** "Enviando áudio...", "Arraste seu áudio aqui", "Áudio curto", "Iniciar Transcrição"
+**Changed To:** "Enviando arquivo...", "Arraste seu arquivo aqui", "Arquivo curto", "Iniciar Processamento"
+**Learning:** The application refers to processing workflows and results as "Projects" and uploaded content as "Files" across the system, avoiding overly restrictive media terms like "Áudio" (since the application also supports video files). Also, "Transcrição" is only one part of the pipeline.
+**Rule:** Unify terminology by using "Projeto" for workflows/results and "Arquivo" for uploads. Avoid using "Áudio" to accommodate video files and avoid specific process names like "Transcrição" when the entire workflow is being initiated.

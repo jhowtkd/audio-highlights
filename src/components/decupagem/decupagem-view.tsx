@@ -123,7 +123,7 @@ export const DecupagemView = memo(function DecupagemView({ segments, projectId }
         return (
             <div className="h-full flex flex-col items-center justify-center p-8 text-center space-y-4">
                 <RefreshCw className="w-12 h-12 text-primary animate-spin" />
-                <h2 className="text-xl font-semibold">Analisando áudio...</h2>
+                <h2 className="text-xl font-semibold">Analisando arquivo...</h2>
                 <p className="text-muted-foreground">Isso pode levar alguns instantes.</p>
             </div>
         );
@@ -166,7 +166,7 @@ export const DecupagemView = memo(function DecupagemView({ segments, projectId }
                         <AlertCircle className="h-4 w-4" />
                         <AlertTitle>Nenhum problema detectado!</AlertTitle>
                         <AlertDescription>
-                            Seu áudio parece estar limpo de silêncios longos ou erros óbvios.
+                            Seu arquivo parece estar limpo de silêncios longos ou erros óbvios.
                         </AlertDescription>
                     </Alert>
                 ) : (

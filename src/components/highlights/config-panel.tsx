@@ -282,7 +282,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
             {audioDuration > 0 && (
               <p>
                 Cobertura estimada:{' '}
-                <span className="font-medium">{estimatedCoverage.toFixed(1)}%</span> do áudio
+                <span className="font-medium">{estimatedCoverage.toFixed(1)}%</span> do arquivo
               </p>
             )}
 
