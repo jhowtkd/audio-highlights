@@ -31,3 +31,30 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-05-24 - Resource Exhaustion via Test Endpoints
+
+**Vulnerability:** A test endpoint (`/api/test-transcribe`) that triggers an external API call to Groq was exposed in production. Attackers could call this endpoint repeatedly without authorization, leading to API quota depletion and potentially financial costs (Denial of Wallet).
+
+**Root Cause:** The endpoint was created for development/testing purposes but left accessible in all environments. It lacked authentication, authorization, and rate limiting.
+
+**Learning:** Test endpoints that consume resources or external APIs must NEVER be exposed in production. Even if they use small payloads (like 1 second of silence), the sheer volume of malicious requests can cause significant damage.
+
+**Prevention:** Always disable test endpoints in production environments by checking `process.env.NODE_ENV === 'production'` and returning a 404 response. Better yet, move test logic to actual unit/integration tests and do not expose them via API routes.
+
+**Code:**
+```typescript
+// Vulnerable pattern:
+export async function GET() {
+    // API call logic...
+}
+
+// Secure pattern:
+export async function GET() {
+    // Disable in production to prevent resource exhaustion
+    if (process.env.NODE_ENV === 'production') {
+        return new NextResponse('Not Found', { status: 404 });
+    }
+    // API call logic...
+}
+```
