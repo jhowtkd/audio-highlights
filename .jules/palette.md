@@ -42,3 +42,12 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2024-05-23 - Native Browser Confirm Overrides Accessible Flow
+
+**UX Problem:** The `TaskCard` component was using the native browser `confirm()` dialog for the "Retranscribe" action. This native dialog blocks the main thread, cannot be styled consistently with the application's design system, and can be jarring or inaccessible for screen readers.
+
+**Learning:** Using native browser modals (like `confirm()` and `alert()`) disrupts the UX flow and introduces accessibility limitations within modern React applications that rely on custom accessible primitives (like Radix UI).
+
+**Solution:** Introduced a reusable `ConfirmDialog` component built on top of the existing Dialog UI component. Replaced the native `confirm()` in `TaskCard` with controlled `ConfirmDialog` instances for both the "Retranscribe" and "Delete" actions.
+
+**Pattern:** For this application, NEVER use native browser dialogs for destructive or critical actions. Always wrap them in the accessible `<ConfirmDialog>` component to maintain design consistency and ensure keyboard/screen reader accessibility without blocking the main thread.
