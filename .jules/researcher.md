@@ -102,3 +102,21 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2024-05-24 - Client-Side Semantic Search Technology Research
+
+**Research Topic:** Adding semantic search capabilities for long transcriptions without incurring API costs.
+
+**Finding:** Evaluated approaches for implementing search functionality:
+1. Server-side API (OpenAI Embeddings) - Accurate but incurs ongoing costs and latency.
+2. Fuzzy Text Search (Fuse.js) - Fast and lightweight but lacks semantic understanding.
+3. Client-side Transformers (`@xenova/transformers`) - Provides semantic search directly in the browser with zero API costs.
+
+**Decision:** Proposed implementing client-side semantic search using `@xenova/transformers` with the `all-MiniLM-L6-v2` quantized model.
+- Completely eliminates ongoing server costs for embeddings.
+- Model size (~22MB) is manageable for desktop environments and can be cached.
+- Provides significantly better discoverability for conversational audio content compared to exact keyword matching.
+
+**Learning:** Running machine learning models client-side via WebAssembly is highly viable for specific tasks like semantic search, offering a compelling trade-off between initial load time and ongoing infrastructure costs/privacy concerns. Offloading this to a Web Worker is crucial to maintain UI responsiveness.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js/index
