@@ -16,6 +16,7 @@ import { DecupagemView } from '@/components/decupagem/decupagem-view';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ERROR_MESSAGES } from '@/lib/constants';
 import { formatDuration } from '@/lib/format-utils';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
@@ -107,6 +108,9 @@ export default function Home() {
 
   // Task Queue hook
   const { addTaskAndNavigate } = useTaskQueue();
+
+  // Reset dialog state
+  const [resetDialogOpen, setResetDialogOpen] = useState(false);
 
   const handleFileAccepted = useCallback((file: File, duration: number) => {
     // Show cost estimator before proceeding
@@ -242,17 +246,7 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
+  const executeReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +262,16 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
+
+  const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      setResetDialogOpen(true);
+      return;
+    }
+    executeReset();
+  }, [transcription, highlights, executeReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -594,6 +597,17 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      <ConfirmDialog
+        open={resetDialogOpen}
+        onOpenChange={setResetDialogOpen}
+        title="Descartar projeto?"
+        message="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+        confirmLabel="Descartar"
+        cancelLabel="Cancelar"
+        confirmVariant="destructive"
+        onConfirm={executeReset}
+      />
     </div>
   );
 }
