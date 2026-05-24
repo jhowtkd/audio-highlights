@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Inclusive Terminology in Upload Component
+
+**Copy Type:** Button label / Empty state
+**Original:** "Iniciar Transcrição" / "Arraste seu áudio aqui"
+**Changed To:** "Iniciar Processamento" / "Arraste seu arquivo aqui"
+**Learning:** Using "áudio" and "Transcrição" is too restrictive when the pipeline supports multiple formats (including video) and does more than just transcribe (it generates highlights, analysis, etc.). Inclusive terminology prevents user confusion.
+**Rule:** Unify terminology across the application. Use "Arquivo" for uploads and "Projeto" or "Processamento" for workflows, avoiding overly specific actions or restrictive media terms.
