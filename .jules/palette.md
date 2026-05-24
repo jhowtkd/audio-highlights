@@ -42,3 +42,12 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2025-01-29 - Native Blocking Dialogs on Main Thread
+
+**UX Problem:** Native browser `window.confirm()` and `alert()` dialogs block the main thread, stall Playwright test execution (unless explicitly mocked or handled), and provide poor accessibility and styling compared to the application's overall design system.
+
+**Learning:** Native prompts are not accessible via standard ARIA techniques and offer no customizability in appearance, creating a disjointed user experience especially on destructive actions.
+
+**Solution:** Introduced a reusable `ConfirmDialog` based on Radix UI `Dialog` primitives that ensures focus trap, keyboard navigation (Escape to close), and seamless integration with existing UI themes without blocking the execution thread.
+
+**Pattern:** For this design system, ALL confirmation prompts must avoid `window.confirm` and utilize the `ConfirmDialog` component.
