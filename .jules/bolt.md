@@ -33,3 +33,13 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-05-24 - Waveform Iteration Blocking Main Thread
+
+**Bottleneck:** Rendering waveforms for large audio files caused main thread blocking because it iterated through every single sample in a huge `Float32Array`.
+**Learning:** For visualization, you don't need sub-sample accuracy. Iterating through all values in `Float32Array` in a tight block can take hundreds of milliseconds on large files.
+**Action:** Implemented a stepping algorithm that samples at most 100 points per block, which drastically reduces the iterations while maintaining an accurate visual representation.
+**Code:**
+```typescript
+const pointsPerBlock = Math.min(blockSize, 100);
+const step = Math.max(1, Math.floor(blockSize / pointsPerBlock));
+```
