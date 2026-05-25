@@ -42,3 +42,9 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2026-05-25 - Native Confirm Dialog Accessibility
+
+**UX Problem:** The TaskCard used native browser `window.confirm()` for destructive actions (Retranscribe and Delete). These dialogs are jarring, block the main thread, don't respect the design system, and can be problematic for screen reader focus management. Additionally, the icon-only buttons lacked `aria-label` attributes and the icons themselves were not hidden from screen readers.
+**Learning:** Native confirm dialogs provide a poor user experience and are not fully accessible. Icon-only buttons must be explicitly labeled.
+**Solution:** Replaced the native `confirm()` and direct delete actions with Radix UI `Dialog` components to create accessible, design-system-aligned confirmation modals. Added `aria-label` to the buttons and `aria-hidden="true"` to the `lucide-react` icons. Escaped quotes as `&quot;` in Dialog descriptions to pass linting.
+**Pattern:** For destructive actions in this design system, NEVER use native `window.confirm()`. ALWAYS use the `Dialog` primitive for confirmation. Icon-only buttons MUST have `aria-label` and `aria-hidden="true"` on the SVG.
