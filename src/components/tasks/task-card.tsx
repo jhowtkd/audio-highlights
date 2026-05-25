@@ -17,6 +17,16 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+    DialogClose,
+} from '@/components/ui/dialog';
 import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import type { Task } from '@/types/task-types';
@@ -79,10 +89,6 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -191,27 +197,71 @@ export function TaskCard({ task }: TaskCardProps) {
                         )}
 
                         {(task.status === 'completed' || task.status === 'error' || task.status === 'pending') && (
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={handleRetranscribe}
-                                className="text-slate-500 hover:text-blue-600"
-                                title="Retranscrever arquivo"
-                            >
-                                <RefreshCw className="h-4 w-4" />
-                            </Button>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="text-slate-500 hover:text-blue-600"
+                                        title="Retranscrever arquivo"
+                                        aria-label="Retranscrever arquivo"
+                                    >
+                                        <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Retranscrever arquivo?</DialogTitle>
+                                        <DialogDescription>
+                                            Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter className="mt-4">
+                                        <DialogClose asChild>
+                                            <Button variant="outline">Cancelar</Button>
+                                        </DialogClose>
+                                        <DialogClose asChild>
+                                            <Button variant="default" onClick={handleRetranscribe}>
+                                                Retranscrever
+                                            </Button>
+                                        </DialogClose>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         )}
 
                         {(task.status === 'completed' || task.status === 'error' || task.status === 'pending') && (
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={() => removeTask(task.id)}
-                                className="text-slate-500 hover:text-red-600"
-                                title="Excluir projeto"
-                            >
-                                <Trash2 className="h-4 w-4" />
-                            </Button>
+                            <Dialog>
+                                <DialogTrigger asChild>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="text-slate-500 hover:text-red-600"
+                                        title="Excluir projeto"
+                                        aria-label="Excluir projeto"
+                                    >
+                                        <Trash2 className="h-4 w-4" aria-hidden="true" />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Excluir projeto?</DialogTitle>
+                                        <DialogDescription>
+                                            Tem certeza que deseja excluir o projeto &quot;{task.filename}&quot;? Esta ação não pode ser desfeita.
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter className="mt-4">
+                                        <DialogClose asChild>
+                                            <Button variant="outline">Cancelar</Button>
+                                        </DialogClose>
+                                        <DialogClose asChild>
+                                            <Button variant="destructive" onClick={() => removeTask(task.id)}>
+                                                Excluir
+                                            </Button>
+                                        </DialogClose>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         )}
 
                         {/* Hidden file input for restoration */}
