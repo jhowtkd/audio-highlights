@@ -33,3 +33,19 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2025-02-14 - Waveform Rendering Blocked Main Thread
+
+**Bottleneck:** Iterating over every single sample in the `Float32Array` audio buffer to calculate the waveform blocked the main thread for long audio files.
+**Learning:** For waveform visualization, you do not need perfect precision for every audio sample. A dense loop reading millions of samples blocks the UI thread, causing jank.
+**Action:** Implemented a step-based sampling method (`const step = Math.max(1, Math.floor(blockSize / 100));`) that limits the loop to process a subset (e.g., 100 points) of data per block, drastically reducing execution time while maintaining visual fidelity.
+**Code:**
+```typescript
+const step = Math.max(1, Math.floor(blockSize / 100));
+let sampleCount = 0;
+for (let j = 0; j < blockSize; j += step) {
+    sum += Math.abs(channelData[blockStart + j]);
+    sampleCount++;
+}
+filteredData.push(sum / sampleCount);
+```
