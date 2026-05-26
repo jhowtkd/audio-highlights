@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-26 - Automated Chapter Generation Research
+
+**Research Topic:** Automated Chapter Generation for Podcasts using LLM
+
+**Finding:**
+Evaluated the feasibility of generating YouTube-style chapters from transcripts. Using our existing OpenAI integration with the `gpt-4o` model is highly effective when providing the transcript with anchored timestamps (e.g., `[45s] text`).
+
+**Decision:**
+Propose adding an Automated Chapter Generation feature that processes the full episode transcript to create a chronological list of chapters (Timestamp + Title + Summary). This leverages existing AI dependencies to provide additional textual outputs.
+
+**Learning:**
+Formatting the transcript with explicit start-time anchors is crucial for the LLM to output accurate timestamps. This approach has very high ROI as it solves a major pain point for creators with minimal new architecture.
+
+**Resources:**
+- research/proposals/automated-chapter-generation.md
