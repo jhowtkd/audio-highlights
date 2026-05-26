@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useState, useMemo, useCallback } from 'react';
+import { useRef, useEffect, useState, useMemo, useCallback, memo } from 'react';
 import { cn } from '@/lib/utils';
 import { formatDuration } from '@/lib/format-utils';
 import type { GeneratedHighlight, TranscriptionSegment } from '@/types';
@@ -27,7 +27,7 @@ const HIGHLIGHT_COLORS = [
 const DEFAULT_HIGHLIGHTS: GeneratedHighlight[] = [];
 const DEFAULT_SEGMENTS: TranscriptionSegment[] = [];
 
-export function Waveform({
+export const Waveform = memo(function Waveform({
     audioUrl,
     duration,
     currentTime,
@@ -98,15 +98,22 @@ export function Waveform({
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
 
+                // To prevent main thread blocking, calculate step size to sample a subset of data points per block
+                // For a typical audio file, block size is huge. We don't need to iterate over every sample.
+                // 100 samples per block is enough for a visually accurate waveform.
+                const subSampleSize = Math.max(1, Math.floor(blockSize / 100));
+
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let sampledCount = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    for (let j = 0; j < blockSize; j += subSampleSize) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        sampledCount++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / sampledCount);
                 }
 
                 // Normalize the data
@@ -359,4 +366,4 @@ export function Waveform({
             )}
         </div>
     );
-}
+});
