@@ -1,0 +1,14 @@
+--- .jules/palette.md
++++ .jules/palette.md
+@@ -40,11 +40,3 @@
+ **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
+ **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+-## 2024-05-27 - Icon-only Buttons Missing Context
+-
+-**UX Problem:** Action buttons like "Retranscrever arquivo" and "Excluir projeto" in `TaskCard` relied only on `title` attributes for context, making them inaccessible to screen readers as icon-only buttons.
+-**Learning:** `title` attributes are not reliably read by all screen readers and do not replace proper ARIA labels. Additionally, decorative icons within these buttons must be hidden from screen readers to prevent redundant or confusing announcements.
+-**Solution:** Added descriptive `aria-label` attributes to the buttons and `aria-hidden="true"` to their internal `lucide-react` icons.
+-**Pattern:** For this design system, ALL icon-only buttons must have:
+-1. A descriptive `aria-label` explaining the action.
+-2. `aria-hidden="true"` applied to the inner decorative SVG/icon component.
