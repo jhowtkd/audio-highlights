@@ -32,3 +32,21 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2025-02-12 - Video vs Audio Terminology
+
+**Copy Type:** Dropzone UI Text, Button Labels, and Dialog Titles
+**Original:**
+- "Enviando áudio..."
+- "Arraste seu áudio aqui"
+- "Iniciar Transcrição"
+- "Adicionar novo áudio"
+**Changed To:**
+- "Enviando arquivo..."
+- "Arraste seu arquivo aqui"
+- "Iniciar Processamento"
+- "Adicionar novo arquivo"
+**Learning:** The application accepts and processes multiple media formats (audio and video like .mp4, .webm). Using strictly "áudio" limits user perception of what they can upload. Also, the backend processes both transcription and highlight generation, meaning "transcrição" under-represents the final value the user receives.
+**Rule:** For this app, ALWAYS:
+1. Use "Arquivo" instead of "Áudio" in upload areas and dialogs.
+2. Use "Processamento" or "Projeto" to describe the overall pipeline/work, rather than "Transcrição", unless specifically referring only to the text transcript generation step.
