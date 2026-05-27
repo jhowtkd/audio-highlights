@@ -102,3 +102,21 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-27 - Web Worker Integration for Client-Side AI
+
+**Research Topic:** Implementing Transformers.js safely in the browser
+
+**Finding:**
+When running `@xenova/transformers` in the browser, extracting embeddings blocks the main thread.
+Using a Web Worker prevents UI freezing, but requires careful handling of state, multiple concurrent `index` calls, and message passing.
+
+**Decision:**
+Implemented `src/lib/search-worker.ts` and `src/hooks/use-semantic-search.ts`.
+Used a `jobId` pattern in the worker to abort previous indexing tasks if a new one is started, preventing array duplication and race conditions.
+
+**Learning:**
+Always use Web Workers for client-side ML inference. Furthermore, when the embeddings are initialized with `normalize: true`, calculating `cosineSimilarity` only requires computing the dot product; dividing by vector magnitudes is redundant.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js/tutorials/react
