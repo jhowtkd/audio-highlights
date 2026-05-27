@@ -17,15 +17,7 @@ import {
 } from '@/lib/export';
 import type { TranscriptionSegment } from '@/types';
 import { TranscriptSegment } from './transcript-segment';
-
-interface SearchResult {
-  segmentId: string;
-  text: string;
-  startTime: number;
-  endTime: number;
-  relevanceScore: number;
-  matchReason: string;
-}
+import { useSemanticSearch } from '@/hooks/use-semantic-search';
 
 interface TranscriptViewerProps {
   segments: TranscriptionSegment[];
@@ -50,9 +42,32 @@ export const TranscriptViewer = memo(function TranscriptViewer({
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+
+  const {
+    isReady,
+    isModelLoading,
+    isIndexing,
+    isSearching,
+    results: searchResults,
+    loadModel,
+    indexSegments,
+    search,
+    clearResults
+  } = useSemanticSearch();
+
+  // Load model and index segments when component mounts or segments change
+  useEffect(() => {
+    if (!isReady && !isModelLoading) {
+      loadModel();
+    }
+  }, [isReady, isModelLoading, loadModel]);
+
+  useEffect(() => {
+    if (isReady && segments.length > 0) {
+      indexSegments(segments);
+    }
+  }, [isReady, segments, indexSegments]);
 
   // Get IDs of matching segments for highlighting
   const matchingSegmentIds = useMemo(() => {
@@ -94,47 +109,18 @@ export const TranscriptViewer = memo(function TranscriptViewer({
   }, [activeSegmentIndex, showSearchResults]);
 
   // Semantic search handler
-  const handleSearch = useCallback(async () => {
-    if (!searchQuery.trim() || segments.length === 0) return;
+  const handleSearch = useCallback(() => {
+    if (!searchQuery.trim() || segments.length === 0 || !isReady || isIndexing) return;
 
-    setIsSearching(true);
     setShowSearchResults(true);
-
-    try {
-      const response = await fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: searchQuery,
-          segments: segments.map(s => ({
-            id: s.id,
-            start: s.start,
-            end: s.end,
-            text: s.text,
-          })),
-          maxResults: 10,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSearchResults(data.results || []);
-      } else {
-        setSearchResults([]);
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [searchQuery, segments]);
+    search(searchQuery, 10);
+  }, [searchQuery, segments, isReady, isIndexing, search]);
 
   const clearSearch = useCallback(() => {
     setSearchQuery('');
-    setSearchResults([]);
+    clearResults();
     setShowSearchResults(false);
-  }, []);
+  }, [clearResults]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -211,18 +197,16 @@ export const TranscriptViewer = memo(function TranscriptViewer({
         </div>
         <Button
           onClick={handleSearch}
-          disabled={isSearching || !searchQuery.trim()}
+          disabled={isSearching || !searchQuery.trim() || !isReady || isIndexing}
           size="sm"
           className="shrink-0"
         >
-          {isSearching ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
+          {isSearching || isModelLoading || isIndexing ? (
+            <Loader2 className="h-4 w-4 animate-spin mr-1" />
           ) : (
-            <>
-              <Sparkles className="h-4 w-4 mr-1" />
-              Buscar
-            </>
+            <Sparkles className="h-4 w-4 mr-1" />
           )}
+          {isModelLoading ? 'Carregando IA...' : isIndexing ? 'Indexando...' : isSearching ? 'Buscando...' : 'Buscar'}
         </Button>
 
         {/* Download Button with Dropdown */}
