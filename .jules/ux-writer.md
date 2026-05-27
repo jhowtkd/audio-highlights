@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-05-27 - Generalization of Media Terms
+
+**Copy Type:** Interface titles and upload prompts
+**Original:** "Adicionar novo áudio", "Arraste seu áudio aqui"
+**Changed To:** "Adicionar novo arquivo", "Arraste seu arquivo aqui"
+**Learning:** The application supports both audio and video formats (e.g. MP4, MOV, WebM). Restricting the terminology to "áudio" creates a misleading user experience and might cause users to think video files are unsupported, thus abandoning the task.
+**Rule:** Unify terminology by using 'Arquivo' (File) for uploads. Avoid using restrictive media terms like 'Áudio' to ensure the copy reflects the actual capabilities of the application.

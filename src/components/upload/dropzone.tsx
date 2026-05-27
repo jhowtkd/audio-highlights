@@ -237,7 +237,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
               ? isDragReject
                 ? 'Formato não suportado'
                 : 'Solte o arquivo aqui'
-              : 'Arraste seu áudio aqui'}
+              : 'Arraste seu arquivo aqui'}
           </p>
 
           <p className="text-sm text-slate-500 mb-4">ou clique para selecionar</p>
