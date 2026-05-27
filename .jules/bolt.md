@@ -33,3 +33,17 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-05-27 - Main Thread Blocking in Waveform Generation
+
+**Bottleneck:** High CPU usage and main thread blocking when rendering waveforms from large audio files.
+**Learning:** Iterating over every sample in the `Float32Array` audio buffer causes severe performance issues (O(N) operations, where N is the total number of audio samples).
+**Action:** Implemented sub-sampling by calculating a `step` size to sample a subset of data points per block, reducing the work done on the main thread drastically.
+**Code:**
+```javascript
+const step = Math.max(1, Math.floor(blockSize / 100));
+let count = 0;
+for (let j = 0; j < blockSize; j += step) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
