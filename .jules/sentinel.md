@@ -31,3 +31,25 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2025-02-14 - Test Endpoint Exposed in Production
+
+**Vulnerability:** A test endpoint (`/api/test-transcribe`) that triggers external API calls (Groq Whisper) was exposed in production. This could lead to resource exhaustion, unauthorized API usage, and potential denial-of-service if abused by malicious actors.
+**Root Cause:** The endpoint was created for development testing but lacked a check to restrict its availability to development environments only.
+**Learning:** Test endpoints, especially those that consume third-party API credits or perform heavy processing, must never be exposed in production without strict authentication and authorization, or should be completely disabled.
+**Prevention:** Always wrap test or debug endpoints with environment checks (e.g., `process.env.NODE_ENV === 'production'`) to disable them or return a 404 status in production. Review all endpoints for proper environment gating before deployment.
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+export async function GET() {
+    // ... test logic ...
+}
+
+// Secure pattern to use:
+export async function GET() {
+    if (process.env.NODE_ENV === 'production') {
+        return new NextResponse(null, { status: 404 });
+    }
+    // ... test logic ...
+}
+```
