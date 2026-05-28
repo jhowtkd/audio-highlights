@@ -32,3 +32,15 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-05-18 - Inclusive Media Terminology
+
+**Copy Type:** Dropzone UI text and Upload Dialog Title
+
+**Original:** "Arraste seu áudio aqui", "Adicionar novo áudio", "Iniciar Transcrição"
+
+**Changed To:** "Arraste seu arquivo aqui", "Adicionar novo projeto", "Iniciar Processamento"
+
+**Learning:** Using overly restrictive media terms (like "Áudio") is confusing when the application also supports video files. Similarly, using specific action terms like "Transcrição" doesn't cover the entire processing pipeline (e.g., generating highlights). Using broader, unified terminology clarifies user expectations.
+
+**Rule:** For UI text in this application, unify terminology by using 'Projeto' (Project) or 'Processamento' (Processing) for workflows and results, and 'Arquivo' (File) for uploads. Avoid using internal jargon like 'Task', restrictive media terms like 'Áudio' (as the application also supports video files), or overly specific actions like 'Transcrição' for the whole pipeline.
