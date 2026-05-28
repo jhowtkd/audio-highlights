@@ -33,3 +33,17 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-05-28 - Audio Waveform Rendering Blocked Main Thread
+
+**Bottleneck:** Iterating over every sample in `Float32Array` for large audio files to calculate waveform data blocks the main thread.
+**Learning:** `channelData.length` can be very large (e.g. 13 million samples for 5 mins of audio), and the nested loops iterating over every single sample cause a massive main thread freeze.
+**Action:** When rendering waveforms from large audio files, avoid iterating over every sample in the `Float32Array` audio buffer. Instead, calculate a step size to sample a subset of data points per block.
+**Code:**
+```typescript
+const stepSize = Math.max(1, Math.ceil(blockSize / 100)); // Max 100 samples per block
+for (let j = 0; j < blockSize; j += stepSize) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
