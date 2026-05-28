@@ -29,6 +29,7 @@ import { Button } from '@/components/ui/button';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import { useTaskQueueContext } from '@/contexts/task-context';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { downloadFile } from '@/lib/export';
 import { findActiveSegmentIndex } from '@/lib/transcription-utils';
 import type { GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
@@ -50,16 +51,17 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const { updateResult } = useTaskQueueContext();
     const { cutVideo, cutMixVideo } = useFFmpeg();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isRetranscribeDialogOpen, setIsRetranscribeDialogOpen] = useState(false);
 
     const [task, setTask] = useState(() => getTask(id));
 
     const handleRetranscribe = () => {
         if (!task) return;
+        setIsRetranscribeDialogOpen(true);
+    };
 
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
+    const confirmRetranscribe = () => {
+        if (!task) return;
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -506,6 +508,17 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                     </p>
                 </div>
             </footer>
+
+            <ConfirmDialog
+                open={isRetranscribeDialogOpen}
+                onOpenChange={setIsRetranscribeDialogOpen}
+                title="Retranscrever arquivo?"
+                message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                confirmLabel="Retranscrever"
+                cancelLabel="Cancelar"
+                confirmVariant="destructive"
+                onConfirm={confirmRetranscribe}
+            />
         </div>
     );
 }
