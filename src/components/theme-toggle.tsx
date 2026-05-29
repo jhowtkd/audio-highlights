@@ -17,8 +17,8 @@ export function ThemeToggle() {
 
     if (!mounted) {
         return (
-            <Button variant="ghost" size="icon" className="h-9 w-9" disabled>
-                <Sun className="h-4 w-4" />
+            <Button variant="ghost" size="icon" className="h-9 w-9" disabled aria-label="Carregando tema">
+                <Sun className="h-4 w-4" aria-hidden="true" />
             </Button>
         );
     }
@@ -34,9 +34,9 @@ export function ThemeToggle() {
             aria-label={isDark ? 'Ativar modo claro' : 'Ativar modo escuro'}
         >
             {isDark ? (
-                <Sun className="h-4 w-4 text-yellow-500" />
+                <Sun className="h-4 w-4 text-yellow-500" aria-hidden="true" />
             ) : (
-                <Moon className="h-4 w-4 text-slate-600" />
+                <Moon className="h-4 w-4 text-slate-600" aria-hidden="true" />
             )}
         </Button>
     );
