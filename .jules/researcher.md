@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-25 - Gemini 2.0 Flash Migration for Highlights Generation
+
+**Research Topic:** Evaluating Gemini 2.0 Flash against GPT-4o for long-context text analysis in highlight generation.
+
+**Finding:**
+Gemini 2.0 Flash provides a massive context window (1M+ tokens) at a fraction of the cost (~$0.15/1M input vs ~$5.00/1M input for GPT-4). It handles strict JSON schema outputs reliably, which is required for our highlight generation.
+
+**Decision:**
+Propose replacing the OpenAI client usage in `/api/highlights/route.ts` with the existing `GeminiClient`.
+
+**Learning:**
+For long-context, structured-output summarization tasks (like full podcast transcripts), fast/cheap models like Gemini 2.0 Flash are often superior to heavy models like GPT-4o, delivering the necessary quality without the latency and high API costs. Leveraging an existing client implementation reduces architectural overhead.
+
+**Resources:**
+- https://ai.google.dev/gemini-api/docs/structured-output
