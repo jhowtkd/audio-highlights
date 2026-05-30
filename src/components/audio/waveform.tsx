@@ -98,15 +98,21 @@ export function Waveform({
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
 
+                // Performance: Sample a subset of data points per block to prevent main thread blocking
+                // on large audio files. Limits to max 1000 samples per block.
+                const maxSamplesPerBlock = 1000;
+                const step = Math.max(1, Math.floor(blockSize / maxSamplesPerBlock));
+                const samplesToRead = Math.ceil(blockSize / step);
+
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    for (let j = 0; j < blockSize; j += step) {
                         sum += Math.abs(channelData[blockStart + j]);
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / samplesToRead);
                 }
 
                 // Normalize the data
