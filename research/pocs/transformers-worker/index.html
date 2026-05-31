@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Transformers.js Worker POC</title>
+</head>
+<body>
+    <h1>Client-side Semantic Search POC</h1>
+    <input type="text" id="input" placeholder="Enter text to embed..." />
+    <button id="btn">Generate Embeddings</button>
+    <pre id="output"></pre>
+
+    <script type="module">
+        const worker = new Worker('./worker.js', { type: 'module' });
+
+        const outputEl = document.getElementById('output');
+        const inputEl = document.getElementById('input');
+        const btn = document.getElementById('btn');
+
+        worker.addEventListener('message', (event) => {
+            const message = event.data;
+
+            if (message.status === 'progress') {
+                outputEl.textContent = `Loading model: ${Math.round(message.progress)}%`;
+            } else if (message.status === 'complete') {
+                outputEl.textContent = `Embedding generated (first 5 dims): \n${JSON.stringify(message.output[0].slice(0, 5), null, 2)}`;
+            } else if (message.status === 'error') {
+                outputEl.textContent = `Error: ${message.error}`;
+            } else {
+                outputEl.textContent = `Status: ${message.status || 'Initializing...'}`;
+            }
+        });
+
+        btn.addEventListener('click', () => {
+            const text = inputEl.value || "Hello world!";
+            outputEl.textContent = 'Generating...';
+            worker.postMessage({ text });
+        });
+    </script>
+</body>
+</html>

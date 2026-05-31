@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2026-06-01 - Web Worker Integration for Client-Side ML
+
+**Research Topic:** Evaluating Web Worker architectural patterns for running large ML models in Next.js without main thread blocking.
+
+**Finding:** Running `@xenova/transformers` directly in React components blocks the UI thread during model initialization and inference, causing jank. Moving it to a dedicated Web Worker ensures the main thread remains responsive.
+
+**Decision:** The approach is highly viable. We can implement a Web Worker for feature extraction using the `Worker` API. We should implement a message-passing interface to send text and receive vectors asynchronously.
+
+**Learning:** When implementing `@xenova/transformers` in the browser, always run the pipeline within a Web Worker to prevent blocking the main UI thread. A `PipelineSingleton` pattern inside the worker is necessary to ensure the model is loaded only once per session. The Next.js Turbopack compiler supports `new Worker(new URL('...', import.meta.url))` natively.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js
+- https://nextjs.org/docs/app/building-your-application/optimizing/web-workers
