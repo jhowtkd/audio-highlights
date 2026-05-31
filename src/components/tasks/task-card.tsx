@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useRef, ChangeEvent } from 'react';
+import { useRef, ChangeEvent, useState } from 'react';
 import {
     FileAudio,
     Trash2,
@@ -21,6 +21,14 @@ import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import type { Task } from '@/types/task-types';
 import { cn } from '@/lib/utils';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from '@/components/ui/dialog';
 
 interface TaskCardProps {
     task: Task;
@@ -69,6 +77,7 @@ export function TaskCard({ task }: TaskCardProps) {
     const router = useRouter();
     const { removeTask, retryTask } = useTaskQueue();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
@@ -206,13 +215,39 @@ export function TaskCard({ task }: TaskCardProps) {
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => removeTask(task.id)}
+                                onClick={() => setIsDeleteDialogOpen(true)}
                                 className="text-slate-500 hover:text-red-600"
                                 title="Excluir projeto"
+                                aria-label="Excluir projeto"
                             >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-4 w-4" aria-hidden="true" />
                             </Button>
                         )}
+
+                        <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+                            <DialogContent>
+                                <DialogHeader>
+                                    <DialogTitle>Excluir projeto?</DialogTitle>
+                                    <DialogDescription>
+                                        Esta ação não pode ser desfeita. Isso excluirá permanentemente o projeto e todos os dados associados.
+                                    </DialogDescription>
+                                </DialogHeader>
+                                <DialogFooter>
+                                    <Button variant="outline" onClick={() => setIsDeleteDialogOpen(false)}>
+                                        Cancelar
+                                    </Button>
+                                    <Button
+                                        variant="destructive"
+                                        onClick={() => {
+                                            removeTask(task.id);
+                                            setIsDeleteDialogOpen(false);
+                                        }}
+                                    >
+                                        Excluir
+                                    </Button>
+                                </DialogFooter>
+                            </DialogContent>
+                        </Dialog>
 
                         {/* Hidden file input for restoration */}
                         <input
