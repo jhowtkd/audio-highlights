@@ -33,3 +33,19 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-06-01 - Avoid Iterating Over Full Float32Array on Main Thread
+
+**Bottleneck:** High CPU utilization and main thread blocking when generating waveform visualization for long audio/video files.
+**Learning:** Iterating over every single sample of a large `Float32Array` audio buffer returned by `decodeAudioData` is extremely slow and blocks the main thread, especially for files longer than a few minutes.
+**Action:** Calculate a step size to sample a subset of data points per block (e.g. max 100 samples per block) instead of analyzing every frame, which dramatically reduces the iteration count.
+**Code:**
+```typescript
+const maxSamplesPerBlock = 100;
+const step = Math.max(1, Math.floor(blockSize / maxSamplesPerBlock));
+
+for (let j = 0; j < blockSize; j += step) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
