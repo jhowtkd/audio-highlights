@@ -42,3 +42,17 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-05-31 - TaskCard Delete Confirmation Dialog
+
+**UX Problem:** The "Excluir projeto" (Delete project) button on the `TaskCard` triggered immediate deletion without any confirmation or feedback, violating the UX principle of making destructive actions reversible or confirmable.
+
+**Learning:** Destructive actions without confirmation are frustrating. Implementing a custom confirmation dialog using the Radix UI `Dialog` primitives prevents accidental data loss and provides a consistent, accessible experience across the application.
+
+**Solution:** Integrated the existing `Dialog` component from `src/components/ui/dialog.tsx` into the `TaskCard` component. Added local state `isDeleteDialogOpen` to control visibility. Replaced the direct `removeTask` call on the trigger button with state toggle. Enhanced the trigger button with proper `aria-label` and `aria-hidden="true"` on the SVG icon.
+
+**Pattern:** For this design system, ALL destructive actions must have:
+1. A confirmation dialog (using `@/components/ui/dialog` primitives).
+2. Proper ARIA attributes on the trigger button (e.g., `aria-label`, `aria-hidden` on icons).
+3. Clear explanations of the consequences inside the dialog description.
+4. Appropriate button variants (e.g., `variant="destructive"` for the final confirm button).
