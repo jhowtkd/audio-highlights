@@ -31,3 +31,28 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2025-02-14 - Test Endpoints Exposed in Production
+
+**Vulnerability:** A test endpoint (`/api/test-transcribe`) that triggers external API calls was left active in production.
+
+**Root Cause:** The endpoint was likely created for development or testing purposes but lacked environmental checks to restrict its availability.
+
+**Learning:** Leaving test or debug endpoints active in production can lead to unauthorized API usage, resource exhaustion, and potential exposure of sensitive information or internal behaviors.
+
+**Prevention:** Always wrap test, debug, or development-only endpoints with environmental checks (e.g., `if (process.env.NODE_ENV === 'production') return new NextResponse(null, { status: 404 });`) or remove them entirely before deploying to production.
+
+**Code:**
+```typescript
+export async function GET() {
+    if (process.env.NODE_ENV === 'production') {
+        return new NextResponse(null, { status: 404 });
+    }
+
+    try {
+        // ... external API calls
+    } catch (error) {
+        // ... error handling
+    }
+}
+```
