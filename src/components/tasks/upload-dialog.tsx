@@ -28,7 +28,7 @@ export function UploadDialog({ open, onOpenChange }: UploadDialogProps) {
         <Dialog open={open} onOpenChange={onOpenChange}>
             <DialogContent className="sm:max-w-2xl">
                 <DialogHeader>
-                    <DialogTitle>Adicionar novo áudio</DialogTitle>
+                    <DialogTitle>Novo projeto</DialogTitle>
                 </DialogHeader>
 
                 <div className="mt-4">
