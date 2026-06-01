@@ -42,3 +42,15 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2024-06-01 - Missing `aria-label` and `aria-hidden` in Icon-only Buttons
+
+**UX Problem:** Buttons consisting solely of an icon (e.g., Delete, Retry, Keep, Cut) relied only on the `title` attribute. Screen readers would read the `title` if present, but relying on `title` is not robust. Furthermore, the internal SVG icons were visible to screen readers, potentially leading to redundant or confusing announcements.
+
+**Learning:** It's a common oversight to omit `aria-label` on buttons that have a tooltip (`title`) or only contain an icon. Also, SVG icons inside interactive elements need `aria-hidden="true"` to prevent them from being individually announced by assistive technologies when the parent element already has an accessible name.
+
+**Solution:** Added explicit `aria-label` attributes to these buttons (mirroring the `title` text) and added `aria-hidden="true"` to their nested SVG elements.
+
+**Pattern:** For any button that does not have visible descriptive text:
+1.  Must have an `aria-label` that clearly describes its action.
+2.  Any purely decorative content inside it, such as an SVG icon, must have `aria-hidden="true"`.
