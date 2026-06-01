@@ -102,3 +102,13 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2025-02-24 - Client-Side Semantic Search Research
+
+**Research Topic:** Migrating semantic search from server-side OpenAI API to client-side Transformers.js.
+**Finding:** Evaluated `@xenova/transformers` with the `all-MiniLM-L6-v2` model in a Node.js POC. The quantized model (~22MB) loads quickly and can generate embeddings and calculate cosine similarity almost instantly (< 1ms for similarity on small datasets, ~50ms for generation).
+**Decision:** Proposing to migrate to Transformers.js running in a Web Worker. It eliminates ongoing OpenAI API costs, drastically reduces search latency after the initial model load, and improves privacy.
+**Learning:** Client-side embedding generation with WebAssembly is highly performant and a viable alternative to server-side LLMs for single-document semantic search. The main thread must not be blocked, making Web Workers mandatory for this approach.
+**Resources:**
+- https://huggingface.co/docs/transformers.js/index
+- https://huggingface.co/sentence-transformers/all-MiniLM-L6-v2
