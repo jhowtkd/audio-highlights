@@ -102,11 +102,17 @@ export function Waveform({
                     const blockStart = blockSize * i;
                     let sum = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    // Performance: Don't iterate over every single sample in large files
+                    // Max 100 samples per block is enough for a smooth waveform
+                    const step = Math.ceil(blockSize / 100);
+                    let count = 0;
+
+                    for (let j = 0; j < blockSize; j += step) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / count);
                 }
 
                 // Normalize the data

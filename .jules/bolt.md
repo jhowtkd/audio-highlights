@@ -33,3 +33,18 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-05-18 - Waveform Generation Blocking Main Thread
+
+**Bottleneck:** Rendering waveforms for large audio files (e.g., 1 hour at 44.1kHz = ~158M samples) blocked the main thread for >400ms because it iterated over every single sample in the `Float32Array`.
+**Learning:** For visualizing audio in a waveform with a limited number of bars (e.g., 200 samples), iterating over every single sample is computationally wasteful and causes UI freeze.
+**Action:** Calculate a step size to only sample a subset of data points per block (e.g., max 100 points per block). This drastically reduces the number of loop iterations while maintaining visual fidelity for the user.
+**Code:**
+```javascript
+const step = Math.ceil(blockSize / 100);
+let count = 0;
+for (let j = 0; j < blockSize; j += step) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+filteredData.push(sum / count);
+```
