@@ -102,3 +102,17 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2024-06-02 - Advanced Waveform Navigation Research
+
+**Research Topic:** Enhancing audio navigation by replacing the simple slider with a visual waveform representation.
+
+**Finding:** Evaluated `wavesurfer.js` v7 as the primary solution. It provides a robust, canvas-based rendering engine and supports `MediaElement` backend, which is crucial for not loading entire large files (up to 4 hours) into Web Audio memory. However, client-side peak generation for such large files will likely cause UI freezes.
+
+**Decision:** Proposing `wavesurfer.js`, but with a strong recommendation to implement server-side peak generation (e.g., using `audiowaveform` or FFmpeg) and feeding the pre-calculated data to the client to ensure performance and stability for long podcasts.
+
+**Learning:** For this codebase, given the support for 4-hour audio files, we cannot rely on standard client-side Web Audio API decoding for waveforms. Pre-calculation is mandatory for a responsive UX.
+
+**Resources:**
+- https://wavesurfer.xyz/
+- https://wavesurfer.xyz/examples/?peaks.js

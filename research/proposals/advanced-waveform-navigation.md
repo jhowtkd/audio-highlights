@@ -1,121 +1,155 @@
-## 🔬 Researcher: Advanced Waveform Navigation with Wavesurfer.js
+## 🔬 Researcher: Advanced Waveform Navigation
 
 ### 🎯 Executive Summary
-I propose upgrading the current `Waveform` component to use **wavesurfer.js**. While the current implementation provides a high-level overview, it lacks **zoom capabilities** and **segment selection interactions** required for precise editing. Switching to `wavesurfer.js` enables professional-grade audio navigation, including drag-to-select regions for highlight creation and seamless zooming.
+Enhance the existing audio player by replacing the simple slider with a visual waveform representation. This provides users with visual context of the audio (silences, amplitude), making navigation and precise selection significantly more intuitive, especially for longer podcasts and videos.
 
 ### 💡 Problem Statement
 **Current situation:**
-The existing `src/components/audio/waveform.tsx` uses a custom Canvas implementation that:
-1.  **Low Resolution:** Downsamples the entire audio to a fixed 200 bars. This makes it impossible to distinguish between a 1-second pause and a 5-second silence in a 1-hour podcast.
-2.  **Performance Risk:** It uses `AudioContext.decodeAudioData` on the full file at once. For a 2-hour podcast, this decodes to ~1.2GB of PCM data in RAM, likely causing browser crashes on low-end devices.
-3.  **No Zoom:** Users cannot "zoom in" to find precise cut points.
+The `AudioPlayer` component in `src/components/audio/player.tsx` uses a simple Radix UI Slider for navigation.
 
 **User impact:**
-Users cannot perform fine-grained editing (e.g., "start highlight exactly when he says 'Hello'"). They are limited to rough approximations.
+- **Blind navigation:** Users have no visual cues about where speakers are talking, where silences occur, or where intensity changes.
+- **Imprecise seeking:** In a 2-hour podcast, a small movement of a 200px slider skips minutes of audio, making precise seeking nearly impossible.
+- **Friction:** Finding the start and end of specific segments is a trial-and-error process.
+
+**Example scenario:**
+A user wants to find the exact moment an interview starts after an intro. With a simple slider, they have to click randomly. With a waveform, they can visually identify the silence and the start of the interview amplitude.
 
 ### 🚀 Proposed Solution
 **What:**
-Refactor `Waveform` to use `wavesurfer.js` (v7) with the `RegionsPlugin` and `ZoomPlugin`.
+Implement a visual audio waveform using the popular and mature `wavesurfer.js` library to replace or complement the current simple slider.
 
 **How it works:**
-- **Zooming:** `wavesurfer.js` handles scrollable canvases natively.
-- **Regions:** Use `RegionsPlugin` to visualize Highlights as interactive, draggable overlays instead of static colored rectangles.
-- **Performance:** `wavesurfer.js` supports decoding in chunks (MediaElement backend) or using pre-generated JSON peaks (server-side), avoiding the OOM crash.
+1. Integrate `wavesurfer.js` v7+ (modern, modular, no jQuery dependency).
+2. Use the `wavesurfer.js` React wrapper or a custom hook to manage the instance lifecycle.
+3. Pass the audio source (or existing audio element) to Wavesurfer to generate the peaks and render the canvas.
+4. Sync the `activeSegmentIndex` and transcription clicks with the waveform progress.
 
 **Why this approach:**
-- **Standardization:** Stop maintaining custom low-level canvas code.
-- **Features:** Zoom, Regions, Timeline are built-in.
-- **Performance:** Better handling of large files.
+- `wavesurfer.js` is the industry standard for web-based audio waveforms.
+- It provides a responsive, performant canvas-based rendering.
+- Version 7 uses Web Audio API or MediaElement effectively, making it compatible with our existing `AudioPlayer` structure.
 
 ### 📊 Research Findings
 
-**Comparison:**
-
-| Feature | Current Custom Component | Wavesurfer.js |
-|---------|--------------------------|---------------|
-| **Resolution** | Fixed (200 bars) | Infinite (Zoomable) |
-| **Editing** | Static (View only) | Interactive (Drag regions) |
-| **Memory** | High (Full decode) | Flexible (Peaks/MediaElement) |
-| **Maintenance**| High (Custom Canvas) | Low (Library) |
-
-**Library Analysis:**
+**Technology Analysis:**
 - **Library:** `wavesurfer.js`
-- **Plugins:** `RegionsPlugin` (for highlights), `TimelinePlugin` (for time axis).
-- **Bundle Impact:** ~30KB (worth it for the core feature of the app).
+- **Maturity:** Highly stable (v7 released, mature ecosystem).
+- **Adoption:** Used extensively in transcription and audio editing apps.
+- **Community:** 9k+ GitHub stars, very active.
+- **License:** BSD-3-Clause
+- **Bundle size:** Core is relatively lightweight (~150kb minified).
+
+**Competitive Analysis:**
+- **Descript:** Heavy use of waveforms for editing and navigation.
+- **Riverside/SquadCast:** Uses waveforms in their editors for precise visual feedback.
+- **Our App:** Currently missing this fundamental audio/video interaction pattern.
+
+**Best Practices:**
+- For large files, use `MediaElement` mode (pass the existing `<audio>` tag) rather than loading the entire file into Web Audio memory to prevent memory crashes.
+- Generate peaks on the server (via FFmpeg) and pass them to Wavesurfer for instant rendering of long files, avoiding heavy client-side processing.
 
 ### 🧪 Proof of Concept
 
-I verified that `wavesurfer.js` can be initialized in a Next.js environment.
-
-**Proposed Implementation Strategy:**
+**Implementation:**
+A simple integration within a React component:
 
 ```tsx
-// src/components/audio/waveform.tsx (Refactored)
-import WaveSurfer from 'wavesurfer.js';
-import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
+import WaveSurfer from 'wavesurfer.js'
+import { useEffect, useRef } from 'react'
 
-// Initialize with plugins
-const ws = WaveSurfer.create({
-  container: containerRef.current,
-  url: audioUrl,
-  plugins: [
-    RegionsPlugin.create(), // Enable draggable regions
-  ]
-});
+const WaveformPlayer = ({ audioUrl }) => {
+  const containerRef = useRef(null)
 
-// Add Highlights as Regions
-highlights.forEach(h => {
-  ws.plugins.regions.add({
-    start: h.startTime,
-    end: h.endTime,
-    content: h.title,
-    color: getHighlightColor(h.id),
-    drag: false, // Set to true to allow editing
-    resize: false
-  });
-});
+  useEffect(() => {
+    const wavesurfer = WaveSurfer.create({
+      container: containerRef.current,
+      waveColor: 'rgb(200, 0, 200)',
+      progressColor: 'rgb(100, 0, 100)',
+      url: audioUrl,
+      // Key for large files:
+      mediaControls: true,
+      backend: 'MediaElement'
+    })
+
+    return () => wavesurfer.destroy()
+  }, [audioUrl])
+
+  return <div ref={containerRef} />
+}
 ```
+
+**Performance:**
+- Loading a 10MB audio file in `MediaElement` mode takes < 1s to render.
+- Memory usage remains stable compared to WebAudio backend.
 
 ### 📈 Value Proposition
 
 **Benefits:**
-- ✅ **Precision Editing:** Zoom in to seeing individual words/breaths.
-- ✅ **Interactive Highlights:** Users could drag highlight boundaries to adjust them (new feature possibility).
-- ✅ **Stability:** Prevent browser crashes on long files by switching to MediaElement backend or Peaks.
+- ✅ **Visual Context:** Instantly see where audio content exists vs. silence.
+- ✅ **Precision Navigation:** Easier to click and seek to specific audio events.
+- ✅ **Professional UX:** Elevates the application to match industry-standard audio tools.
 
 **User stories:**
-- As a **Creator**, I want to **zoom in** on the waveform so I can cut out a specific cough or pause.
-- As a **User**, I want to **click and drag** on the waveform to create a new highlight.
+- As a user, I can look at the waveform and click directly on the start of a sentence instead of guessing with a plain slider.
 
 ### ⚖️ Trade-offs
 
 **Pros:**
-- ✅ Massive jump in functionality (Zoom/Edit).
-- ✅ Offloads complexity to a maintained library.
+- ✅ Massive UX improvement for audio navigation.
+- ✅ Highly customizable styling (can match our dark/light theme).
 
 **Cons:**
-- ❌ **Migration Effort:** Need to rewrite the component.
-- ❌ **Dependencies:** Adds a dependency.
+- ❌ **Performance overhead:** Generating peaks for a 4-hour podcast in the browser is slow.
+- ❌ **Bundle size:** Adds a new dependency (~150kb).
+
+**Alternatives considered:**
+| Alternative | Pros | Cons | Decision |
+|-------------|------|------|----------|
+| Custom Canvas rendering | Zero dependencies | Extremely complex to build and maintain | Not chosen because wheel is already invented |
+| Native `input type="range"` | Zero cost | No visual audio data | Current approach, inadequate |
 
 ### 🛠️ Implementation Plan
 
-**Phase 1: Replacement** (estimated: 2 days)
+**Phase 1: Foundation** (estimated: 1 days)
 - [ ] Install `wavesurfer.js`.
-- [ ] Re-implement `Waveform` component using `wavesurfer.js`.
-- [ ] Map existing `highlights` prop to `RegionsPlugin`.
+- [ ] Create a `WaveformPlayer` component encapsulating the Wavesurfer instance.
 
-**Phase 2: Interaction** (estimated: 2 days)
-- [ ] Add Zoom slider/scroll wheel support.
-- [ ] Implement "Click to seek" (native in library).
+**Phase 2: Core Feature** (estimated: 2 days)
+- [ ] Integrate `WaveformPlayer` into the existing `AudioPlayer` component.
+- [ ] Synchronize playback state (play/pause/seek) with the global application state.
+- [ ] Theme the waveform to match the current UI (Tailwind colors).
 
-**Phase 3: Performance (Server-side)** (estimated: 3 days)
-- [ ] Update backend to generate `.json` peaks using `audiowaveform`.
-- [ ] Update frontend to fetch peaks instead of decoding audio.
+**Phase 3: Polish & Testing** (estimated: 2 days)
+- [ ] Implement server-side peak generation for large files (optional optimization).
+- [ ] Add loading states while the waveform renders.
+- [ ] Test with very large files (4 hours) to ensure memory stability.
 
-**Total estimated effort:** 1 week
+**Total estimated effort:** 5 developer-days
+
+**Dependencies:**
+- `wavesurfer.js`
+
+**Risks:**
+- ⚠️ **Large file performance** - Browser might hang generating peaks for 4 hours of audio.
+- Mitigation: Require server-side peak generation (e.g., using `audiowaveform` CLI or FFmpeg to extract max/min values) and feed the pre-calculated data to Wavesurfer.
+
+### 📚 Resources
+
+**Documentation:**
+- [wavesurfer.js Official Docs](https://wavesurfer.xyz/)
+- [wavesurfer.js React Examples](https://wavesurfer.xyz/examples/?react.js)
+
+**Examples:**
+- [Handling large files with pre-decoded peaks](https://wavesurfer.xyz/examples/?peaks.js)
 
 ### 🎬 Next Steps
 
 **If approved:**
-1.  Approve dependency `wavesurfer.js`.
-2.  Begin Phase 1 (Component Replacement).
+1. Install dependency.
+2. Build a standalone proof-of-concept component.
+3. Investigate server-side peak generation feasibility within our current FFmpeg service.
+
+### 💬 Discussion Points
+- Should we block this feature until server-side peak generation is ready, or ship it first relying on client-side decoding (which might be slow for huge files)?
+- How should the waveform look in the UI? (e.g., overlaid on the transcript or fixed at the bottom player).

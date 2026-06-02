@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html>
+<head><title>Waveform POC</title></head>
+<body>
+  <h1>Waveform POC using wavesurfer.js</h1>
+  <div id="waveform" style="border: 1px solid #ccc;"></div>
+
+  <script type="module">
+    import WaveSurfer from 'https://cdn.jsdelivr.net/npm/wavesurfer.js@7/dist/wavesurfer.esm.js'
+
+    const wavesurfer = WaveSurfer.create({
+      container: '#waveform',
+      waveColor: 'rgb(200, 0, 200)',
+      progressColor: 'rgb(100, 0, 100)',
+      url: 'https://actions.google.com/sounds/v1/alarms/bugle_tune.ogg',
+      mediaControls: true,
+      backend: 'MediaElement'
+    })
+
+    wavesurfer.on('ready', () => {
+      console.log('Waveform is ready!');
+    });
+  </script>
+</body>
+</html>
