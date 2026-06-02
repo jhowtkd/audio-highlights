@@ -32,3 +32,22 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2026-06-02 - Replaced Browser Confirm with Dialog for Retranscribe
+
+**Copy Type:** Confirmation Dialog
+
+**Original:** "Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente." (Browser `confirm()`)
+
+**Changed To:**
+Title: "Retranscrever arquivo?"
+Description: "Isso apagará os resultados atuais e consumirá novos créditos. Deseja continuar?"
+Buttons: "Cancelar" / "Retranscrever" (Radix Dialog)
+
+**Learning:** Destructive actions with financial consequences (like spending credits) were using blocking, inaccessible browser `confirm()` prompts with generic "OK/Cancel" buttons. The message was slightly wordy and bundled everything into a single string.
+By moving to a custom Dialog, we can split the context (title) from the consequence (description) and provide action-specific button labels ("Retranscrever") while maintaining the critical warning about credit consumption.
+
+**Rule:** For destructive actions:
+1. Avoid native `confirm()` - use Radix UI Dialog.
+2. Provide a clear title for the action.
+3. Keep financial/data-loss warnings in the description.
+4. Use action-specific button labels (e.g., "Retranscrever" instead of "OK").
