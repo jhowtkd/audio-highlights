@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useRef, ChangeEvent } from 'react';
+import { useRef, ChangeEvent, useState } from 'react';
 import {
     FileAudio,
     Trash2,
@@ -17,6 +17,15 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+    DialogTrigger,
+} from '@/components/ui/dialog';
 import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import type { Task } from '@/types/task-types';
@@ -69,6 +78,7 @@ export function TaskCard({ task }: TaskCardProps) {
     const router = useRouter();
     const { removeTask, retryTask } = useTaskQueue();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isRetranscribeDialogOpen, setIsRetranscribeDialogOpen] = useState(false);
 
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
@@ -79,10 +89,7 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
+        setIsRetranscribeDialogOpen(false);
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -191,15 +198,35 @@ export function TaskCard({ task }: TaskCardProps) {
                         )}
 
                         {(task.status === 'completed' || task.status === 'error' || task.status === 'pending') && (
-                            <Button
-                                size="sm"
-                                variant="ghost"
-                                onClick={handleRetranscribe}
-                                className="text-slate-500 hover:text-blue-600"
-                                title="Retranscrever arquivo"
-                            >
-                                <RefreshCw className="h-4 w-4" />
-                            </Button>
+                            <Dialog open={isRetranscribeDialogOpen} onOpenChange={setIsRetranscribeDialogOpen}>
+                                <DialogTrigger asChild>
+                                    <Button
+                                        size="sm"
+                                        variant="ghost"
+                                        className="text-slate-500 hover:text-blue-600"
+                                        title="Retranscrever arquivo"
+                                        aria-label="Retranscrever arquivo"
+                                    >
+                                        <RefreshCw className="h-4 w-4" aria-hidden="true" />
+                                    </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                    <DialogHeader>
+                                        <DialogTitle>Retranscrever arquivo?</DialogTitle>
+                                        <DialogDescription>
+                                            Isso apagará os resultados atuais e consumirá novos créditos. Deseja continuar?
+                                        </DialogDescription>
+                                    </DialogHeader>
+                                    <DialogFooter>
+                                        <Button variant="outline" onClick={() => setIsRetranscribeDialogOpen(false)}>
+                                            Cancelar
+                                        </Button>
+                                        <Button onClick={handleRetranscribe}>
+                                            Retranscrever
+                                        </Button>
+                                    </DialogFooter>
+                                </DialogContent>
+                            </Dialog>
                         )}
 
                         {(task.status === 'completed' || task.status === 'error' || task.status === 'pending') && (
