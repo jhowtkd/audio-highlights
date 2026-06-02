@@ -33,3 +33,9 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-05-18 - Audio Waveform Generation Freezing UI
+
+**Bottleneck:** `generateWaveform` in `Waveform` component iterated through every sample of `channelData` buffer synchronously, causing long lockups on large audio files.
+**Learning:** For rendering small ~200 bar visual waveforms, calculating the average amplitude of *every* sample in a large chunk is unnecessary precision.
+**Action:** Subsample the `channelData` block during aggregation based on block size `stepSize = Math.max(1, Math.floor(blockSize / 100))` to drop complexity from millions of iterations to a few thousand without visual degradation.
+**Code:** `for (let j = 0; j < blockSize; j += stepSize)`
