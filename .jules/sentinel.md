@@ -31,3 +31,16 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-06-03 - Test Endpoints Exposed in Production
+
+**Vulnerability:** A test endpoint (`/api/test-transcribe`) that triggers external API calls was left active in production. This could lead to resource exhaustion and unauthorized API usage.
+**Root Cause:** The endpoint was created for development testing but lacked a check to restrict its availability based on the environment.
+**Learning:** Test endpoints that trigger external API calls must be disabled in production environments.
+**Prevention:** Always add a check `if (process.env.NODE_ENV === 'production')` to return a 404 response for development-only routes.
+**Code:**
+```typescript
+if (process.env.NODE_ENV === 'production') {
+    return new NextResponse(null, { status: 404 });
+}
+```
