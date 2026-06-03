@@ -102,3 +102,22 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-06-03 - Client-Side Semantic Search Technology Research
+
+**Research Topic:** Migrating from server-side OpenAI vector search to client-side semantic search.
+
+**Finding:** Evaluated replacing `/api/search` with `@xenova/transformers` (`Xenova/all-MiniLM-L6-v2`) in the browser.
+- **Model Load:** ~1.1s for the 23MB model.
+- **Inference time:** <30ms per query.
+- **Accuracy:** Very good semantic matching capability.
+
+**Decision:** Propose migrating to Transformers.js.
+- Eliminates API costs and latency.
+- Enhances privacy.
+- Requires downloading a 23MB model.
+
+**Learning:** Running quantized AI models in the browser via WebAssembly is viable for semantic search over transcripts and significantly improves UX ("Search as you type") while eliminating backend token costs. We should handle the heavy lifting in a Web Worker to keep the UI responsive.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js
