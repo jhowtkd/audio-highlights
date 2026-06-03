@@ -42,3 +42,11 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2026-02-12 - Cut Suggestion Card Action Buttons Accessibility
+
+**UX Problem:** The action buttons (Manter, Confirmar Corte, Marcar para Revisão) in the `CutSuggestionCard` component were icon-only buttons without `aria-label` attributes. Screen readers would read the raw SVG code or announce them as unlabelled buttons, making the cut suggestion feature inaccessible to users relying on assistive technologies.
+**Learning:** Icon-only buttons must always have an `aria-label` that clearly describes their action, and the decorative SVG icons within them should be explicitly hidden from the accessibility tree using `aria-hidden="true"`.
+**Solution:** Added descriptive `aria-label`s to the `Button` components and `aria-hidden="true"` to the inner `Check`, `Scissors`, and `Search` Lucide icons.
+**Pattern:** For this design system, ALL icon-only action buttons MUST have:
+1. An explicit `aria-label` detailing the action.
+2. `aria-hidden="true"` on the internal decorative icon element to prevent redundant or confusing screen reader output.
