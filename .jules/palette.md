@@ -42,3 +42,10 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2024-06-04 - Native Confirm Dialog Replacement
+
+**UX Problem:** The "Excluir projeto" destructive action used a direct deletion triggered by a button click, which could easily lead to accidental data loss. There was no native browser `confirm()` either, making it completely unsafe.
+**Learning:** Native `confirm()` blocks the main thread and is inaccessible and jarring. Direct destructive actions without confirmation violate the "Make actions reversible or confirmable" principle.
+**Solution:** Implemented a custom confirmation dialog using Radix UI primitives (`@/components/ui/dialog`) within the `TaskCard` component. This provides a styled, accessible, non-blocking modal to confirm the deletion.
+**Pattern:** For destructive actions in this application (like deleting items), do not trigger the action immediately. Instead, always wrap the action with a custom confirmation dialog using the existing Radix UI `Dialog` component stack. Ensure the dialog contains clear, descriptive text explaining the consequences of the action.
