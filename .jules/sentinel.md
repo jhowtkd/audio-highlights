@@ -31,3 +31,23 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-06-04 - Test Endpoint Exposed in Production
+
+**Vulnerability:** A test endpoint (`/api/test-transcribe`) that triggers an external API call to Groq was exposed in all environments, including production. This could lead to resource exhaustion and unauthorized API usage by attackers making repeated calls to the test endpoint.
+**Root Cause:** The endpoint was created for testing the Groq API integration but was not disabled or protected in production environments.
+**Learning:** Test endpoints, debug features, and health checks that consume resources or perform external calls must be strictly controlled or disabled in production to prevent abuse.
+**Prevention:** For any test or debug endpoints, always check `process.env.NODE_ENV === 'production'` and return a 404 (or require strict authorization) to ensure they are not accessible in production.
+
+**Code:**
+```typescript
+export async function GET() {
+    if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json(
+            { error: 'Endpoint disabled in production' },
+            { status: 404 }
+        );
+    }
+    // ... test logic ...
+}
+```
