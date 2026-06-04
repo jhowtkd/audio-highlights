@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-06-04 - Unifying Upload Terminology
+
+**Copy Type:** Dropzone UI Text
+**Original:** "Enviando áudio...", "Iniciar Transcrição", "Arraste seu áudio aqui"
+**Changed To:** "Enviando arquivo...", "Iniciar Processamento", "Arraste seu arquivo aqui"
+**Learning:** The application accepts video files (MP4, WebM) alongside audio files, making the term "áudio" too restrictive and confusing for users uploading videos. Furthermore, the application pipeline involves transcription, highlight generation, and video clipping, meaning "Transcrição" understates the action's scope. Unifying terms under "arquivo" (file) and "Processamento" (processing) accurately reflects the app's full capabilities and aligns with dashboard status terminology ("Processando").
+**Rule:** Unify terminology by using "Projeto" (Project) or "Processamento" (Processing) for workflows and results, and "Arquivo" (File) for uploads. Avoid using restrictive media terms like "Áudio" unless referring specifically to an audio-only context, and avoid overly specific actions like "Transcrição" for the entire pipeline.
