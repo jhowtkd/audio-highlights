@@ -102,11 +102,17 @@ export function Waveform({
                     const blockStart = blockSize * i;
                     let sum = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    // Optimization: Subsample the data to prevent blocking the main thread
+                    // For an hour-long audio, blockSize can be ~793,800. We don't need every sample.
+                    const stepSize = Math.max(1, Math.floor(blockSize / 100));
+                    let count = 0;
+
+                    for (let j = 0; j < blockSize; j += stepSize) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / count);
                 }
 
                 // Normalize the data
