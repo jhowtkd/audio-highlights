@@ -33,3 +33,19 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-06-04 - Waveform Generation Blocking UI Thread
+
+**Bottleneck:** Full decode fallback loop for `channelData` iterates over every sample to compute waveform bars, synchronously blocking the main UI thread during generation for large files (e.g., ~158M samples for an hour-long audio).
+**Learning:** Iterating through every sample on the main thread is unnecessary and slow since the target visual resolution is only 200 bars. Subsampling reduces computations significantly without noticeable fidelity loss.
+**Action:** When processing large audio buffers for visual rendering, always downsample or subsample the data (e.g., `stepSize`) instead of iterating synchronously through every sample.
+**Code:**
+```typescript
+const stepSize = Math.max(1, Math.floor(blockSize / 100));
+let count = 0;
+
+for (let j = 0; j < blockSize; j += stepSize) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
