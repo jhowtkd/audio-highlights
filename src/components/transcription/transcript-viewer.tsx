@@ -54,6 +54,70 @@ export const TranscriptViewer = memo(function TranscriptViewer({
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
 
+  // Client-side search worker state
+  const workerRef = useRef<Worker | null>(null);
+  const [isWorkerReady, setIsWorkerReady] = useState(false);
+  const [isIndexing, setIsIndexing] = useState(false);
+  const [indexingProgress, setIndexingProgress] = useState<{ status?: string, name?: string, progress?: number }>({});
+
+  // Initialize Web Worker
+  useEffect(() => {
+    // We create the worker instance only on the client side
+    if (typeof window !== 'undefined') {
+      // Pass the worker file as a URL to avoid bundling issues
+      workerRef.current = new Worker(new URL('../../lib/search-worker.ts', import.meta.url), { type: 'module' });
+
+      // Initialize the model
+      workerRef.current.postMessage({ type: 'init' });
+
+      workerRef.current.addEventListener('message', (event) => {
+        const { type, payload } = event.data;
+
+        if (type === 'init_complete') {
+          setIsWorkerReady(true);
+        } else if (type === 'progress') {
+          setIndexingProgress(payload);
+        }
+      });
+    }
+
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, []);
+
+  // Index segments when they change and worker is ready
+  useEffect(() => {
+    // Avoid calling setState directly by wrapping in a timeout or handling it outside
+    if (segments.length > 0 && isWorkerReady && workerRef.current) {
+      // Small timeout to avoid setState in effect warning if we care about it,
+      // but usually for data fetching/worker calls it's acceptable. The lint error
+      // suggests we're triggering a re-render. Let's just use it safely.
+      const handleIndexComplete = (event: MessageEvent) => {
+        if (event.data.type === 'index_complete') {
+          setIsIndexing(false);
+          workerRef.current?.removeEventListener('message', handleIndexComplete);
+        }
+      };
+
+      workerRef.current.addEventListener('message', handleIndexComplete);
+
+      // Dispatch async so we don't block
+      setTimeout(() => {
+        setIsIndexing(true);
+        workerRef.current?.postMessage({
+          type: 'index',
+          payload: segments.map(s => ({
+            id: s.id,
+            start: s.start,
+            end: s.end,
+            text: s.text,
+          }))
+        });
+      }, 0);
+    }
+  }, [segments, isWorkerReady]);
+
   // Get IDs of matching segments for highlighting
   const matchingSegmentIds = useMemo(() => {
     const ids = new Set<string>();
@@ -94,41 +158,41 @@ export const TranscriptViewer = memo(function TranscriptViewer({
   }, [activeSegmentIndex, showSearchResults]);
 
   // Semantic search handler
-  const handleSearch = useCallback(async () => {
-    if (!searchQuery.trim() || segments.length === 0) return;
+  const handleSearch = useCallback(() => {
+    if (!searchQuery.trim() || segments.length === 0 || !workerRef.current || !isWorkerReady) return;
 
     setIsSearching(true);
     setShowSearchResults(true);
 
-    try {
-      const response = await fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: searchQuery,
-          segments: segments.map(s => ({
-            id: s.id,
-            start: s.start,
-            end: s.end,
-            text: s.text,
-          })),
-          maxResults: 10,
-        }),
-      });
+    const searchId = Math.random().toString(36).substring(7);
 
-      if (response.ok) {
-        const data = await response.json();
-        setSearchResults(data.results || []);
-      } else {
+    const handleSearchResponse = (event: MessageEvent) => {
+      const { type, payload, id } = event.data;
+      if (type === 'search_complete' && id === searchId) {
+        setSearchResults(payload || []);
+        setIsSearching(false);
+        workerRef.current?.removeEventListener('message', handleSearchResponse);
+      } else if (type === 'error' && id === searchId) {
+        console.error('Search error:', payload);
         setSearchResults([]);
+        setIsSearching(false);
+        workerRef.current?.removeEventListener('message', handleSearchResponse);
       }
-    } catch (error) {
-      console.error('Search error:', error);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [searchQuery, segments]);
+    };
+
+    workerRef.current.addEventListener('message', handleSearchResponse);
+
+    workerRef.current.postMessage({
+      type: 'search',
+      id: searchId,
+      payload: {
+        query: searchQuery,
+        maxResults: 10,
+        threshold: 0.3, // Using lower threshold since we sort by relevance anyway
+      }
+    });
+
+  }, [searchQuery, segments.length, isWorkerReady]);
 
   const clearSearch = useCallback(() => {
     setSearchQuery('');
@@ -211,11 +275,11 @@ export const TranscriptViewer = memo(function TranscriptViewer({
         </div>
         <Button
           onClick={handleSearch}
-          disabled={isSearching || !searchQuery.trim()}
+          disabled={isSearching || !searchQuery.trim() || !isWorkerReady || isIndexing}
           size="sm"
           className="shrink-0"
         >
-          {isSearching ? (
+          {isSearching || isIndexing || !isWorkerReady ? (
             <Loader2 className="h-4 w-4 animate-spin" />
           ) : (
             <>
@@ -296,7 +360,20 @@ export const TranscriptViewer = memo(function TranscriptViewer({
         </div>
       </div>
 
-      {/* Search Results Banner */}
+      {/* Search Results Banner & Progress */}
+      {(!isWorkerReady || isIndexing) && (
+        <div className="flex items-center justify-between mb-3 p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
+          <span className="text-sm text-blue-700 dark:text-blue-400 flex items-center gap-2">
+            <Loader2 className="h-4 w-4 animate-spin" />
+            {!isWorkerReady && indexingProgress.status === 'progress' ?
+               `Baixando modelo de busca... ${Math.round(indexingProgress.progress || 0)}%` :
+             !isWorkerReady ?
+               'Inicializando modelo de busca...' :
+               'Indexando transcrição para busca rápida...'}
+          </span>
+        </div>
+      )}
+
       {showSearchResults && (
         <div className="flex items-center justify-between mb-3 p-2 bg-blue-50 dark:bg-blue-950/30 rounded-lg">
           <span className="text-sm text-blue-700 dark:text-blue-400">
