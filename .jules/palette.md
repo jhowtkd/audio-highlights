@@ -42,3 +42,13 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2024-06-05 - Native Window Confirm Replaced with Custom Radix UI Dialog
+
+**UX Problem:** Native `window.confirm` dialogs are jarring, block the main thread, don't match the application's design system, and have poor accessibility compared to custom implementations.
+
+**Learning:** Destructive actions (like retranscribing which costs credits, or deleting a project) used native browser confirm dialogs. A unified, accessible dialog component ensures a smooth and cohesive experience.
+
+**Solution:** Created a new `ConfirmDialog` component using existing Radix UI Dialog primitives (`@/components/ui/dialog`) and replaced all `window.confirm` calls across the app (`src/components/tasks/task-card.tsx`, `src/app/tasks/[id]/page.tsx`, `src/app/page.tsx`) with the custom React component.
+
+**Pattern:** For this design system, ALL confirmation dialogs must use the custom `ConfirmDialog` component. It provides better accessibility, doesn't block the main thread, and maintains visual consistency.

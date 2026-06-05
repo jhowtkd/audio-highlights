@@ -32,6 +32,7 @@ import { useFFmpeg } from '@/hooks/use-ffmpeg';
 import { downloadFile } from '@/lib/export';
 import { findActiveSegmentIndex } from '@/lib/transcription-utils';
 import type { GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface HighlightStats {
     totalDuration: number;
@@ -52,13 +53,15 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
+    const [isConfirmOpen, setIsConfirmOpen] = useState(false);
 
     const handleRetranscribe = () => {
         if (!task) return;
+        setIsConfirmOpen(true);
+    };
 
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
+    const confirmRetranscribe = () => {
+        if (!task) return;
 
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
@@ -506,6 +509,15 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                     </p>
                 </div>
             </footer>
+
+            <ConfirmDialog
+                open={isConfirmOpen}
+                onOpenChange={setIsConfirmOpen}
+                title="Retranscrever arquivo?"
+                description="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                confirmText="Retranscrever"
+                onConfirm={confirmRetranscribe}
+            />
         </div>
     );
 }
