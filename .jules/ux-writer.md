@@ -32,3 +32,19 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2026-06-05 - Tone and Inclusivity Improvements in Upload and Error Handling
+
+**Copy Type:** Error Messages and Component Microcopy (Dropzone)
+**Original:**
+- "O arquivo excede o limite de 500MB. Comprima o áudio ou divida em partes menores."
+- "Não foi possível gerar os highlights."
+- "Arraste seu áudio aqui"
+**Changed To:**
+- "O arquivo deve ter no máximo 500MB. Tente enviar um arquivo menor."
+- "Não foi possível gerar os cortes."
+- "Arraste seu arquivo aqui"
+**Learning:** The previous microcopy used too much English jargon ("highlights"), technical phrasing, and overly-specific phrasing ("áudio", when videos are supported). It also featured slightly blame-y/instructional language on errors instead of helpful constraints.
+**Rule:** For this app, ALWAYS:
+1. Translate jargon into plain, descriptive Portuguese (e.g., "highlights" -> "cortes").
+2. Ensure file-type references are inclusive (use "arquivo" rather than "áudio" if the component accepts multiple formats).
+3. Soften error messages: state constraints as rules ("deve ter no máximo...") instead of violations ("excede o limite...").
