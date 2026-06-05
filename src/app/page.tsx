@@ -24,6 +24,7 @@ import { CostEstimator } from '@/components/upload/cost-estimator';
 import { downloadFile } from '@/lib/export';
 import { findActiveSegmentIndex } from '@/lib/transcription-utils';
 import type { Transcription, GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 type AppStep = 'upload' | 'transcribing' | 'transcribed' | 'generating' | 'completed' | 'error';
 
@@ -58,6 +59,7 @@ export default function Home() {
 
   // Video state
   const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   const activeSegmentIndex = useMemo(() => {
     if (!transcription?.segments) return -1;
@@ -245,14 +247,13 @@ export default function Home() {
   const handleReset = useCallback(() => {
     // Confirm before resetting if there's content
     if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
+      setIsResetConfirmOpen(true);
+      return;
     }
+    performReset();
+  }, [transcription, highlights.length]);
 
+  const performReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +269,7 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -594,6 +595,16 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      <ConfirmDialog
+        open={isResetConfirmOpen}
+        onOpenChange={setIsResetConfirmOpen}
+        title="Descartar projeto?"
+        description="Deseja realmente descartar este projeto? Todo o progresso será perdido e esta ação não pode ser desfeita."
+        confirmText="Descartar"
+        variant="destructive"
+        onConfirm={performReset}
+      />
     </div>
   );
 }
