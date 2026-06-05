@@ -102,3 +102,13 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-06-05 - Automated Speaker Diarization Proposal
+
+**Research Topic:** Enhancing transcriptions with automatic speaker detection.
+**Finding:** Found that incorporating a Diarization API (like Deepgram) or using models like Pyannote can add significant contextual value to the transcription workflow, helping users identify speakers in interviews/podcasts without manual intervention. The current Groq Whisper implementation lacks native speaker diarization.
+**Decision:** Proposed integrating Deepgram (or exploring Pyannote/AssemblyAI) as a supplementary API call to label and align speakers with the existing transcription segments.
+**Learning:** When acting as the Researcher agent, strictly avoid modifying application source code (e.g., files in `src/`) or permanently altering configuration files like `package.json`. The objective is solely to investigate and output a Markdown research proposal in the `research/proposals/` directory.
+**Resources:**
+- https://developers.deepgram.com/docs/diarization
+- https://github.com/pyannote/pyannote-audio
