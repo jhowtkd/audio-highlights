@@ -31,3 +31,20 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2026-06-06 - Missing Security Headers in Next.js
+
+**Vulnerability:** The application was missing standard HTTP security headers (HSTS, X-Frame-Options, X-Content-Type-Options, etc.), exposing it to clickjacking, MIME-type sniffing, and other common attacks.
+**Root Cause:** The `headers()` function in `next.config.ts` was commented out, likely during development, and never enabled for production.
+**Learning:** Always ensure `next.config.ts` applies standard security headers globally (`/(.*)`) before deploying to production.
+**Prevention:** Include a pre-deployment checklist to verify the presence and correct configuration of security headers.
+**Code:**
+```typescript
+const securityHeaders = [
+  { key: 'X-DNS-Prefetch-Control', value: 'on' },
+  { key: 'Strict-Transport-Security', value: 'max-age=63072000; includeSubDomains; preload' },
+  { key: 'X-XSS-Protection', value: '1; mode=block' },
+  { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+  { key: 'X-Content-Type-Options', value: 'nosniff' },
+  { key: 'Referrer-Policy', value: 'origin-when-cross-origin' }
+];
+```
