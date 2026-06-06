@@ -102,3 +102,21 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2024-06-06 - Client-Side Semantic Search Technology Research
+
+**Research Topic:** Adding client-side semantic search for transcript segments
+
+**Finding:** Evaluated running semantic search locally in the browser using `@xenova/transformers`.
+- Successfully ran `Xenova/all-MiniLM-L6-v2` locally via Node.js script.
+- Model is capable of clustering related concepts (e.g., "Avanços em IA e automação" matched highest with "A tecnologia de machine learning ajuda na automação").
+
+**Decision:** Propose integrating `@xenova/transformers` for in-browser semantic search.
+- Small model footprint (~22MB quantized).
+- Zero external API costs.
+- Requires Web Worker implementation to prevent blocking the UI thread during embedding generation and inference.
+
+**Learning:** When using Transformers.js in a Next.js environment with Web Workers, special care must be taken to instantiate the worker using relative paths (`new Worker(new URL('...', import.meta.url))`) rather than module aliases (`@/`), as aliases cause build failures in workers.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js/index
