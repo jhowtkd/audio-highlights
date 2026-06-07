@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-06-08 - Vertical Video Export (Social Media)
+
+**Research Topic:** Adding vertical (9:16) video export with burned-in subtitles for social media clips.
+
+**Finding:** Evaluated FFmpeg capabilities for this task. It's highly feasible using the `crop`, `scale`, and `subtitles` filters. However, client-side `@ffmpeg/core` WASM builds often lack the `libass` library required for the `subtitles` filter to work correctly, making this heavily reliant on server-side processing. Burning subtitles also requires transcoding (`-c:v libx264`), which is significantly slower than the current `stream copy` operations.
+
+**Decision:** Proposed implementing this as a server-side only feature (in `ffmpeg-service`), starting with a simple center-crop.
+
+**Learning:** When planning advanced video manipulation (like text overlays), client-side WASM FFmpeg is generally insufficient due to missing compiled libraries and slow performance. These features must be offloaded to the server.
+
+**Resources:**
+- FFmpeg filters documentation: https://ffmpeg.org/ffmpeg-filters.html
