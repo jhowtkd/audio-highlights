@@ -42,3 +42,13 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2026-06-07 - Refactoring Native window.confirm to Custom ConfirmDialog
+
+**UX Problem:** The application used native `window.confirm` dialogs for destructive actions like resetting a project or retranscribing a file. Native dialogs block the main thread, ignore the application's design system, and create a jarring user experience.
+**Learning:** Native confirm dialogs are quick to implement but provide poor UX. They also cannot be styled to match dark/light modes or the app's visual identity. Replacing them requires managing `isOpen` state and extracting the confirmation logic into separate callback functions.
+**Solution:** Created a reusable, accessible `<ConfirmDialog>` component built on top of the existing Radix UI-based `Dialog` primitives. Updated `src/app/page.tsx`, `src/app/tasks/[id]/page.tsx`, and `src/components/tasks/task-card.tsx` to use this new component, managing state with `useState` and `useCallback`.
+**Pattern:** For destructive or major state-changing actions, never use `window.confirm`. Instead:
+1. Import `<ConfirmDialog>` from `@/components/ui/confirm-dialog`.
+2. Manage its visibility with `const [isConfirmOpen, setIsConfirmOpen] = useState(false)`.
+3. Wrap the actual destructive logic in a function (e.g., `executeReset` or `confirmDelete`) and pass it to the `onConfirm` prop.
+4. Render the `<ConfirmDialog>` outside the main flow (e.g., alongside the Toaster).
