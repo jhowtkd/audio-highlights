@@ -31,3 +31,20 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2024-06-07 - Test Endpoint Exposed in Production
+
+**Vulnerability:** A test endpoint (`/api/test-transcribe`) that interacts with external APIs (Groq Whisper model) and performs file creation tasks was accessible in all environments, including production.
+
+**Root Cause:** The endpoint was created to verify API keys and integration during development, but lacked an environment check to disable it when deployed.
+
+**Learning:** Any endpoint created specifically for testing or debugging must explicitly check `process.env.NODE_ENV` and return an error (like a 404 Not Found) if running in production. This prevents unauthorized users from discovering and abusing these endpoints, which could lead to resource exhaustion, API rate limiting, or quota consumption.
+
+**Prevention:** Always verify test routes (`*.test.ts` or routes starting with `test-`) are either excluded from production builds or include a strict environment guard at the very beginning of the request handler.
+
+**Code:**
+```typescript
+// Secure pattern to use at the top of test handlers:
+if (process.env.NODE_ENV === 'production') {
+    return new NextResponse(null, { status: 404 });
+}
+```
