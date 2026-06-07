@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2025-02-18 - Unify Terminology (Audio vs Arquivo, Transcrição vs Processamento)
+
+**Copy Type:** Upload dialog and dropzone text
+**Original:** "Adicionar novo áudio", "Enviando áudio...", "Áudio curto", "Arraste seu áudio aqui", "Iniciar Transcrição"
+**Changed To:** "Criar novo projeto", "Enviando arquivo...", "Arquivo curto", "Arraste seu arquivo aqui", "Iniciar processamento"
+**Learning:** Users can upload both audio and video files. Using "áudio" and "transcrição" is too specific and can be confusing. Using "arquivo" and "processamento" (or "projeto") is more accurate and unified across the app.
+**Rule:** ALWAYS use "Arquivo" instead of "Áudio", and "Processamento" or "Projeto" instead of "Transcrição" to ensure consistency and accuracy.
