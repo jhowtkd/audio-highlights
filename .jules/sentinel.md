@@ -31,3 +31,15 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2024-06-08 - Test Endpoint Enabled in Production
+
+**Vulnerability:** A test endpoint that performs external API calls or consumes resources was left enabled in production, which could lead to unauthorized usage and resource exhaustion.
+**Root Cause:** The test endpoint was created for development/testing purposes but was not disabled for the production environment.
+**Learning:** In this codebase, test endpoints (e.g., `/api/test-transcribe`) must be disabled in production environments by checking `if (process.env.NODE_ENV === 'production')` and returning a 404 response to prevent unauthorized usage and resource exhaustion.
+**Prevention:** Always add a production check to test endpoints or remove them entirely before deploying to production.
+**Code:**
+```typescript
+if (process.env.NODE_ENV === 'production') {
+    return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+}
+```
