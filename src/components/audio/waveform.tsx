@@ -98,15 +98,20 @@ export function Waveform({
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
 
+                // Performance: Subsamples audio data using stepSize, reducing computation from O(n) to O(1) per block and preventing main thread blocking.
+                const stepSize = Math.max(1, Math.floor(blockSize / 100));
+
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    for (let j = 0; j < blockSize; j += stepSize) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / count);
                 }
 
                 // Normalize the data

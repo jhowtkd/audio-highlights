@@ -33,3 +33,16 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-06-08 - Fast Waveform Generation via Subsampling
+
+**Bottleneck:** Rendering the waveform generated from `audioBuffer.getChannelData(0)` was extremely slow for large audio files because it synchronously iterated over every single audio sample to calculate block averages.
+**Learning:** For a 200-bar visual representation, calculating the exact average using all samples is a massive overkill and blocks the main thread.
+**Action:** Subsampling the audio buffer by skipping samples using a `stepSize` (e.g., examining only 100 samples per block) reduces computation from O(N) to roughly O(1) per block while maintaining the same visual output.
+**Code:**
+```typescript
+const stepSize = Math.max(1, Math.floor(blockSize / 100));
+for (let j = 0; j < blockSize; j += stepSize) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
