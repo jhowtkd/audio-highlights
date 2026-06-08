@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-05 - Content-Agnostic Upload Terminology
+
+**Copy Type:** Modal titles and Upload Dropzone labels
+**Original:** "Adicionar novo áudio" / "Enviando áudio..." / "Áudio curto" / "Arraste seu áudio aqui" / "Iniciar Transcrição"
+**Changed To:** "Novo projeto" / "Enviando arquivo..." / "Arquivo curto" / "Arraste seu arquivo aqui" / "Iniciar Processamento"
+**Learning:** The application accepts both audio and video files. Specifying "áudio" in the upload interface can confuse users trying to upload a video. Using "Arquivo" and "Projeto" keeps the language inclusive of all supported formats and consistent with the "Criar novo projeto" button that triggers the upload dialog. "Iniciar Processamento" accurately describes the multi-step operation (transcription + highlights generation).
+**Rule:** Unify terminology using consistent Portuguese phrasing: use 'Arquivo' instead of 'Áudio', and 'Projeto' or 'Processamento' instead of 'Task' or 'Transcrição'.
