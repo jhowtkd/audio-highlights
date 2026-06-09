@@ -42,3 +42,16 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2024-06-09 - Accessible Confirm Dialogs for Destructive Actions
+
+**UX Problem:** The application used native `window.confirm()` dialogs for destructive actions like deleting projects or discarding progress. Native confirms block the main thread, cannot be styled to match the design system, and often lack robust accessibility support.
+
+**Learning:** Native dialogs create a jarring experience and are inaccessible. Destructive actions need clear warnings that match the application's aesthetic and support keyboard/screen reader navigation properly using components like Radix UI's Dialog.
+
+**Solution:** Created a reusable `ConfirmDialog` component built on top of the existing shadcn/ui (Radix) `Dialog` primitives and replaced all instances of `window.confirm()` and `confirm()` with it, ensuring destructive actions ("danger" variant) are clear.
+
+**Pattern:** For this design system, ALL destructive or state-resetting actions must:
+1. Use the custom `<ConfirmDialog>` instead of native `window.confirm()`.
+2. Specify a clear `title` and `message` explaining the consequences.
+3. Use `confirmVariant="danger"` for actions that delete data or reset progress.

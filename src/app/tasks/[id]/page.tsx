@@ -30,6 +30,7 @@ import { useTaskQueue } from '@/hooks/use-task-queue';
 import { useTaskQueueContext } from '@/contexts/task-context';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
 import { downloadFile } from '@/lib/export';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { findActiveSegmentIndex } from '@/lib/transcription-utils';
 import type { GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
 
@@ -52,20 +53,20 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
+    const [isRetranscribeDialogOpen, setIsRetranscribeDialogOpen] = useState(false);
+
+    const executeRetranscribe = useCallback(() => {
+        if (!task) return;
+        setIsRetranscribeDialogOpen(false);
+        const success = retryTask(task.id);
+        if (!success) {
+            fileInputRef.current?.click();
+        }
+    }, [task, retryTask]);
 
     const handleRetranscribe = () => {
         if (!task) return;
-
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
-        // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
-        const success = retryTask(task.id);
-        if (!success) {
-            // Arquivo não está na memória, abrir seletor
-            fileInputRef.current?.click();
-        }
+        setIsRetranscribeDialogOpen(true);
     };
 
     const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -327,6 +328,16 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
             <Toaster position="top-right" richColors />
+
+            <ConfirmDialog
+                isOpen={isRetranscribeDialogOpen}
+                title="Retranscrever arquivo?"
+                message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                confirmLabel="Retranscrever"
+                confirmVariant="danger"
+                onConfirm={executeRetranscribe}
+                onCancel={() => setIsRetranscribeDialogOpen(false)}
+            />
 
             {/* Header */}
             <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">

@@ -22,6 +22,7 @@ import { useFFmpeg } from '@/hooks/use-ffmpeg';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import { CostEstimator } from '@/components/upload/cost-estimator';
 import { downloadFile } from '@/lib/export';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { findActiveSegmentIndex } from '@/lib/transcription-utils';
 import type { Transcription, GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
 
@@ -48,6 +49,7 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('transcription');
   const [statusMessage] = useState<string>('');
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
   // Timer states
   const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -242,17 +244,7 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
+  const executeReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,11 +260,31 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+    setIsResetDialogOpen(false);
+  }, [audioUrl]);
+
+  const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      setIsResetDialogOpen(true);
+      return;
+    }
+    executeReset();
+  }, [transcription, highlights, executeReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Toaster position="top-right" richColors />
+
+      <ConfirmDialog
+        isOpen={isResetDialogOpen}
+        title="Descartar projeto?"
+        message="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+        confirmLabel="Descartar"
+        confirmVariant="danger"
+        onConfirm={executeReset}
+        onCancel={() => setIsResetDialogOpen(false)}
+      />
 
       {/* Header */}
       <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
