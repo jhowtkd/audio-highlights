@@ -33,3 +33,10 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-06-09 - Destructive Benchmarking
+
+**Bottleneck:** Writing new temporary benchmarking scripts
+**Learning:** During exploration, I created a `benchmark.js` file to test the optimization locally, which inadvertently overwrote a pre-existing `benchmark.js` file in the repository root. This is considered a destructive action.
+**Action:** When creating new standalone files for proofs of concept or benchmarks, always place them in isolated directories (e.g., `research/pocs/` or `tmp/`), or use uniquely generated filenames to avoid overwriting existing repository files. Ensure any created temporary files are explicitly reverted or removed.
+**Code:** N/A
