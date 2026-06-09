@@ -341,7 +341,7 @@ export default function Home() {
                       <Mic className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                     </div>
                     <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                      Transcrição Automática
+                      Processamento Automático
                     </h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
                       Powered by OpenAI Whisper com timestamps precisos
@@ -353,7 +353,7 @@ export default function Home() {
                       <Sparkles className="h-6 w-6 text-purple-600 dark:text-purple-400" />
                     </div>
                     <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                      Highlights Inteligentes
+                      Cortes Inteligentes
                     </h3>
                     <p className="text-sm text-slate-600 dark:text-slate-400">
                       IA identifica os melhores momentos para clips virais
@@ -384,7 +384,7 @@ export default function Home() {
               <Mic className="h-16 w-16 mx-auto text-blue-500" />
             </div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-3">
-              Transcrevendo seu áudio...
+              Processando seu projeto...
             </h2>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
               {audioFile?.name}
