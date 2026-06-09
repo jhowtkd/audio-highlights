@@ -174,7 +174,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
             <div className="text-sm text-amber-800 dark:text-amber-200">
               <p className="font-medium">Áudio curto ({formatDuration(audioFile.duration)})</p>
               <p className="mt-0.5 text-amber-700 dark:text-amber-300">
-                A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto.
+                A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto para melhores cortes.
               </p>
             </div>
           </div>
@@ -183,7 +183,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
         <div className="mt-6 flex justify-end">
           <Button onClick={handleSubmit} size="lg" className="w-full sm:w-auto">
             <Upload className="mr-2 h-4 w-4" />
-            Iniciar Transcrição
+            Criar projeto
           </Button>
         </div>
       </div>
