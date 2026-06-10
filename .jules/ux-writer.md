@@ -32,3 +32,15 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2025-01-24 - Terminology Unification in Upload Flow
+
+**Copy Type:** Dialog Title and Button Labels
+
+**Original:** "Adicionar novo áudio", "Iniciar Transcrição", "Arraste seu áudio aqui"
+
+**Changed To:** "Novo projeto", "Iniciar processamento", "Arraste seu arquivo aqui"
+
+**Learning:** The application supports both audio and video, and its core entity is a "Project", not just a transcription task. Using "áudio" and "transcrição" in the upload flow was inaccurate and failed to communicate the full value of the app (which also generates highlights). Unifying the terminology to "Arquivo", "Projeto", and "Processamento" sets clearer expectations.
+
+**Rule:** For this app, ALWAYS use consistent terminology: "Arquivo" instead of "Áudio", "Projeto" or "Processamento" instead of "Transcrição", and "Cortes" instead of "Highlights".
