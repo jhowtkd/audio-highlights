@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import { getGroqClient, GROQ_WHISPER_MODEL } from '@/lib/groq-client';
 
 export async function GET() {
+    // SECURITY: Disable test endpoint in production to prevent resource exhaustion and unauthorized use
+    if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+    }
+
     try {
         // Check client initialization
         const client = getGroqClient();
