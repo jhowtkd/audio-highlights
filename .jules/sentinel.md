@@ -31,3 +31,33 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-06-11 - Exposed Test Endpoints in Production
+
+**Vulnerability:** The `/api/test-transcribe` endpoint was exposed and accessible in the production environment.
+**Root Cause:** The endpoint was created for testing purposes but lacked any environment checks or authentication to restrict its use.
+**Learning:** Test endpoints that perform external API calls or consume resources must be disabled or properly secured in production environments to prevent unauthorized usage and resource exhaustion (e.g., hitting rate limits or incurring costs for external services).
+**Prevention:** Always add a check at the beginning of test or debug endpoints: `if (process.env.NODE_ENV === 'production') { return NextResponse.json({ error: 'Not Found' }, { status: 404 }); }`. This ensures they fail securely without leaking information.
+**Code:**
+```typescript
+// Vulnerable:
+export async function GET() {
+    try {
+        const client = getGroqClient();
+        // ... test logic
+    }
+}
+
+// Secure:
+export async function GET() {
+    // SECURITY: Disable test endpoint in production
+    if (process.env.NODE_ENV === 'production') {
+        return NextResponse.json({ error: 'Not Found' }, { status: 404 });
+    }
+
+    try {
+        const client = getGroqClient();
+        // ... test logic
+    }
+}
+```
