@@ -33,3 +33,19 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-06-11 - Waveform Generation Blocking Main Thread
+
+**Bottleneck:** Rendering the waveform iterates over the entire `channelData` buffer synchronously. For large files, this means looping over millions of floats (e.g. 10 mins = 26M samples) inside `useEffect`, causing the main UI thread to block and drop frames.
+**Learning:** For rendering visualizations like a 200-bar waveform, reading every single audio sample is highly redundant since the data is downsampled heavily visually anyway.
+**Action:** Subsample the audio data when aggregating blocks by adding a dynamic `stepSize` to the inner loop. We cap the number of processed samples per block to ~100.
+**Code:**
+```typescript
+const stepSize = Math.max(1, Math.floor(blockSize / 100)); // Sample at most 100 points per block
+let count = 0;
+for (let j = 0; j < blockSize; j += stepSize) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+filteredData.push(sum / count);
+```
