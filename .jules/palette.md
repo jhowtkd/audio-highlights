@@ -42,3 +42,15 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2026-06-11 - Native Window Confirm Replaced with Accessible Dialogs
+
+**UX Problem:** The application used native `window.confirm()` dialogs for destructive actions (like resetting a project or retranscribing an audio file). These block the main thread, look inconsistent across different browsers/OS, and provide a poor user experience. Additionally, deleting a project from the task list lacked a confirmation altogether.
+
+**Learning:** Relying on native `confirm()` in a modern React application disrupts the visual flow and can lead to accidental data loss if not implemented correctly (as seen with the missing delete confirmation).
+
+**Solution:** Created a reusable, accessible `<ConfirmDialog>` component built on top of `@radix-ui/react-dialog`. Replaced all instances of `window.confirm()` with this new component and added a missing confirmation dialog for the project deletion action.
+
+**Pattern:** For this design system, ALL destructive actions must:
+1. Trigger an accessible `<ConfirmDialog>` instead of a native `confirm()`.
+2. Clearly state what will happen and that the action cannot be undone.
+3. Provide a clear "Cancel" option alongside a visually distinct (e.g., destructive) "Confirm" option.

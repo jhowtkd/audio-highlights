@@ -15,8 +15,10 @@ import {
     ArrowRight,
     RefreshCw
 } from 'lucide-react';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import type { Task } from '@/types/task-types';
@@ -69,6 +71,8 @@ export function TaskCard({ task }: TaskCardProps) {
     const router = useRouter();
     const { removeTask, retryTask } = useTaskQueue();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isConfirmRetranscribeOpen, setIsConfirmRetranscribeOpen] = useState(false);
+    const [isConfirmDeleteOpen, setIsConfirmDeleteOpen] = useState(false);
 
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
@@ -78,17 +82,25 @@ export function TaskCard({ task }: TaskCardProps) {
         router.push(`/tasks/${task.id}`);
     };
 
-    const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
+    const executeRetranscribe = () => {
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
             // Arquivo não está na memória, abrir seletor
             fileInputRef.current?.click();
         }
+    };
+
+    const handleRetranscribe = () => {
+        setIsConfirmRetranscribeOpen(true);
+    };
+
+    const executeDelete = () => {
+        removeTask(task.id);
+    };
+
+    const handleDelete = () => {
+        setIsConfirmDeleteOpen(true);
     };
 
     const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -111,6 +123,25 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     return (
+        <>
+        <ConfirmDialog
+            open={isConfirmRetranscribeOpen}
+            onOpenChange={setIsConfirmRetranscribeOpen}
+            title="Retranscrever arquivo?"
+            message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+            confirmLabel="Retranscrever"
+            confirmVariant="destructive"
+            onConfirm={executeRetranscribe}
+        />
+        <ConfirmDialog
+            open={isConfirmDeleteOpen}
+            onOpenChange={setIsConfirmDeleteOpen}
+            title="Excluir projeto?"
+            message="Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita e todo o progresso será perdido."
+            confirmLabel="Excluir"
+            confirmVariant="destructive"
+            onConfirm={executeDelete}
+        />
         <div className={cn(
             "bg-white dark:bg-slate-900 rounded-xl border p-4 transition-all",
             task.status === 'error'
@@ -206,7 +237,7 @@ export function TaskCard({ task }: TaskCardProps) {
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => removeTask(task.id)}
+                                onClick={handleDelete}
                                 className="text-slate-500 hover:text-red-600"
                                 title="Excluir projeto"
                             >
@@ -226,5 +257,6 @@ export function TaskCard({ task }: TaskCardProps) {
                 </div>
             </div>
         </div>
+        </>
     );
 }
