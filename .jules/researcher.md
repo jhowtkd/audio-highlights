@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-06-12 - Server-Side Burned-In Subtitles
+
+**Research Topic:** Adding hardcoded subtitles to video highlights.
+
+**Finding:**
+Client-side FFmpeg WASM often lacks `libass` support, and applying the `subtitles` filter requires CPU-intensive video re-encoding, unlike stream copying.
+
+**Decision:**
+Propose adding a new endpoint to the `ffmpeg-service` microservice to burn subtitles. This offloads re-encoding from the client and guarantees `libass` availability via our Dockerized environment.
+
+**Learning:**
+Applying the `subtitles` video filter in FFmpeg requires full video re-encoding and cannot be used in conjunction with stream copying (`-c copy`), resulting in significant processing overhead.
+
+**Resources:**
+- research/proposals/2026-06-12-burned-in-subtitles.md
