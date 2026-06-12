@@ -33,3 +33,9 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-06-12 - Waveform Generation Blocking Main Thread
+
+**Bottleneck:** Synchronous iteration over millions of audio samples during waveform generation blocking the main UI thread.
+**Learning:** For audio visualization, exact mathematical precision on every sample isn't strictly necessary.
+**Action:** Subsample the audio buffer array by skipping samples with a calculated step size to maintain a constant number of operations.
+**Code:** `const stepSize = Math.max(1, Math.floor(blockSize / 100)); for (let j = 0; j < blockSize; j += stepSize) { ... }`
