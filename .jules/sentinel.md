@@ -31,3 +31,15 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2025-01-24 - Unauthorized Test Endpoint Exposure
+
+**Vulnerability:** A test endpoint (`/api/test-transcribe`) that performs external API calls was left exposed in production, allowing unauthorized users to consume external API credits and server resources (Resource Exhaustion/DoS).
+**Root Cause:** The endpoint lacked environment checks to restrict its availability to development environments.
+**Learning:** Test endpoints that consume third-party API quotas or perform heavy operations must be explicitly disabled in production to prevent abuse.
+**Prevention:** Always check `process.env.NODE_ENV === 'production'` in test routes and return a 404 response to hide their existence in production.
+**Code:**
+```typescript
+if (process.env.NODE_ENV === 'production') {
+    return new NextResponse('Not Found', { status: 404 });
+}
+```
