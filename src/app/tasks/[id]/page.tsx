@@ -19,6 +19,7 @@ import { DecupagemView } from '@/components/decupagem/decupagem-view';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster, toast } from 'sonner';
 import { AudioPlayer } from '@/components/audio/player';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { TranscriptViewer } from '@/components/transcription/transcript-viewer';
 import { ConfigPanel } from '@/components/highlights/config-panel';
 import { HighlightList } from '@/components/highlights/highlight-list';
@@ -52,13 +53,10 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
+    const [isRetranscribeConfirmOpen, setIsRetranscribeConfirmOpen] = useState(false);
 
-    const handleRetranscribe = () => {
+    const confirmRetranscribe = () => {
         if (!task) return;
-
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
 
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
@@ -66,6 +64,10 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
             // Arquivo não está na memória, abrir seletor
             fileInputRef.current?.click();
         }
+    };
+
+    const handleRetranscribe = () => {
+        setIsRetranscribeConfirmOpen(true);
     };
 
     const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -506,6 +508,17 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                     </p>
                 </div>
             </footer>
+
+            <ConfirmDialog
+                open={isRetranscribeConfirmOpen}
+                onOpenChange={setIsRetranscribeConfirmOpen}
+                title="Retranscrever arquivo?"
+                description="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                confirmText="Retranscrever"
+                cancelText="Cancelar"
+                variant="destructive"
+                onConfirm={confirmRetranscribe}
+            />
         </div>
     );
 }
