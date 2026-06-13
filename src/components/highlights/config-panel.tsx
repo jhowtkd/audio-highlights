@@ -99,7 +99,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
           <div>
             <CardTitle className="flex items-center gap-2 text-lg">
               <Sparkles className="h-5 w-5 text-blue-500" />
-              Configurar Highlights
+              Configurar Cortes
             </CardTitle>
             <CardDescription>
               Customize a duração e estilo dos seus cortes
@@ -206,7 +206,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 aria-valuetext={formatDuration(config.targetDuration)}
               />
               <p className="text-xs text-slate-500">
-                Duração ideal de cada highlight
+                Duração ideal de cada corte
               </p>
             </div>
 
@@ -231,7 +231,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 aria-valuetext={formatDuration(config.maxDuration)}
               />
               <p className="text-xs text-slate-500">
-                Nenhum highlight será maior que isso
+                Nenhum corte será maior que isso
               </p>
             </div>
 
@@ -240,7 +240,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
               <div className="flex items-center justify-between">
                 <Label htmlFor="quantity" className="flex items-center gap-2">
                   <Hash className="h-4 w-4 text-slate-500" />
-                  Quantidade de Highlights
+                  Quantidade de Cortes
                 </Label>
               </div>
               <Input
@@ -253,7 +253,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
                 className="w-full"
               />
               <p className="text-xs text-slate-500">
-                Entre 1 e 20 highlights independentes
+                Entre 1 e 20 cortes independentes
               </p>
             </div>
           </div>
@@ -273,7 +273,7 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
               </p>
             ) : (
               <p>
-                <span className="font-medium">{config.quantity}</span> highlights de{' '}
+                <span className="font-medium">{config.quantity}</span> cortes de{' '}
                 <span className="font-medium">{formatDuration(config.minDuration)}</span> a{' '}
                 <span className="font-medium">{formatDuration(config.maxDuration)}</span>
               </p>
@@ -307,12 +307,12 @@ export const ConfigPanel = memo(function ConfigPanel({ onGenerate, isGenerating,
           {isGenerating ? (
             <>
               <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent mr-2" />
-              {config.isMix ? 'Criando Storytelling...' : 'Gerando Highlights...'}
+              {config.isMix ? 'Criando Storytelling...' : 'Gerando Cortes...'}
             </>
           ) : (
             <>
               {config.isMix ? <Workflow className="h-4 w-4 mr-2" /> : <Sparkles className="h-4 w-4 mr-2" />}
-              {config.isMix ? 'Gerar Mix Storytelling' : 'Gerar Highlights'}
+              {config.isMix ? 'Gerar Mix Storytelling' : 'Gerar Cortes'}
             </>
           )}
         </Button>
