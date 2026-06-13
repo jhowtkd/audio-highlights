@@ -98,15 +98,20 @@ export function Waveform({
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
 
+                // Performance: Reduces computation from O(n) across millions of samples to O(1) per bucket. By downsampling the audio data and processing only a subset of samples per block, we prevent blocking the main UI thread, reducing processing time significantly.
+                const stepSize = Math.max(1, Math.floor(blockSize / 100));
+
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    for (let j = 0; j < blockSize; j += stepSize) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / count);
                 }
 
                 // Normalize the data
