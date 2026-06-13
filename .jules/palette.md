@@ -42,3 +42,10 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-03-01 - Replaced native confirm() with accessible ConfirmDialog
+
+**UX Problem:** Native `window.confirm()` dialogs block the main UI thread, cannot be styled to match the design system, and offer poor keyboard navigation support.
+**Learning:** The system needs consistent, accessible, and theme-aware confirmation dialogs for destructive actions.
+**Solution:** Replaced native `confirm()` calls with the custom, accessible `<ConfirmDialog>` component from shadcn/ui (Radix UI).
+**Pattern:** For destructive actions (deleting, resetting state, overriding data), always use `<ConfirmDialog>` instead of `window.confirm()`. It ensures focus trapping, proper ARIA labeling, and non-blocking execution.

@@ -13,6 +13,7 @@ import { HighlightList } from '@/components/highlights/highlight-list';
 import { EpisodeSummary } from '@/components/highlights/episode-summary';
 import { Waveform } from '@/components/audio/waveform';
 import { DecupagemView } from '@/components/decupagem/decupagem-view';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
@@ -43,6 +44,9 @@ export default function Home() {
   const [highlightStats, setHighlightStats] = useState<HighlightStats | null>(null);
   const [episodeAnalysis, setEpisodeAnalysis] = useState<EpisodeAnalysis | null>(null);
   const [currentTime, setCurrentTime] = useState<number>(0);
+
+  // State for confirm dialog
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
   const [seekTo, setSeekTo] = useState<number | undefined>(undefined);
   const [transcriptionProgress, setTranscriptionProgress] = useState<number>(0);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -242,17 +246,7 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
+  const performReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +262,16 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
+
+  const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      setIsResetConfirmOpen(true);
+    } else {
+      performReset();
+    }
+  }, [transcription, highlights.length, performReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -594,6 +597,17 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      <ConfirmDialog
+        open={isResetConfirmOpen}
+        onOpenChange={setIsResetConfirmOpen}
+        title="Descartar projeto?"
+        description="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+        confirmText="Descartar"
+        cancelText="Cancelar"
+        variant="destructive"
+        onConfirm={performReset}
+      />
     </div>
   );
 }
