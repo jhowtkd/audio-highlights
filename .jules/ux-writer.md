@@ -32,3 +32,14 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2025-05-18 - Dialog Title Consistency
+
+**Copy Type:** Dialog Title
+
+**Original:** "Adicionar novo áudio"
+
+**Changed To:** "Novo projeto"
+
+**Learning:** Unifying terminology across the app reduces confusion. Users click "Novo projeto" to open the dialog, so the dialog title should match the action that opened it. Also, the app supports video, so "áudio" is technically limiting.
+
+**Rule:** Always ensure dialog titles match the button or action that opened them. Use consistent terminology ("Projeto" instead of "Áudio").
