@@ -32,3 +32,10 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2024-06-13 - Unify Terminology for Highlights
+
+**Copy Type:** Empty State and Button Label
+**Original:** "Nenhum highlight gerado ainda", "Gerar Highlights"
+**Changed To:** "Nenhum corte gerado ainda", "Gerar Cortes"
+**Learning:** Users benefit from consistent, localized terminology. "Highlights" is English jargon, whereas "Cortes" is widely understood in the context of Brazilian Portuguese video processing.
+**Rule:** For UI text in this application, unify terminology using consistent Portuguese phrasing: use 'Cortes' instead of the English jargon 'Highlights'.
