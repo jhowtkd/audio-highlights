@@ -33,3 +33,16 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-01-24 - Audio Waveform Generation Blocking UI Thread
+
+**Bottleneck:** Rendering large waveforms synchronously in `Waveform.tsx` blocking the main thread.
+**Learning:** Decoding audio data and iterating through every single audio sample synchronously block the UI thread completely, especially on large files.
+**Action:** Implemented downsampling using `stepSize`. Rather than running `O(N)` where N is every audio sample in a block, incrementing by `stepSize` caps the iterations to a maximum predefined number (~100 in this case) per bucket.
+**Code:**
+```typescript
+const stepSize = Math.max(1, Math.floor(blockSize / 100));
+for (let j = 0; j < blockSize; j += stepSize) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
