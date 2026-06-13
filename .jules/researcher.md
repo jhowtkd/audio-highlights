@@ -102,3 +102,17 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2024-06-13 - Server-Side Subtitle Burn-In via FFmpeg
+
+**Research Topic:** Adding burned-in subtitles to video highlights.
+
+**Finding:** The `@ffmpeg/ffmpeg` WASM build used on the client-side lacks the `libass` library necessary for the `subtitles` filter. We verified that the backend `ffmpeg-static` build (`ffmpeg-service`) has `libass` and `libfreetype` enabled.
+
+**Decision:** The proposal should suggest using the existing server-side `ffmpeg-service` to burn in subtitles using the `subtitles` filter with an `.srt` file.
+
+**Learning:** Client-side WASM FFmpeg has limitations with complex filters like `subtitles` due to missing libraries (like `libass`). Server-side processing is required for this feature.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- https://github.com/ffmpegwasm/ffmpeg.wasm/issues/
