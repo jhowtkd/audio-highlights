@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useRef, ChangeEvent } from 'react';
+import { useRef, ChangeEvent, useState } from 'react';
 import {
     FileAudio,
     Trash2,
@@ -21,6 +21,7 @@ import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import type { Task } from '@/types/task-types';
 import { cn } from '@/lib/utils';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface TaskCardProps {
     task: Task;
@@ -69,6 +70,7 @@ export function TaskCard({ task }: TaskCardProps) {
     const router = useRouter();
     const { removeTask, retryTask } = useTaskQueue();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showRetranscribeDialog, setShowRetranscribeDialog] = useState(false);
 
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
@@ -79,10 +81,10 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
+        setShowRetranscribeDialog(true);
+    };
 
+    const confirmRetranscribe = () => {
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -225,6 +227,14 @@ export function TaskCard({ task }: TaskCardProps) {
                     </div>
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={showRetranscribeDialog}
+                onOpenChange={setShowRetranscribeDialog}
+                title="Retranscrever arquivo?"
+                description="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                onConfirm={confirmRetranscribe}
+            />
         </div>
     );
 }
