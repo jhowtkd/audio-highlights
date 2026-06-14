@@ -42,3 +42,16 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2024-06-14 - Destructive Action Keyboard Trap & UX
+
+**UX Problem:** The application used native `window.confirm()` dialogs for destructive actions like retranscribing a file or starting a new project. Native dialogs block the main thread, cannot be styled to match the application's design system, and can be jarring for users.
+
+**Learning:** When users encounter a native browser alert/confirm dialog, it breaks the immersion of the application and feels disjointed. By replacing them with a custom accessible React component (`<ConfirmDialog>`), we maintain visual consistency and ensure that focus management and screen reader support are handled appropriately via Radix UI primitives.
+
+**Solution:** Created a reusable `<ConfirmDialog>` component based on the design system's `<Dialog>` primitive. Replaced all instances of `window.confirm()` and `confirm()` in `src/app/page.tsx`, `src/app/tasks/[id]/page.tsx`, and `src/components/tasks/task-card.tsx` with the new accessible component, managing its visibility via React state.
+
+**Pattern:** For this design system, ALL destructive actions must:
+1. Avoid native `window.confirm()` or `alert()`.
+2. Use the accessible `<ConfirmDialog>` component from `@/components/ui/confirm-dialog`.
+3. Clearly state the consequences of the action.
+4. Allow easy cancellation via Escape key or clicking outside.
