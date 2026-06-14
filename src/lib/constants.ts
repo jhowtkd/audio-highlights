@@ -103,12 +103,12 @@ export const DEFAULT_VOLUME = 1;
 
 // Error messages
 export const ERROR_MESSAGES = {
-  FILE_TOO_LARGE: 'O arquivo excede o limite de 500MB. Comprima o áudio ou divida em partes menores.',
-  AUDIO_TOO_LONG: 'O áudio excede o limite de 4 horas. Divida o arquivo em partes menores.',
-  NO_FILE_PROVIDED: 'Nenhum arquivo enviado',
-  TRANSCRIPTION_FAILED: 'Não foi possível transcrever o áudio. Verifique o arquivo e tente novamente.',
-  HIGHLIGHTS_FAILED: 'Não foi possível gerar os highlights. Tente novamente em alguns instantes.',
+  FILE_TOO_LARGE: 'Arquivo deve ter menos de 500MB. Comprima o arquivo ou divida em partes menores.',
+  AUDIO_TOO_LONG: 'Arquivo deve ter menos de 4 horas. Divida o arquivo em partes menores.',
+  NO_FILE_PROVIDED: 'Nenhum arquivo enviado. Selecione um arquivo para começar.',
+  TRANSCRIPTION_FAILED: 'Não foi possível processar o arquivo. Verifique se o formato é válido e tente novamente.',
+  HIGHLIGHTS_FAILED: 'Não foi possível gerar os cortes. Tente novamente em alguns instantes.',
   INVALID_AUDIO_FILE: 'Formato inválido. Aceitamos: MP3, WAV, M4A, OGG, FLAC, WebM.',
-  API_KEY_MISSING: 'Chave da API OpenAI não configurada',
+  API_KEY_MISSING: 'Chave da API OpenAI não configurada. Configure a chave para continuar.',
   NETWORK_ERROR: 'Sem conexão com a internet. Verifique sua rede e tente novamente.',
 } as const;
