@@ -31,3 +31,21 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2026-01-24 - DoS vulnerability via massive segment texts
+
+**Vulnerability:** The application was vulnerable to a potential Denial of Service (DoS) attack where malicious users could submit arbitrarily large string payloads in the `text` or `word` properties of `transcriptionSegmentSchema`.
+
+**Root Cause:** The Zod validation schema for transcription segments only validated that the type was a `z.string()`, but lacked a maximum character length `.max()` constraint.
+
+**Learning:** When using Zod to validate client payloads, always define explicit `.max()` limits for strings and arrays to prevent memory exhaustion and prompt injection vulnerabilities, especially when dealing with potentially huge datasets like transcription arrays.
+
+**Prevention:** Ensure all `z.string()` definitions handling user or external API input in validations contain `.max()` with centralized constants.
+
+**Code:**
+```typescript
+// Vulnerable
+text: z.string()
+
+// Secure
+text: z.string().max(MAX_SEGMENT_TEXT_LENGTH)
+```

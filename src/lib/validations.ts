@@ -13,6 +13,7 @@ import {
   MAX_TOPICS_COUNT,
   MAX_NARRATIVE_CONTEXT_LENGTH,
   MAX_SEGMENTS_COUNT,
+  MAX_SEGMENT_TEXT_LENGTH,
 } from './constants';
 
 // Transcription API validation
@@ -57,10 +58,10 @@ export const transcriptionSegmentSchema = z.object({
   id: z.string(),
   start: z.number().nonnegative(),
   end: z.number().nonnegative(),
-  text: z.string(),
+  text: z.string().max(MAX_SEGMENT_TEXT_LENGTH),
   confidence: z.number().min(0).max(1).optional(),
   words: z.array(z.object({
-    word: z.string(),
+    word: z.string().max(MAX_SEGMENT_TEXT_LENGTH),
     start: z.number().nonnegative(),
     end: z.number().nonnegative(),
     confidence: z.number().min(0).max(1).optional(),
