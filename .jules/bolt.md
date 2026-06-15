@@ -33,3 +33,9 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2025-06-15 - Synchronous Audio Processing Blocked Main Thread
+
+**Bottleneck:** Rendering waveforms for large audio files caused severe UI jank because the waveform generation iterated over every single float in the audio buffer synchronously.
+**Learning:** Iterating over 10M+ floats synchronously on the main thread is a recipe for disaster.
+**Action:** When rendering visual representations of large data sets like audio, always subsample by skipping indices (e.g., `stepSize`) rather than processing every value.
+**Code:** `for (let j = 0; j < blockSize; j += stepSize)`
