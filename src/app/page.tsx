@@ -16,6 +16,7 @@ import { DecupagemView } from '@/components/decupagem/decupagem-view';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ERROR_MESSAGES } from '@/lib/constants';
 import { formatDuration } from '@/lib/format-utils';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
@@ -58,6 +59,9 @@ export default function Home() {
 
   // Video state
   const [videoFile, setVideoFile] = useState<File | null>(null);
+
+  // Confirm state
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   const activeSegmentIndex = useMemo(() => {
     if (!transcription?.segments) return -1;
@@ -242,17 +246,7 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
+  const performReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +262,17 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
+
+  const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      setIsResetConfirmOpen(true);
+      return;
+    }
+
+    performReset();
+  }, [transcription, highlights, performReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -594,6 +598,16 @@ export default function Home() {
           </p>
         </div>
       </footer>
+
+      <ConfirmDialog
+        open={isResetConfirmOpen}
+        onOpenChange={setIsResetConfirmOpen}
+        title="Descartar projeto?"
+        description="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+        confirmText="Descartar"
+        onConfirm={performReset}
+        destructive
+      />
     </div>
   );
 }
