@@ -32,3 +32,17 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2026-06-15 - Error Message for Video Cut Failure
+
+**Copy Type:** Error messages for video processing
+
+**Original:** "Erro ao cortar vídeo"
+
+**Changed To:** "Não foi possível cortar o vídeo. Verifique se o arquivo está corrompido e tente novamente."
+
+**Learning:** Vague error messages like "Erro ao cortar vídeo" leave the user confused about the root cause and next steps. Providing a clearer explanation and a suggested action improves user experience and reduces frustration.
+This change uses the exact same constant for error tracking.
+
+**Rule:** For this app, ALWAYS:
+1. Explain what makes the video cut process invalid (don't just say "Erro")
+2. Provide an actionable step to attempt again or fix it.

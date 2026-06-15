@@ -157,7 +157,7 @@ export default function Home() {
             downloadFile(blob, filename);
             return 'Vídeo baixado com sucesso!';
           },
-          error: 'Erro ao cortar vídeo'
+          error: ERROR_MESSAGES.VIDEO_CUT_FAILED
         }
       );
     }
