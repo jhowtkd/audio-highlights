@@ -1,14 +1,43 @@
 import { describe, it, expect } from 'vitest';
-import { highlightConfigSchema, decupageRequestSchema, searchRequestSchema } from './validations';
+import { highlightConfigSchema, decupageRequestSchema, searchRequestSchema, transcriptionSegmentSchema } from './validations';
 import {
   MAX_EPISODE_TITLE_LENGTH,
   MAX_TOPIC_LENGTH,
   MAX_TOPICS_COUNT,
   MAX_NARRATIVE_CONTEXT_LENGTH,
   MAX_SEGMENTS_COUNT,
+  MAX_SEGMENT_TEXT_LENGTH,
 } from './constants';
 
 describe('Validation Schemas', () => {
+  describe('transcriptionSegmentSchema', () => {
+    it('should validate text length', () => {
+      const longText = 'a'.repeat(MAX_SEGMENT_TEXT_LENGTH + 1);
+      const validText = 'a'.repeat(MAX_SEGMENT_TEXT_LENGTH);
+
+      const validSegment = {
+        id: '1',
+        start: 0,
+        end: 1,
+        text: validText,
+        words: [{ word: validText, start: 0, end: 1 }]
+      };
+
+      const invalidSegmentText = {
+        ...validSegment,
+        text: longText
+      };
+
+      const invalidSegmentWord = {
+        ...validSegment,
+        words: [{ word: longText, start: 0, end: 1 }]
+      };
+
+      expect(() => transcriptionSegmentSchema.parse(validSegment)).not.toThrow();
+      expect(() => transcriptionSegmentSchema.parse(invalidSegmentText)).toThrow();
+      expect(() => transcriptionSegmentSchema.parse(invalidSegmentWord)).toThrow();
+    });
+  });
   describe('highlightConfigSchema', () => {
     it('should validate episodeTitle length', () => {
       const longTitle = 'a'.repeat(MAX_EPISODE_TITLE_LENGTH + 1);
