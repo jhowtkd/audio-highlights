@@ -32,6 +32,7 @@ import { useFFmpeg } from '@/hooks/use-ffmpeg';
 import { downloadFile } from '@/lib/export';
 import { findActiveSegmentIndex } from '@/lib/transcription-utils';
 import type { GeneratedHighlight, HighlightConfig, EpisodeAnalysis } from '@/types';
+import { ERROR_MESSAGES } from '@/lib/constants';
 
 interface HighlightStats {
     totalDuration: number;
@@ -217,7 +218,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                         downloadFile(blob, filename);
                         return 'Vídeo baixado com sucesso!';
                     },
-                    error: 'Erro ao cortar vídeo'
+                    error: ERROR_MESSAGES.VIDEO_CUT_FAILED
                 }
             );
         }
