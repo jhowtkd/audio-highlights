@@ -102,3 +102,21 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2026-06-15 - Server-Side Subtitle Burn-in Research
+
+**Research Topic:** Adding burned-in subtitles (hardsubs) to exported clips
+
+**Finding:**
+Evaluated client-side and server-side approaches for burning subtitles into video.
+1. Client-side `@ffmpeg/ffmpeg` (WASM) lacks the `libass` library, making the `subtitles` filter unavailable.
+2. Server-side `ffmpeg-static` supports `subtitles` via `libass` but fails with the `drawtext` filter.
+3. Applying the `subtitles` filter requires a full video re-encode and cannot be used with stream copying (`-c copy`), resulting in significant processing overhead.
+
+**Decision:**
+Propose server-side implementation using `ffmpeg-service` with `ffmpeg-static` and the `subtitles` filter, despite the re-encoding overhead.
+
+**Learning:**
+Advanced video manipulation like burned-in subtitles cannot be reliably performed client-side due to WASM limitations. When using server-side FFmpeg for this, always generate an external subtitle file (`.srt` or `.ass`) to use with the `subtitles` filter, and expect a CPU-intensive full re-encode. The `drawtext` filter is broken in `ffmpeg-static`.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
