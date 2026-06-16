@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { Mic, Sparkles, FileText, AlertCircle, Timer, Film, X, ListTodo, Scissors } from 'lucide-react';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { Toaster, toast } from 'sonner';
 import { Dropzone } from '@/components/upload/dropzone';
 import { AudioPlayer } from '@/components/audio/player';
@@ -35,6 +36,7 @@ interface HighlightStats {
 
 export default function Home() {
   const [step, setStep] = useState<AppStep>('upload');
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
   const [audioFile, setAudioFile] = useState<File | null>(null);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [audioDuration, setAudioDuration] = useState<number>(0);
@@ -242,17 +244,7 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
+  const confirmReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +260,17 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
+
+  const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      setIsResetDialogOpen(true);
+      return;
+    }
+
+    confirmReset();
+  }, [transcription, highlights.length, confirmReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -304,6 +306,15 @@ export default function Home() {
                   Novo projeto
                 </button>
               )}
+          <ConfirmDialog
+            open={isResetDialogOpen}
+            onOpenChange={setIsResetDialogOpen}
+            title="Descartar projeto?"
+            message="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+            confirmLabel="Descartar"
+            confirmVariant="destructive"
+            onConfirm={confirmReset}
+          />
             </div>
           </div>
         </div>
