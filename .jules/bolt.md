@@ -33,3 +33,16 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-06-16 - Waveform Generation Blocking Main UI Thread
+
+**Bottleneck:** Rendering the waveform from large audio buffers blocks the main UI thread by iterating over millions of samples synchronously.
+**Learning:** Attempting to sum every single sample of a large audio buffer synchronously will block the main thread and cause UI freezes. Downsampling provides visually identical results in a fraction of the time.
+**Action:** When processing large audio buffers for visual rendering, always subsample the audio data by skipping samples using a calculated stepSize instead of iterating over every sample.
+**Code:**
+```typescript
+const stepSize = Math.max(1, Math.floor(blockSize / 100));
+for (let j = 0; j < blockSize; j += stepSize) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
