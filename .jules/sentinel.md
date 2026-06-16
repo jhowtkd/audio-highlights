@@ -31,3 +31,20 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-06-16 - Missing Timeouts on External API Calls
+
+**Vulnerability:** External API calls to OpenAI and Groq (for transcriptions, highlights, decupagem, and search) and internal long-running chunked processing fetches lacked explicit timeouts. This could lead to server resource exhaustion and potential DoS if the external services hung or were slow to respond.
+**Root Cause:** Reliance on default network timeouts (or lack thereof) when making external SDK calls and internal fetches.
+**Learning:** Always enforce explicit, reasonable timeouts on all network requests (both external SDK calls and internal fetches) to ensure the system fails fast and securely, preventing thread/connection exhaustion.
+**Prevention:** Add explicit `timeout` options to OpenAI/Groq SDK calls and use `AbortSignal.timeout()` on `fetch` calls.
+**Code:**
+```typescript
+// Vulnerable:
+const completion = await openai.chat.completions.create({...});
+const response = await fetch('/api/transcribe', {...});
+
+// Secure:
+const completion = await openai.chat.completions.create({...}, { timeout: 30000 });
+const response = await fetch('/api/transcribe', {..., signal: AbortSignal.timeout(180000)});
+```

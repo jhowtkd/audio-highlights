@@ -102,6 +102,9 @@ export async function POST(request: NextRequest) {
         model: GROQ_WHISPER_MODEL,
         response_format: 'verbose_json',
         timestamp_granularities: ['segment', 'word'],
+      }, {
+        // SECURITY: Added timeout to prevent hanging external API calls from exhausting server resources
+        timeout: 120000
       }) as unknown as WhisperResponse;
     } catch (error: unknown) {
       // Capture detailed error information from Groq

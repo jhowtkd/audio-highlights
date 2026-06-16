@@ -70,6 +70,9 @@ REGRAS:
             ],
             temperature: 0.3,
             max_tokens: 1000,
+        }, {
+            // SECURITY: Added timeout to prevent hanging external API calls from exhausting server resources
+            timeout: 30000
         });
 
         const content = completion.choices[0]?.message?.content;

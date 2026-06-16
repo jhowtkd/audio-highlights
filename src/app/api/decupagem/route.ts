@@ -88,6 +88,9 @@ export async function POST(request: NextRequest) {
             ],
             response_format: { type: 'json_object' },
             temperature: 0.1, // Low temperature for consistent analysis
+        }, {
+            // SECURITY: Added timeout to prevent hanging external API calls from exhausting server resources
+            timeout: 60000
         });
 
         const content = completion.choices[0].message.content;

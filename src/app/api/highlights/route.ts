@@ -429,6 +429,9 @@ export async function POST(request: NextRequest) {
         },
       ],
       max_completion_tokens: GPT_MAX_TOKENS,
+    }, {
+      // SECURITY: Added timeout to prevent hanging external API calls from exhausting server resources
+      timeout: 120000
     });
 
     const content = completion.choices[0]?.message?.content;
