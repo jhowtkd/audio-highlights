@@ -102,3 +102,21 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2026-06-17 - Server-Side Subtitles Support
+
+**Research Topic:** Burning subtitles into video using FFmpeg
+
+**Finding:**
+Evaluated client-side vs server-side FFmpeg for burning subtitles.
+Client-side `@ffmpeg/ffmpeg` standard WASM builds lack `libass`, failing to support the `subtitles` filter.
+Server-side `ffmpeg-static` includes `libass` and successfully processes `.srt` files with the `subtitles` filter. However, it fails with the `drawtext` filter despite `libfreetype` being enabled.
+
+**Decision:**
+Propose implementing subtitle burn-in via a new endpoint in `ffmpeg-service` using the `subtitles` filter and `.srt` files.
+
+**Learning:**
+When using `@ffmpeg/ffmpeg` in the browser, standard WASM builds often lack the `libass` library required for the `subtitles` filter. For advanced video manipulation like burned-in subtitles, utilize the server-side FFmpeg service instead. In the backend `ffmpeg-service`, the `ffmpeg-static` package supports the `subtitles` filter (via `libass`) but fails when using the `drawtext` filter despite `libfreetype` being enabled. Applying the `subtitles` video filter in FFmpeg requires full video re-encoding and cannot be used in conjunction with stream copying (`-c copy`), resulting in significant processing overhead.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/2026-06-17-subtitles-support.md
