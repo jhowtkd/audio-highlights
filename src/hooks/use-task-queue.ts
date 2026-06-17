@@ -216,7 +216,7 @@ export function useTaskQueue() {
             return true;
         } catch (error) {
             console.error('Error retrying task:', error);
-            toast.error('Erro ao reiniciar processamento');
+            toast.error('Não foi possível reiniciar o processamento. Tente adicionar o arquivo novamente.');
             return false;
         }
     }, [state.tasks, getTaskFile, context, resetTask, processQueue]);

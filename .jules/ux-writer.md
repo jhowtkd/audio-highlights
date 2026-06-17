@@ -32,3 +32,16 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2024-06-17 - Error Message Specificity and Actionability
+
+**Copy Type:** Toast error message
+
+**Original:** "Erro ao reiniciar processamento"
+
+**Changed To:** "Não foi possível reiniciar o processamento. Tente adicionar o arquivo novamente."
+
+**Learning:** Generic error messages like "Erro ao [ação]" tell the user what failed but provide no path forward. By explicitly stating what failed and suggesting an actionable next step ("Tente adicionar o arquivo novamente"), we reduce user frustration and dead ends.
+
+**Rule:** For this app, ALWAYS:
+1. Avoid generic "Erro ao [ação]" phrases that offer no next steps.
+2. If an action fails, explicitly state what couldn't be done and suggest a workaround or retry action.
