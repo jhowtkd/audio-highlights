@@ -230,6 +230,7 @@ async function transcribeSingleFile(
     const response = await fetch('/api/transcribe', {
         method: 'POST',
         body: formData,
+        signal: AbortSignal.timeout(60000), // SECURITY: Prevent resource exhaustion from hanging requests
     });
 
     const responseText = await response.text();
@@ -262,6 +263,7 @@ async function transcribeChunk(file: File, projectId: string, retries = 3): Prom
             const response = await fetch('/api/transcribe', {
                 method: 'POST',
                 body: formData,
+                signal: AbortSignal.timeout(60000), // SECURITY: Prevent resource exhaustion from hanging requests
             });
 
             const responseText = await response.text();

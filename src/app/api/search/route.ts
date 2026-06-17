@@ -113,6 +113,7 @@ export async function POST(request: NextRequest) {
         const openai = new OpenAI({
             apiKey,
             organization: process.env.OPENAI_ORG_ID,
+            timeout: 30000, // SECURITY: Prevent resource exhaustion from hanging requests
         });
 
         // Split segments into chunks dynamically based on token count

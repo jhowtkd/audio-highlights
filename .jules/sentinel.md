@@ -31,3 +31,17 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2025-06-17 - Unbounded External API Requests
+
+**Vulnerability:** External API requests using the `fetch` API or `OpenAI` client (which wraps `fetch`) were made without explicit timeouts. This could lead to resource exhaustion if the remote server hangs or is slow to respond, potentially causing denial-of-service (DoS).
+**Root Cause:** Developer oversight. Default `fetch` and SDK requests might not have suitable timeouts for the application's context.
+**Learning:** Always configure explicit timeouts for all external requests and internal API calls to prevent hanging connections and resource exhaustion. Use `timeout: ms` for OpenAI/Groq clients and `signal: AbortSignal.timeout(ms)` for `fetch` operations.
+**Prevention:** Mandate explicit timeout definitions for any `fetch` or SDK client instantiation across the codebase.
+**Code:**
+```typescript
+// Vulnerable pattern
+fetch('/api/endpoint');
+
+// Secure pattern
+fetch('/api/endpoint', { signal: AbortSignal.timeout(30000) });
+```

@@ -112,6 +112,7 @@ export function useTaskQueue() {
                 const response = await fetch('/api/transcribe', {
                     method: 'POST',
                     body: formData,
+                    signal: AbortSignal.timeout(60000), // SECURITY: Prevent resource exhaustion from hanging requests
                 });
 
                 const responseText = await response.text();
