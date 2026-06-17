@@ -17,15 +17,7 @@ import {
 } from '@/lib/export';
 import type { TranscriptionSegment } from '@/types';
 import { TranscriptSegment } from './transcript-segment';
-
-interface SearchResult {
-  segmentId: string;
-  text: string;
-  startTime: number;
-  endTime: number;
-  relevanceScore: number;
-  matchReason: string;
-}
+import { useSemanticSearch } from '@/hooks/use-semantic-search';
 
 interface TranscriptViewerProps {
   segments: TranscriptionSegment[];
@@ -50,9 +42,10 @@ export const TranscriptViewer = memo(function TranscriptViewer({
 
   // Search state
   const [searchQuery, setSearchQuery] = useState('');
-  const [isSearching, setIsSearching] = useState(false);
-  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
   const [showSearchResults, setShowSearchResults] = useState(false);
+
+  // Semantic Search Hook
+  const { search, clearSearch: clearHookSearch, searchResults, isSearching, isIndexing, progress } = useSemanticSearch(segments);
 
   // Get IDs of matching segments for highlighting
   const matchingSegmentIds = useMemo(() => {
@@ -94,47 +87,17 @@ export const TranscriptViewer = memo(function TranscriptViewer({
   }, [activeSegmentIndex, showSearchResults]);
 
   // Semantic search handler
-  const handleSearch = useCallback(async () => {
+  const handleSearch = useCallback(() => {
     if (!searchQuery.trim() || segments.length === 0) return;
-
-    setIsSearching(true);
     setShowSearchResults(true);
-
-    try {
-      const response = await fetch('/api/search', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          query: searchQuery,
-          segments: segments.map(s => ({
-            id: s.id,
-            start: s.start,
-            end: s.end,
-            text: s.text,
-          })),
-          maxResults: 10,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        setSearchResults(data.results || []);
-      } else {
-        setSearchResults([]);
-      }
-    } catch (error) {
-      console.error('Search error:', error);
-      setSearchResults([]);
-    } finally {
-      setIsSearching(false);
-    }
-  }, [searchQuery, segments]);
+    search(searchQuery);
+  }, [searchQuery, segments, search]);
 
   const clearSearch = useCallback(() => {
     setSearchQuery('');
-    setSearchResults([]);
     setShowSearchResults(false);
-  }, []);
+    clearHookSearch();
+  }, [clearHookSearch]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
     if (e.key === 'Enter') {
@@ -211,12 +174,17 @@ export const TranscriptViewer = memo(function TranscriptViewer({
         </div>
         <Button
           onClick={handleSearch}
-          disabled={isSearching || !searchQuery.trim()}
+          disabled={isSearching || isIndexing || !searchQuery.trim()}
           size="sm"
           className="shrink-0"
         >
           {isSearching ? (
             <Loader2 className="h-4 w-4 animate-spin" />
+          ) : isIndexing ? (
+            <>
+              <Loader2 className="h-4 w-4 mr-1 animate-spin" />
+              {progress > 0 ? `${progress}%` : 'Indexando...'}
+            </>
           ) : (
             <>
               <Sparkles className="h-4 w-4 mr-1" />
