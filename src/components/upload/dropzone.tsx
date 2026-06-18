@@ -122,7 +122,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
       >
         <Loader2 className="mx-auto h-12 w-12 text-slate-400 animate-spin mb-4" />
         <p className="text-lg font-medium text-slate-700 dark:text-slate-300 mb-2">
-          Enviando áudio...
+          Enviando arquivo...
         </p>
         <Progress value={uploadProgress} className="max-w-xs mx-auto mb-2" />
         <p className="text-sm text-slate-500">{uploadProgress}%</p>
@@ -237,7 +237,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
               ? isDragReject
                 ? 'Formato não suportado'
                 : 'Solte o arquivo aqui'
-              : 'Arraste seu áudio aqui'}
+              : 'Arraste seu arquivo aqui'}
           </p>
 
           <p className="text-sm text-slate-500 mb-4">ou clique para selecionar</p>
