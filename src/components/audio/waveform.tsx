@@ -96,17 +96,23 @@ export function Waveform({
                 const channelData = audioBuffer.getChannelData(0);
                 const samples = 200; // Number of bars in the waveform
                 const blockSize = Math.floor(channelData.length / samples);
+
+                // PERFORMANCE: Subsample audio data by skipping samples to prevent blocking main UI thread. Reduces computation time by ~98% for large audio files
+                const stepSize = Math.max(1, Math.floor(blockSize / 100));
+
                 const filteredData: number[] = [];
 
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    for (let j = 0; j < blockSize; j += stepSize) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / count);
                 }
 
                 // Normalize the data
