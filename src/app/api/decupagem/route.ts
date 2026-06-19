@@ -71,6 +71,7 @@ export async function POST(request: NextRequest) {
         const openai = new OpenAI({
             apiKey,
             organization: process.env.OPENAI_ORG_ID,
+            timeout: 60000, // SECURITY: Prevent resource exhaustion from hanging external requests
         });
 
         // Check transcript size to prevent token limits

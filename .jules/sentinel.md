@@ -31,3 +31,20 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-02-12 - Missing Timeouts on External API Calls
+
+**Vulnerability:** External API calls to OpenAI, Groq, and Gemini lacked explicit timeouts. This could allow hanging requests to consume memory, exhaust connection pools, and block event loop threads, leading to a Denial of Service (DoS).
+**Root Cause:** The `fetch` API and third-party SDKs (like the OpenAI SDK) do not enforce aggressive default timeouts, leaving the application vulnerable if the remote server becomes unresponsive or connection is blackholed.
+**Learning:** Always configure strict timeouts for all outbound network requests, especially those made within high-throughput or expensive API routes.
+**Prevention:** Explicitly configure timeouts for external SDK calls (e.g., using `timeout: ms`) and internal `fetch` operations (using `signal: AbortSignal.timeout(ms)`).
+**Code:**
+```typescript
+// Vulnerable:
+const openai = new OpenAI({ apiKey });
+fetch(url, { method: 'POST', body });
+
+// Secure:
+const openai = new OpenAI({ apiKey, timeout: 30000 });
+fetch(url, { method: 'POST', body, signal: AbortSignal.timeout(30000) });
+```
