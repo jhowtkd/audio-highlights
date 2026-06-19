@@ -33,3 +33,8 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-06-19 - Waveform Generation Blocked Main Thread
+**Bottleneck:** Synchronous iteration over the entire decoded audio buffer (millions of samples) to calculate waveform bars on the main thread.
+**Learning:** For visual rendering, iterating every single sample is unnecessary and blocks the UI. We can achieve the same visual result by subsampling.
+**Action:** When processing large audio buffers for visual rendering, always downsample the data by skipping samples using a calculated stepSize (e.g., Math.max(1, Math.floor(blockSize / 100))).
+**Code:** const stepSize = Math.max(1, Math.floor(blockSize / 100));
