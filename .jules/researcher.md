@@ -102,3 +102,13 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-05-22 - Audio Visualization Upgrade with wavesurfer.js
+
+**Research Topic:** Upgrading the custom canvas-based audio waveform visualization to `wavesurfer.js`.
+**Finding:** Current canvas implementation decodes entire audio files into memory causing UI freezes and limits visualization resolution to 200 samples. Evaluated `wavesurfer.js` v7 with `MediaElement` backend.
+**Decision:** Propose migrating to `wavesurfer.js`. It natively supports `MediaElement` streaming (no full decode required), has built-in zoom, and the `RegionsPlugin` directly maps to our highlights feature.
+**Learning:** For audio applications handling >10min files, custom canvas + full AudioBuffer decoding is an anti-pattern. Always prefer streaming backends (`MediaElement`) or pre-computed peaks to prevent browser memory exhaustion.
+**Resources:**
+- https://wavesurfer.xyz/docs/
+- https://wavesurfer.xyz/docs/migrating
