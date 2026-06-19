@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-05 - Format-Agnostic Terminology
+
+**Copy Type:** Dialog Titles, Loading States, Empty States
+**Original:** "Adicionar novo áudio", "Enviando áudio...", "Áudio curto", "Arraste seu áudio aqui"
+**Changed To:** "Novo projeto", "Enviando arquivo...", "Arquivo curto", "Arraste seu arquivo aqui"
+**Learning:** Users upload both video and audio files. Using "áudio" creates a format-specific mental model that is confusing when uploading video. Using "projeto" for the workflow and "arquivo" for the asset is more accurate and inclusive of all supported formats.
+**Rule:** Always refer to a user's workload as a 'Projeto' (Project) rather than 'Áudio' or 'Vídeo', and use 'arquivo' (file) for media assets in user-facing UI text.
