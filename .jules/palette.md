@@ -42,3 +42,15 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2024-06-20 - Custom Confirm Dialogs for Destructive Actions
+
+**UX Problem:** The application was using native `window.confirm()` dialogs for destructive actions like deleting projects or retranscribing. These native dialogs block the main thread, are inconsistent across browsers, cannot be styled to match the brand, and create a jarring experience for users.
+
+**Learning:** Native alerts and confirms break the immersion of the application's design system and interrupt the user flow abruptly. They also don't support custom styling (like "destructive" red buttons) to adequately warn users about the severity of an action.
+
+**Solution:** Implemented a reusable, accessible `<ConfirmDialog>` component using the existing `@/components/ui/dialog` Radix primitives. Refactored the `TaskCard`, `[id]/page.tsx`, and `page.tsx` components to use this custom dialog instead of the native `confirm()` and `window.confirm()` functions, utilizing React state to manage visibility asynchronously.
+
+**Pattern:** For all destructive or critical actions requiring confirmation:
+1. Never use `window.confirm()` or `window.alert()`.
+2. Use the `<ConfirmDialog>` component with appropriate `title`, `message`, and `confirmVariant="destructive"`.
+3. Manage the dialog's state asynchronously within the parent component using `isOpen` and `onOpenChange`.
