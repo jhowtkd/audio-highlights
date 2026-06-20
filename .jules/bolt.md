@@ -33,3 +33,16 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-06-20 - Full AudioBuffer Iteration Blocks Main Thread
+
+**Bottleneck:** Rendering waveforms for large audio files caused severe UI freezing due to iterating over every single sample synchronously.
+**Learning:** Looping through millions of samples in an AudioBuffer block blocks the main UI thread. High-resolution audio doesn't need pixel-perfect sample checking to render a waveform; subsampling provides visually identical results with negligible cost.
+**Action:** Always calculate a `stepSize` when iterating large buffers for visualizations and skip samples (e.g., `for (let j = 0; j < blockSize; j += stepSize)`).
+**Code:**
+```typescript
+const stepSize = Math.max(1, Math.floor(blockSize / 100));
+for (let j = 0; j < blockSize; j += stepSize) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
