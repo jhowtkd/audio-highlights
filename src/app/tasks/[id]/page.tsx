@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, use, useRef, ChangeEvent, useMemo } from 'react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -52,14 +53,15 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
+    const [isRetranscribeOpen, setIsRetranscribeOpen] = useState(false);
 
     const handleRetranscribe = () => {
         if (!task) return;
+        setIsRetranscribeOpen(true);
+    };
 
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
+    const confirmRetranscribe = () => {
+        if (!task) return;
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -284,6 +286,17 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                     <RefreshCw className="h-4 w-4 mr-2" />
                                     Retranscrever
                                 </Button>
+
+                                <ConfirmDialog
+                                    isOpen={isRetranscribeOpen}
+                                    onOpenChange={setIsRetranscribeOpen}
+                                    title="Retranscrever arquivo?"
+                                    message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                                    confirmLabel="Retranscrever"
+                                    confirmVariant="destructive"
+                                    onConfirm={confirmRetranscribe}
+                                />
+
                                 <ThemeToggle />
 
                                 {/* Hidden file input for restoration */}
