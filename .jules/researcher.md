@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-06-20 - Server-Side Hardsubs with FFmpeg
+
+**Research Topic:** Burning subtitles directly into video exports (Hardsubs)
+
+**Finding:** Investigated using FFmpeg for server-side subtitle burning. Found that the `ffmpeg-static` package supports the `subtitles` filter (via `libass`) but fails when using the `drawtext` filter despite `libfreetype` being enabled. Additionally, applying the `subtitles` video filter requires full video re-encoding and cannot be used in conjunction with stream copying (`-c copy`).
+
+**Decision:** Proposed using the `subtitles` filter for a "Burn Subtitles" feature, accepting the tradeoff of higher processing time.
+
+**Learning:** For this codebase, when using FFmpeg for text overlay, we must rely on the `subtitles` filter and an external subtitle file (.srt/.vtt) rather than attempting inline `drawtext`. We must also account for the significant processing overhead of re-encoding.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
