@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useCallback, useEffect, use, useRef, ChangeEvent, useMemo } from 'react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
@@ -52,13 +53,10 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
+    const [isRetranscribeDialogOpen, setIsRetranscribeDialogOpen] = useState(false);
 
     const handleRetranscribe = () => {
         if (!task) return;
-
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
 
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
@@ -277,7 +275,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={handleRetranscribe}
+                                    onClick={() => setIsRetranscribeDialogOpen(true)}
                                     className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                                     title="Retranscrever arquivo"
                                 >
@@ -506,6 +504,14 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                     </p>
                 </div>
             </footer>
+
+            <ConfirmDialog
+                open={isRetranscribeDialogOpen}
+                onOpenChange={setIsRetranscribeDialogOpen}
+                title="Retranscrever arquivo?"
+                message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                onConfirm={handleRetranscribe}
+            />
         </div>
     );
 }
