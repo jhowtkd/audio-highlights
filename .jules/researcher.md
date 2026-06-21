@@ -102,3 +102,10 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2026-03-05 - Speaker Diarization Research
+
+**Research Topic:** Speaker Diarization for Transcription
+**Finding:** Diarization is essential for interviews. Need to verify if the current Groq Whisper API supports it reliably, otherwise might need an alternative like Deepgram.
+**Decision:** Proposing to add speaker labels to the data model and UI.
+**Learning:** For multi-speaker content, raw text is insufficient. The data model must account for speaker turns.
+**Resources:** None yet (need to check API docs).
