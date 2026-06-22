@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, use, useRef, ChangeEvent, useMemo } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
     Mic,
     Sparkles,
@@ -52,20 +53,21 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
+    const [isRetranscribeConfirmOpen, setIsRetranscribeConfirmOpen] = useState(false);
 
-    const handleRetranscribe = () => {
+    const confirmRetranscribe = () => {
         if (!task) return;
-
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
             // Arquivo não está na memória, abrir seletor
             fileInputRef.current?.click();
         }
+    };
+
+    const handleRetranscribe = () => {
+        if (!task) return;
+        setIsRetranscribeConfirmOpen(true);
     };
 
     const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -327,6 +329,16 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
             <Toaster position="top-right" richColors />
+
+            <ConfirmDialog
+                isOpen={isRetranscribeConfirmOpen}
+                onOpenChange={setIsRetranscribeConfirmOpen}
+                title="Retranscrever arquivo?"
+                message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                confirmLabel="Retranscrever"
+                cancelLabel="Cancelar"
+                onConfirm={confirmRetranscribe}
+            />
 
             {/* Header */}
             <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
