@@ -42,3 +42,12 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2024-06-22 - Replacing Native Confirm Dialog
+
+**UX Problem:** Native `window.confirm` dialogues freeze the main UI thread, block user interactions, and lack customizable, accessible styling in sync with the design system.
+
+**Learning:** Accessible web design requires feedback dialogues that respect the page's styling and allow screen readers to properly read content without entirely freezing the interface's scripting context.
+
+**Solution:** Introduced and implemented a `<ConfirmDialog>` based on Radix UI that supports complete accessibility, screen readers, focus states, and works seamlessly with the existing dark/light mode setup.
+
+**Pattern:** In this codebase, avoid using native `window.confirm()` or `confirm()` dialogs for destructive actions. Instead, import and use the custom accessible `<ConfirmDialog>` component from `@/components/ui/confirm-dialog`.

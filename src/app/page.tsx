@@ -3,6 +3,7 @@
 import { useState, useCallback, useEffect, useRef, useMemo } from 'react';
 import Link from 'next/link';
 import { Mic, Sparkles, FileText, AlertCircle, Timer, Film, X, ListTodo, Scissors } from 'lucide-react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster, toast } from 'sonner';
 import { Dropzone } from '@/components/upload/dropzone';
@@ -58,6 +59,8 @@ export default function Home() {
 
   // Video state
   const [videoFile, setVideoFile] = useState<File | null>(null);
+
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   const activeSegmentIndex = useMemo(() => {
     if (!transcription?.segments) return -1;
@@ -242,17 +245,7 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
+  const confirmReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,11 +261,32 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
+
+  const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      setIsResetConfirmOpen(true);
+      return;
+    }
+
+    confirmReset();
+  }, [transcription, highlights, confirmReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Toaster position="top-right" richColors />
+
+      <ConfirmDialog
+        isOpen={isResetConfirmOpen}
+        onOpenChange={setIsResetConfirmOpen}
+        title="Descartar projeto?"
+        message="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+        confirmLabel="Descartar"
+        cancelLabel="Cancelar"
+        confirmVariant="destructive"
+        onConfirm={confirmReset}
+      />
 
       {/* Header */}
       <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
