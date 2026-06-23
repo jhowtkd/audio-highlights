@@ -16,6 +16,7 @@ import { DecupagemView } from '@/components/decupagem/decupagem-view';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ERROR_MESSAGES } from '@/lib/constants';
 import { formatDuration } from '@/lib/format-utils';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
@@ -48,6 +49,7 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('transcription');
   const [statusMessage] = useState<string>('');
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState<boolean>(false);
 
   // Timer states
   const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -242,17 +244,7 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
+  const performReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +260,16 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
+
+  const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      setIsResetDialogOpen(true);
+      return;
+    }
+    performReset();
+  }, [transcription, highlights.length, performReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -594,6 +595,15 @@ export default function Home() {
           </p>
         </div>
       </footer>
+      <ConfirmDialog
+        open={isResetDialogOpen}
+        onOpenChange={setIsResetDialogOpen}
+        title="Deseja realmente descartar este projeto?"
+        description="Todo o progresso será perdido."
+        confirmText="Descartar projeto"
+        variant="destructive"
+        onConfirm={performReset}
+      />
     </div>
   );
 }
