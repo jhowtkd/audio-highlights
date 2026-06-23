@@ -33,3 +33,18 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-06-23 - Subsampling for Audio Waveforms
+
+**Bottleneck:** Rendering the waveform on the client for long audio files involves reading the full `AudioBuffer` and summing millions of audio data points, completely blocking the main thread during navigation.
+**Learning:** Calculating an average of magnitude data per waveform bucket by iterating over every single point inside a large chunk is mathematically precise but perceptually unnecessary and too expensive. You don't need a perfectly continuous sum to render a 200px visual bar.
+**Action:** Always step-sample (or subsample) when iterating through multi-million length TypedArrays if the output is destined for a heavily constrained/small visualization layer like a DOM canvas.
+**Code:**
+```typescript
+const stepSize = Math.max(1, Math.floor(blockSize / 100));
+
+for (let j = 0; j < blockSize; j += stepSize) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
