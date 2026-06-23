@@ -328,7 +328,7 @@ export default function Home() {
                     Transforme seu podcast em highlights
                   </h1>
                   <p className="text-lg text-slate-600 dark:text-slate-400">
-                    Faça upload do seu áudio e deixe a IA identificar os melhores momentos
+                    Faça upload do seu arquivo e deixe a IA identificar os melhores momentos
                   </p>
                 </div>
 
@@ -384,7 +384,7 @@ export default function Home() {
               <Mic className="h-16 w-16 mx-auto text-blue-500" />
             </div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-3">
-              Transcrevendo seu áudio...
+              Transcrevendo seu arquivo...
             </h2>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
               {audioFile?.name}
