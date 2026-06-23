@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2026-03-01 - Client-Side Semantic Search Technology Research
+
+**Research Topic:** Evaluating in-browser models for replacing server-side OpenAI semantic search.
+
+**Finding:** Evaluated `@xenova/transformers` with `Xenova/all-MiniLM-L6-v2` in a Web Worker setup. The quantized model (~23MB) loads quickly when cached, processes local embeddings very fast (~8ms per text segment), and calculates cosine similarity in <5ms.
+
+**Decision:** Proposing to replace `/api/search` with a local Web Worker implementation using `transformers.js`. The model can be downloaded once and cached.
+
+**Learning:** For this codebase, avoiding an external API call for search significantly improves the UX ("Search as you type") and saves on OpenAI API token costs. A Web Worker is strictly necessary to keep the main thread unblocked during the computationally heavy initial embedding of large transcripts.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js/index
+- https://github.com/xenova/transformers.js
