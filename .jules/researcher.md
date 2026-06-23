@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2026-03-05 - Speaker Diarization Technology Research
+
+**Research Topic:** Adding speaker identification (diarization) to the transcription pipeline.
+
+**Finding:** Groq Whisper does not natively support speaker diarization. Evaluated 3 approaches:
+1. Third-party API (Deepgram/AssemblyAI) - Fast, accurate, but adds API cost.
+2. Self-hosted Pyannote.audio - Open source, but requires GPU infrastructure and high maintenance.
+3. WhisperX (Replicate) - Combines fast Whisper with Pyannote, good middle ground.
+
+**Decision:** Proposed adding Speaker Diarization. The implementation choice between API and self-hosted requires further cost analysis, but the feature is critical for interview podcasts.
+
+**Learning:** For this codebase, adding diarization will significantly improve the AI highlight generation (GPT-4o) because the LLM will have context on the conversational flow (Q&A format).
+
+**Resources:**
+- https://github.com/m-bain/whisperX
+- https://github.com/pyannote/pyannote-audio
