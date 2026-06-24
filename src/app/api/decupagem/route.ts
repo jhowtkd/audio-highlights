@@ -80,6 +80,7 @@ export async function POST(request: NextRequest) {
         console.log('[Decupagem API] Calling LLM for analysis...');
         const prompt = buildAnalysisPrompt(segments, config.narrativeContext);
 
+        // SECURITY: Explicitly configure timeout to prevent resource exhaustion and hanging requests
         const completion = await openai.chat.completions.create({
             model: GPT_MODEL,
             messages: [
@@ -88,7 +89,7 @@ export async function POST(request: NextRequest) {
             ],
             response_format: { type: 'json_object' },
             temperature: 0.1, // Low temperature for consistent analysis
-        });
+        }, { timeout: 60000 });
 
         const content = completion.choices[0].message.content;
         if (!content) {
