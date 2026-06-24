@@ -31,3 +31,28 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-06-24 - DoS vulnerability via unbounded Zod schemas
+
+**Vulnerability:** Zod schemas for transcription segments did not specify maximum lengths for string fields (`text`, `word`, `id`) and array sizes (`words`). This could allow attackers to send massive payloads, consuming excessive memory and CPU, leading to Denial of Service (DoS).
+**Root Cause:** Schema validation assumed client-side data would be reasonably sized without explicitly enforcing bounds in the backend validation logic.
+**Learning:** Always apply `.max()` limits to unbounded `z.string()` and `z.array()` structures that receive input from clients.
+**Prevention:** Establish global maximums for lengths and array counts in `src/lib/constants.ts` and ensure all string/array properties in `zod` schemas refer to these constants.
+**Code:**
+```typescript
+// Vulnerable pattern
+export const transcriptionSegmentSchema = z.object({
+  text: z.string(),
+  words: z.array(z.object({
+    word: z.string(),
+  })).optional(),
+});
+
+// Secure pattern
+export const transcriptionSegmentSchema = z.object({
+  text: z.string().max(MAX_SEGMENT_TEXT_LENGTH),
+  words: z.array(z.object({
+    word: z.string().max(MAX_WORD_LENGTH),
+  })).max(MAX_WORDS_COUNT).optional(),
+});
+```
