@@ -31,3 +31,27 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-06-24 - Resource Exhaustion via Hanging External API Calls
+
+**Vulnerability:** The application made external requests to multiple APIs (OpenAI, Groq, Gemini) without explicit timeouts. This could lead to hanging requests that consume server resources and connections, eventually causing denial of service (DoS) or increased cloud bills.
+
+**Root Cause:** Reliance on default SDK or `fetch` timeouts, which are often either infinite or excessively long, failing to explicitly bound the execution time for network operations.
+
+**Learning:** External API dependencies and internal `fetch` operations should always have explicitly configured timeouts. This applies to both raw HTTP requests (`AbortSignal.timeout`) and abstracted SDK method parameters (`{ timeout: ms }`). It's a critical layer of defense-in-depth against unresponsive services and resource exhaustion.
+
+**Prevention:**
+- For raw `fetch` calls, use `signal: AbortSignal.timeout(ms)`.
+- For OpenAI/Groq SDKs, use the `{ timeout: ms }` option in the request config.
+- Add an automated check or lint rule to ensure network operations explicitly configure execution timeouts.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+await fetch(url, { ... })
+await getGroqClient().audio.transcriptions.create({ ... })
+
+// Secure pattern to use:
+await fetch(url, { signal: AbortSignal.timeout(30000), ... })
+await getGroqClient().audio.transcriptions.create({ ... }, { timeout: 60000 })
+```

@@ -416,6 +416,7 @@ export async function POST(request: NextRequest) {
 
     // Call OpenAI Chat API
     console.log('[Highlights API] Calling GPT-5 Nano...', config.isMix ? '(Mix Mode)' : '(Standard Mode)');
+    // SECURITY: Explicitly configure timeout to prevent resource exhaustion and hanging requests
     const completion = await openai.chat.completions.create({
       model: GPT_MODEL,
       messages: [
@@ -429,7 +430,7 @@ export async function POST(request: NextRequest) {
         },
       ],
       max_completion_tokens: GPT_MAX_TOKENS,
-    });
+    }, { timeout: 60000 });
 
     const content = completion.choices[0]?.message?.content;
 

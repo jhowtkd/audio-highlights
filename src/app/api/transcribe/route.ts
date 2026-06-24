@@ -97,12 +97,13 @@ export async function POST(request: NextRequest) {
     // Call Groq Whisper API with enhanced error handling
     let transcriptionResponse: WhisperResponse;
     try {
+      // SECURITY: Explicitly configure timeout to prevent resource exhaustion and hanging requests
       transcriptionResponse = await getGroqClient().audio.transcriptions.create({
         file: fileToSend,
         model: GROQ_WHISPER_MODEL,
         response_format: 'verbose_json',
         timestamp_granularities: ['segment', 'word'],
-      }) as unknown as WhisperResponse;
+      }, { timeout: 60000 }) as unknown as WhisperResponse;
     } catch (error: unknown) {
       // Capture detailed error information from Groq
       console.error('[Transcription API] Groq API Error:', error);
