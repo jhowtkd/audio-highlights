@@ -32,3 +32,10 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2025-01-30 - Terminology Unification (Project/File)
+
+**Copy Type:** Interface Text (Dialog Titles, Dropzone text)
+**Original:** "Adicionar novo áudio", "Enviando áudio...", "Áudio curto", "Arraste seu áudio aqui"
+**Changed To:** "Novo projeto", "Enviando arquivo...", "Arquivo curto", "Arraste seu arquivo aqui"
+**Learning:** Users upload both audio and video files. Using the word "áudio" incorrectly constrains the user's mental model and causes confusion when uploading video. Referring to the workload as a "Projeto" and the media asset as an "arquivo" is format-agnostic and more accurate.
+**Rule:** For this app, ALWAYS refer to a user's workload as a "Projeto" rather than "Áudio" or "Vídeo", and use "arquivo" for media assets in user-facing UI text.
