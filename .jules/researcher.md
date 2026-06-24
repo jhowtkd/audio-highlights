@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2024-06-24 - Client-Side LLM Inference with WebGPU
+
+**Research Topic:** Generating highlights locally using WebLLM to replace OpenAI API calls.
+
+**Finding:**
+WebGPU-based inference using `@mlc-ai/web-llm` and models like `Phi-3-mini` (quantized) is mature enough to run directly in modern browsers. It achieves ~30 tokens/sec on M1 Macs. However, it requires a ~1.8GB initial model download and high RAM usage.
+
+**Decision:**
+Propose adding a "Local AI" option for highlight generation as an alternative to OpenAI. It eliminates API costs and ensures total privacy, but requires keeping the server-side API as a fallback for unsupported devices (e.g., Safari without flags, older mobile devices).
+
+**Learning:**
+Local LLMs in the browser are viable for specific, discrete tasks like summarization when paired with a good system prompt and JSON schema enforcement, provided the user's hardware is capable. Always use a Web Worker to prevent UI blocking.
+
+**Resources:**
+- https://webllm.mlc.ai/
+- research/proposals/client-side-webllm-highlights.md
