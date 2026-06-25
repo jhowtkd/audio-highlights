@@ -42,3 +42,15 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2026-06-25 - Replacing Native Browser Confirm Dialogs
+
+**UX Problem:** The application was using blocking browser-native `window.confirm()` and `confirm()` dialogs for destructive actions like deleting projects or retranscribing files. These dialogs pause the main UI thread, cannot be styled to match the design system, and offer poor screen reader accessibility.
+
+**Learning:** It is crucial to use custom React-based modals built on top of accessible primitives (like Radix UI) for confirmation flows instead of native browser prompts.
+
+**Solution:** Created a reusable `<ConfirmDialog>` component leveraging existing shadcn/ui Dialog primitives. Replaced all instances of `window.confirm()` in `src/app/page.tsx`, `src/app/tasks/[id]/page.tsx`, and `src/components/tasks/task-card.tsx` with this new component, managing its open state locally.
+
+**Pattern:** For this design system, ALL destructive or significant state-resetting actions must:
+1. Not use `window.confirm()`
+2. Trigger an accessible `<ConfirmDialog>`
+3. Maintain focus management and keyboard navigability via the dialog component
