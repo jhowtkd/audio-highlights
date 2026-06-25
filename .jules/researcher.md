@@ -102,3 +102,12 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-06-25 - Client-Side AI Considerations
+
+**Research Topic:** Implementing Transformers.js in Browser
+**Finding:** Generating semantic embeddings locally is fast but computationally heavy for the main thread.
+**Decision:** All Transformers.js operations must be offloaded to a Web Worker.
+**Learning:** In this codebase, when performing heavy client-side AI computations (e.g., generating semantic search embeddings via transformers.js), always utilize a Web Worker to prevent blocking the main UI thread and maintain a responsive user experience.
+**Resources:**
+- https://huggingface.co/docs/transformers.js/
