@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-01 - Empty Search Results Copy Improvement
+
+**Copy Type:** Empty State (Search)
+**Original:** "Nenhum resultado para \"[termo]\""
+**Changed To:** "Nenhum resultado para \"[termo]\". Tente palavras diferentes."
+**Learning:** A dead-end empty state leaves the user without guidance. Adding a simple, actionable next step ("Tente palavras diferentes") helps users recover from the search failure and prevents frustration.
+**Rule:** For search empty states, always include what was searched and suggest an actionable solution (e.g., trying different keywords or checking spelling).

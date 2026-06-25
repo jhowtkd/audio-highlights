@@ -307,7 +307,7 @@ export const TranscriptViewer = memo(function TranscriptViewer({
                 <span className="font-medium">{searchResults.length}</span> resultados para &ldquo;{searchQuery}&rdquo;
               </>
             ) : (
-              <>Nenhum resultado para &ldquo;{searchQuery}&rdquo;</>
+              <>Nenhum resultado para &ldquo;{searchQuery}&rdquo;. Tente palavras diferentes.</>
             )}
           </span>
           <Button variant="ghost" size="sm" onClick={clearSearch}>
