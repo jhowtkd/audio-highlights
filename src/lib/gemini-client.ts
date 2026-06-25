@@ -97,12 +97,14 @@ export class GeminiClient {
             console.log(`[Gemini] Calling ${GEMINI_MODEL} (attempt ${attempt}/${maxRetries})...`);
 
             try {
+                // SECURITY: Added timeout to prevent resource exhaustion and hanging requests
                 const response = await fetch(url, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify(requestBody),
+                    signal: AbortSignal.timeout(30000), // 30 seconds timeout
                 });
 
                 if (!response.ok) {
