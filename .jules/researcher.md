@@ -102,3 +102,13 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-06-26 - Web Audio API Normalization Research
+
+**Research Topic:** Real-time audio volume normalization (Dynamic Range Compression) for podcast playback.
+**Finding:** Evaluated using Web Audio API's `DynamicsCompressorNode` attached to a `MediaElementAudioSourceNode`. The native API handles real-time compression with negligible overhead and zero added bundle size.
+**Decision:** Proposed adding client-side playback normalization using Web Audio API. This dramatically improves the listening experience for raw, unedited audio files with uneven volumes, without requiring server-side FFmpeg processing.
+**Learning:** Native browser media APIs (like Web Audio) are incredibly powerful for "Pro" audio tool features and can often replace heavy server-side processing for playback-only scenarios. However, this creates a mismatch if exported clips don't have matching FFmpeg `loudnorm` filters applied.
+**Resources:**
+- https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode
+- research/proposals/2026-06-26-client-side-audio-normalization.md
