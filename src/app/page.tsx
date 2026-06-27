@@ -8,6 +8,7 @@ import { Toaster, toast } from 'sonner';
 import { Dropzone } from '@/components/upload/dropzone';
 import { AudioPlayer } from '@/components/audio/player';
 import { TranscriptViewer } from '@/components/transcription/transcript-viewer';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ConfigPanel } from '@/components/highlights/config-panel';
 import { HighlightList } from '@/components/highlights/highlight-list';
 import { EpisodeSummary } from '@/components/highlights/episode-summary';
@@ -242,17 +243,9 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
 
+  const handleResetConfirm = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,11 +261,31 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
+
+  const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      setShowResetConfirm(true);
+    } else {
+        handleResetConfirm();
+    }
+  }, [transcription, highlights, handleResetConfirm]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <Toaster position="top-right" richColors />
+
+      <ConfirmDialog
+        open={showResetConfirm}
+        onOpenChange={setShowResetConfirm}
+        title="Descartar projeto?"
+        message="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+        confirmLabel="Descartar"
+        cancelLabel="Cancelar"
+        confirmVariant="destructive"
+        onConfirm={handleResetConfirm}
+      />
 
       {/* Header */}
       <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
