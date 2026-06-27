@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useEffect, use, useRef, ChangeEvent, useMemo } from 'react';
 import Link from 'next/link';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useRouter } from 'next/navigation';
 import {
     Mic,
@@ -52,13 +53,10 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
+    const [showRetranscribeConfirm, setShowRetranscribeConfirm] = useState(false);
 
-    const handleRetranscribe = () => {
+    const handleRetranscribeConfirm = () => {
         if (!task) return;
-
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
 
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
@@ -66,6 +64,10 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
             // Arquivo não está na memória, abrir seletor
             fileInputRef.current?.click();
         }
+    };
+
+    const handleRetranscribe = () => {
+        setShowRetranscribeConfirm(true);
     };
 
     const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -285,6 +287,16 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                     Retranscrever
                                 </Button>
                                 <ThemeToggle />
+
+                                <ConfirmDialog
+                                    open={showRetranscribeConfirm}
+                                    onOpenChange={setShowRetranscribeConfirm}
+                                    title="Retranscrever arquivo?"
+                                    message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                                    confirmLabel="Retranscrever"
+                                    cancelLabel="Cancelar"
+                                    onConfirm={handleRetranscribeConfirm}
+                                />
 
                                 {/* Hidden file input for restoration */}
                                 <input
