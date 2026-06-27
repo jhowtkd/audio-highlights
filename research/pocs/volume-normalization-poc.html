@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<body>
+  <audio id="audio" controls src="https://www.w3schools.com/html/horse.mp3"></audio>
+  <button id="normalizeBtn">Enable Normalization</button>
+  <script>
+    let audioContext;
+    let source;
+    let compressor;
+    let isNormalized = false;
+
+    document.getElementById('normalizeBtn').addEventListener('click', () => {
+      const audio = document.getElementById('audio');
+
+      if (!audioContext) {
+        audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        source = audioContext.createMediaElementSource(audio);
+        compressor = audioContext.createDynamicsCompressor();
+
+        compressor.threshold.value = -24;
+        compressor.knee.value = 30;
+        compressor.ratio.value = 12;
+        compressor.attack.value = 0.003;
+        compressor.release.value = 0.25;
+      }
+
+      if (isNormalized) {
+        compressor.disconnect();
+        source.disconnect();
+        source.connect(audioContext.destination);
+        document.getElementById('normalizeBtn').innerText = 'Enable Normalization';
+      } else {
+        source.disconnect();
+        source.connect(compressor);
+        compressor.connect(audioContext.destination);
+        document.getElementById('normalizeBtn').innerText = 'Disable Normalization';
+      }
+      isNormalized = !isNormalized;
+    });
+  </script>
+</body>
+</html>
