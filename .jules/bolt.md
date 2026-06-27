@@ -33,3 +33,23 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-06-27 - Frequent mousemove Layout Thrashing in Waveform
+
+**Bottleneck:** High CPU usage and layout thrashing (jank) caused by the `Waveform` component's `handleMouseMove` executing `getBoundingClientRect()` synchronously on every mousemove event.
+**Learning:** React synthetic events for `mousemove` fire dozens of times per second. Reading layout properties like `getBoundingClientRect()` synchronously inside these handlers forces layout recalculation (thrashing) and blocks the main UI thread.
+**Action:** When handling high-frequency events like `mousemove` that involve reading DOM geometry, always throttle the execution using `requestAnimationFrame` to align with the browser's render cycle and prevent layout thrashing.
+**Code:**
+```typescript
+const rafRef = useRef<number | null>(null);
+
+const handleMouseMove = useCallback((e) => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+
+    rafRef.current = requestAnimationFrame(() => {
+        const rect = containerRef.current.getBoundingClientRect();
+        // logic...
+        rafRef.current = null;
+    });
+}, []);
+```
