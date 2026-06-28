@@ -102,3 +102,15 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2026-06-28 - Client-Side Semantic Search Research
+
+**Research Topic:** Replacing API-based semantic search with client-side embeddings
+
+**Finding:** Evaluated `@xenova/transformers` for generating embeddings locally in a Web Worker.
+
+**Decision:** Propose migrating to a client-side solution using `Xenova/all-MiniLM-L6-v2`.
+
+**Learning:** Web Worker implementation ensures the main UI thread is not blocked during embedding generation, adhering to the codebase constraints.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js
