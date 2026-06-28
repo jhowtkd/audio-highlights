@@ -32,3 +32,10 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2024-06-28 - Unified Media Terminology
+
+**Copy Type:** Dialog Titles & Dropzone states
+**Original:** "Adicionar novo áudio", "Enviando áudio...", "Arraste seu áudio aqui"
+**Changed To:** "Adicionar novo arquivo", "Enviando arquivo...", "Arraste seu arquivo aqui"
+**Learning:** The application accepts both audio and video formats, but the UI previously used "áudio" which implies only audio files are accepted. Using "arquivo" provides a format-agnostic mental model.
+**Rule:** Always use "arquivo" instead of "áudio" ou "vídeo" in user-facing UI text when referring to a user's media asset, unless referring to a specific workflow item.
