@@ -13,6 +13,10 @@ import {
   MAX_TOPICS_COUNT,
   MAX_NARRATIVE_CONTEXT_LENGTH,
   MAX_SEGMENTS_COUNT,
+  MAX_ID_LENGTH,
+  MAX_SEGMENT_TEXT_LENGTH,
+  MAX_WORD_LENGTH,
+  MAX_WORDS_PER_SEGMENT,
 } from './constants';
 
 // Transcription API validation
@@ -53,18 +57,19 @@ export const highlightConfigSchema = z.object({
 // Basic type checking is sufficient for now, logic will be handled in the API.
 
 // Shared segment schema
+// SECURITY: Enforce maximum lengths on all string and array inputs to prevent DoS via memory exhaustion
 export const transcriptionSegmentSchema = z.object({
-  id: z.string(),
+  id: z.string().max(MAX_ID_LENGTH),
   start: z.number().nonnegative(),
   end: z.number().nonnegative(),
-  text: z.string(),
+  text: z.string().max(MAX_SEGMENT_TEXT_LENGTH),
   confidence: z.number().min(0).max(1).optional(),
   words: z.array(z.object({
-    word: z.string(),
+    word: z.string().max(MAX_WORD_LENGTH),
     start: z.number().nonnegative(),
     end: z.number().nonnegative(),
     confidence: z.number().min(0).max(1).optional(),
-  })).optional(),
+  })).max(MAX_WORDS_PER_SEGMENT).optional(),
 });
 
 // Highlights API request validation
