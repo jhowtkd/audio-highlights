@@ -426,10 +426,10 @@ export default function Home() {
               </div>
             </div>
             <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-3">
-              Não foi possível processar
+              Não conseguimos processar o arquivo
             </h2>
             <p className="text-slate-600 dark:text-slate-400 mb-6">
-              {errorMessage || 'Tivemos um problema técnico. Por favor, tente novamente.'}
+              {errorMessage || 'Ocorreu um erro inesperado. Por favor, tente novamente em alguns instantes.'}
             </p>
             <div className="flex gap-3 justify-center">
               <Button onClick={handleRetry} variant="default">

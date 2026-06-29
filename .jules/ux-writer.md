@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-06-29 - Generic Error Message Improvement
+
+**Copy Type:** Error state
+**Original:** "Não foi possível processar" / "Tivemos um problema técnico. Por favor, tente novamente."
+**Changed To:** "Não conseguimos processar o arquivo" / "Ocorreu um erro inesperado. Por favor, tente novamente em alguns instantes."
+**Learning:** "Não foi possível processar" was vague. "Não conseguimos processar o arquivo" explicitly clarifies what failed. "Tivemos um problema técnico" can sound slightly robotic. "Ocorreu um erro inesperado" paired with "em alguns instantes" sets a better expectation for the user's retry attempt.
+**Rule:** For generic processing errors, explicitly state what failed (e.g., "o arquivo") and provide a realistic timeframe for the retry (e.g., "em alguns instantes").
