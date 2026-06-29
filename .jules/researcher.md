@@ -102,3 +102,17 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2024-06-29 - Client-Side Semantic Search Research
+
+**Research Topic:** Evaluating options to move semantic search functionality from server-side (OpenAI GPT-4o via API) to client-side to improve responsiveness, remove API costs, and enhance privacy.
+
+**Finding:** Evaluated moving semantic search to client-side using `transformers.js` (WebAssembly-based ML running in browser) vs current server-side approach. Found that we can load small embedding models directly in the browser.
+
+**Decision:** I will create a research proposal to replace the server-side semantic search API with client-side embeddings via `transformers.js`, utilizing a Web Worker as required by the codebase rules to avoid blocking the main UI thread.
+
+**Learning:** Client-side vector search is highly feasible for the scale of podcast transcripts (usually < 50k words). A small ONNX embedding model (like `Xenova/all-MiniLM-L6-v2`) is ~22MB and only needs to be downloaded once, then cached by the browser.
+
+**Resources:**
+- https://huggingface.co/docs/transformers.js/
+- Current codebase uses `src/app/api/search/route.ts` which calls OpenAI's chat completion for search - this is slow and expensive for simple queries.
