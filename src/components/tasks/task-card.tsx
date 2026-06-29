@@ -3,7 +3,8 @@
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useRef, ChangeEvent } from 'react';
+import { useRef, ChangeEvent, useState } from 'react';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import {
     FileAudio,
     Trash2,
@@ -70,6 +71,9 @@ export function TaskCard({ task }: TaskCardProps) {
     const { removeTask, retryTask } = useTaskQueue();
     const fileInputRef = useRef<HTMLInputElement>(null);
 
+    const [isRetranscribeConfirmOpen, setIsRetranscribeConfirmOpen] = useState(false);
+    const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
     const isProcessing = ['converting', 'transcribing', 'generating'].includes(task.status);
@@ -79,16 +83,24 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
+        setIsRetranscribeConfirmOpen(true);
+    };
 
+    const confirmRetranscribe = () => {
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
             // Arquivo não está na memória, abrir seletor
             fileInputRef.current?.click();
         }
+    };
+
+    const handleDelete = () => {
+        setIsDeleteConfirmOpen(true);
+    };
+
+    const confirmDelete = () => {
+        removeTask(task.id);
     };
 
     const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -206,13 +218,35 @@ export function TaskCard({ task }: TaskCardProps) {
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => removeTask(task.id)}
+                                onClick={handleDelete}
                                 className="text-slate-500 hover:text-red-600"
                                 title="Excluir projeto"
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         )}
+
+                        <ConfirmDialog
+                            open={isRetranscribeConfirmOpen}
+                            onOpenChange={setIsRetranscribeConfirmOpen}
+                            title="Retranscrever arquivo?"
+                            description="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                            confirmText="Retranscrever"
+                            cancelText="Cancelar"
+                            variant="default"
+                            onConfirm={confirmRetranscribe}
+                        />
+
+                        <ConfirmDialog
+                            open={isDeleteConfirmOpen}
+                            onOpenChange={setIsDeleteConfirmOpen}
+                            title="Excluir projeto?"
+                            description="Tem certeza que deseja excluir este projeto? Todo o histórico e arquivos serão perdidos."
+                            confirmText="Excluir"
+                            cancelText="Cancelar"
+                            variant="destructive"
+                            onConfirm={confirmDelete}
+                        />
 
                         {/* Hidden file input for restoration */}
                         <input
