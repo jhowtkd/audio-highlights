@@ -33,3 +33,30 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-06-30 - Context Provider Performance Optimization
+
+**Bottleneck:** `TaskQueueProvider` caused unnecessary re-renders in all consuming components because the `value` prop object reference changed on every render.
+**Learning:** React context providers need their `value` prop to be memoized if it contains objects or arrays to prevent unnecessary renders in components that consume the context.
+**Action:** Use `useMemo` to memoize the context `value` object in providers, only updating it when the internal state or stable references change.
+**Code:**
+```typescript
+    const contextValue = useMemo(() => ({
+        state,
+        addTask,
+        updateProgress,
+        completeTask,
+        // ...
+    }), [
+        state,
+        addTask,
+        updateProgress,
+        completeTask,
+        // ...
+    ]);
+
+    return (
+        <TaskQueueContext.Provider value={contextValue}>
+            {children}
+        </TaskQueueContext.Provider>
+    );
+```
