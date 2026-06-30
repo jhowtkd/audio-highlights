@@ -18,6 +18,7 @@ import {
 import { DecupagemView } from '@/components/decupagem/decupagem-view';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster, toast } from 'sonner';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { AudioPlayer } from '@/components/audio/player';
 import { TranscriptViewer } from '@/components/transcription/transcript-viewer';
 import { ConfigPanel } from '@/components/highlights/config-panel';
@@ -52,14 +53,15 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
+    const [isRetranscribeOpen, setIsRetranscribeOpen] = useState(false);
 
     const handleRetranscribe = () => {
         if (!task) return;
+        setIsRetranscribeOpen(true);
+    };
 
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
+    const executeRetranscribe = () => {
+        if (!task) return;
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -327,6 +329,16 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
             <Toaster position="top-right" richColors />
+
+            <ConfirmDialog
+                open={isRetranscribeOpen}
+                onOpenChange={setIsRetranscribeOpen}
+                title="Retranscrever arquivo?"
+                message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                confirmLabel="Retranscrever"
+                confirmVariant="destructive"
+                onConfirm={executeRetranscribe}
+            />
 
             {/* Header */}
             <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">

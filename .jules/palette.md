@@ -42,3 +42,15 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2026-06-30 - Accessible Confirmation Dialog for Destructive Actions
+
+**UX Problem:** The application was using the native browser `window.confirm()` dialogs (e.g., when resetting a project or retranscribing an audio file). These native dialogs are jarring, inconsistent with the application's design system, and can be inaccessible or confusing for some users. Furthermore, a destructive action (deleting a project) was missing a confirmation step altogether.
+
+**Learning:** Relying on native `confirm()` breaks the immersion and aesthetic of the web application. Users prefer consistent, branded, and clearly labeled confirmation modals. Implementing a generic, accessible React confirmation modal using existing primitives (`@radix-ui/react-dialog`) ensures keyboard accessibility, focus management, and a unified design.
+
+**Solution:** Created a reusable `<ConfirmDialog>` component that wraps the existing design system's `<Dialog>` and `<Button>` components. Replaced all instances of `window.confirm()` and `confirm()` with this new component, managing its visibility via React state (`useState`). Added a new confirmation step to the project deletion action.
+
+**Pattern:** For this design system, ALL destructive or irrecoverable actions must:
+1. Trigger a custom `<ConfirmDialog>` instead of a native `confirm()`.
+2. Manage the dialog's open/closed state locally in the component triggering the action.
+3. Use the `destructive` variant for the primary action button to clearly indicate danger.
