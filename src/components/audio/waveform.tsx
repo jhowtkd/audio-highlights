@@ -38,9 +38,19 @@ export function Waveform({
 }: WaveformProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const animationFrameRef = useRef<number | null>(null);
     const [waveformData, setWaveformData] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [hoveredHighlight, setHoveredHighlight] = useState<GeneratedHighlight | null>(null);
+
+    // Cleanup animation frame on unmount
+    useEffect(() => {
+        return () => {
+            if (animationFrameRef.current !== null) {
+                cancelAnimationFrame(animationFrameRef.current);
+            }
+        };
+    }, []);
 
     // Generate waveform data from audio
     useEffect(() => {
@@ -228,39 +238,48 @@ export function Waveform({
 
     // Handle mouse move to show highlight tooltip
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        if (!containerRef.current || duration === 0 || sortedHighlights.length === 0) {
-            setHoveredHighlight(null);
-            return;
+        // Performance: Throttle high-frequency mousemove events using requestAnimationFrame to prevent layout thrashing and main-thread blocking.
+        if (animationFrameRef.current !== null) {
+            cancelAnimationFrame(animationFrameRef.current);
         }
 
-        const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const hoverTime = (x / rect.width) * duration;
+        const clientX = e.clientX;
 
-        // Binary search for the hovered highlight
-        let found: GeneratedHighlight | null = null;
-        let left = 0;
-        let right = sortedHighlights.length - 1;
-
-        while (left <= right) {
-            const mid = (left + right) >> 1;
-            const h = sortedHighlights[mid];
-
-            if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
-                found = h;
-                break;
+        animationFrameRef.current = requestAnimationFrame(() => {
+            if (!containerRef.current || duration === 0 || sortedHighlights.length === 0) {
+                setHoveredHighlight(null);
+                return;
             }
 
-            if (hoverTime < h.startTime) {
-                right = mid - 1;
-            } else {
-                // If we are past the start time but not within the highlight,
-                // the target must be further to the right.
-                left = mid + 1;
-            }
-        }
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const hoverTime = (x / rect.width) * duration;
 
-        setHoveredHighlight(found);
+            // Binary search for the hovered highlight
+            let found: GeneratedHighlight | null = null;
+            let left = 0;
+            let right = sortedHighlights.length - 1;
+
+            while (left <= right) {
+                const mid = (left + right) >> 1;
+                const h = sortedHighlights[mid];
+
+                if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
+                    found = h;
+                    break;
+                }
+
+                if (hoverTime < h.startTime) {
+                    right = mid - 1;
+                } else {
+                    // If we are past the start time but not within the highlight,
+                    // the target must be further to the right.
+                    left = mid + 1;
+                }
+            }
+
+            setHoveredHighlight(found);
+        });
     }, [duration, sortedHighlights]);
 
     // Handle keyboard navigation
@@ -316,7 +335,12 @@ export function Waveform({
                 onClick={handleClick}
                 onKeyDown={handleKeyDown}
                 onMouseMove={handleMouseMove}
-                onMouseLeave={() => setHoveredHighlight(null)}
+                onMouseLeave={() => {
+                    if (animationFrameRef.current !== null) {
+                        cancelAnimationFrame(animationFrameRef.current);
+                    }
+                    setHoveredHighlight(null);
+                }}
                 tabIndex={0}
                 role="slider"
                 aria-label="Audio waveform"
