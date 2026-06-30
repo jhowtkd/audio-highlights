@@ -8,6 +8,7 @@ import { Toaster, toast } from 'sonner';
 import { Dropzone } from '@/components/upload/dropzone';
 import { AudioPlayer } from '@/components/audio/player';
 import { TranscriptViewer } from '@/components/transcription/transcript-viewer';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ConfigPanel } from '@/components/highlights/config-panel';
 import { HighlightList } from '@/components/highlights/highlight-list';
 import { EpisodeSummary } from '@/components/highlights/episode-summary';
@@ -48,6 +49,7 @@ export default function Home() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<string>('transcription');
   const [statusMessage] = useState<string>('');
+  const [isResetConfirmOpen, setIsResetConfirmOpen] = useState(false);
 
   // Timer states
   const [elapsedTime, setElapsedTime] = useState<number>(0);
@@ -242,17 +244,7 @@ export default function Home() {
     setSeekTo(startTime);
   }, []);
 
-  const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
+  const executeReset = useCallback(() => {
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +260,17 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+  }, [audioUrl]);
+
+  const handleReset = useCallback(() => {
+    // Confirm before resetting if there's content
+    if (transcription || highlights.length > 0) {
+      setIsResetConfirmOpen(true);
+      return;
+    }
+
+    executeReset();
+  }, [transcription, highlights.length, executeReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -308,6 +310,16 @@ export default function Home() {
           </div>
         </div>
       </header>
+
+      <ConfirmDialog
+        open={isResetConfirmOpen}
+        onOpenChange={setIsResetConfirmOpen}
+        title="Descartar projeto?"
+        message="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+        confirmLabel="Descartar"
+        confirmVariant="destructive"
+        onConfirm={executeReset}
+      />
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
