@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef, useMemo } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type {
     Task,
@@ -318,25 +318,40 @@ export function TaskQueueProvider({ children }: { children: React.ReactNode }) {
         filesRef.current.set(taskId, file);
     }, []);
 
+    const contextValue = useMemo(() => ({
+        state,
+        addTask,
+        updateProgress,
+        completeTask,
+        updateResult,
+        failTask,
+        resetTask,
+        removeTask,
+        clearCompleted,
+        getTask,
+        getNextPendingTask,
+        startProcessing,
+        getTaskFile,
+        setTaskFile,
+    }), [
+        state,
+        addTask,
+        updateProgress,
+        completeTask,
+        updateResult,
+        failTask,
+        resetTask,
+        removeTask,
+        clearCompleted,
+        getTask,
+        getNextPendingTask,
+        startProcessing,
+        getTaskFile,
+        setTaskFile,
+    ]);
+
     return (
-        <TaskQueueContext.Provider
-            value={{
-                state,
-                addTask,
-                updateProgress,
-                completeTask,
-                updateResult,
-                failTask,
-                resetTask,
-                removeTask,
-                clearCompleted,
-                getTask,
-                getNextPendingTask,
-                startProcessing,
-                getTaskFile,
-                setTaskFile,
-            }}
-        >
+        <TaskQueueContext.Provider value={contextValue}>
             {children}
         </TaskQueueContext.Provider>
     );
