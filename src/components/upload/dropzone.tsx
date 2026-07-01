@@ -174,7 +174,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
             <div className="text-sm text-amber-800 dark:text-amber-200">
               <p className="font-medium">Áudio curto ({formatDuration(audioFile.duration)})</p>
               <p className="mt-0.5 text-amber-700 dark:text-amber-300">
-                A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto.
+                A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos áudios com pelo menos 1 minuto.
               </p>
             </div>
           </div>
@@ -195,7 +195,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
       <div
         {...getRootProps({
           role: 'button',
-          'aria-label': 'Área de upload de arquivo. Arraste e solte ou clique para selecionar.',
+          'aria-label': 'Área de upload de áudio. Arraste e solte ou clique para selecionar.',
         })}
         className={cn(
           'border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 outline-none',
@@ -236,7 +236,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
             {isDragActive
               ? isDragReject
                 ? 'Formato não suportado'
-                : 'Solte o arquivo aqui'
+                : 'Solte o áudio aqui'
               : 'Arraste seu áudio aqui'}
           </p>
 

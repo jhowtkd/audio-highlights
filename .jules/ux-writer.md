@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-05 - Accurate Media Terminology
+
+**Copy Type:** Warning message / Dropzone text / Error message
+**Original:** "Recomendamos arquivos com pelo menos 1 minuto." / "Solte o arquivo aqui" / "Divida o arquivo em partes menores." (for duration limit)
+**Changed To:** "Recomendamos áudios com pelo menos 1 minuto." / "Solte o áudio aqui" / "Divida o áudio em partes menores."
+**Learning:** Using "arquivo" (file) when referring to media duration creates a semantic error in Portuguese (files have sizes, media has duration). In an audio-focused app, using "áudio" maintains helpful specificity and correct semantics.
+**Rule:** Avoid generalizing media terms to "arquivo" (file). Use "áudio" when referring to media duration, content, or the primary upload action. Never use "arquivo" when referring to duration (e.g., "Áudio curto" should not be "Arquivo curto").
