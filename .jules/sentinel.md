@@ -31,3 +31,18 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-02-12 - Missing Timeouts on External API Calls
+
+**Vulnerability:** External SDK calls (OpenAI, Groq) were missing explicit timeouts. In case of network issues or slow API responses, this could lead to hanging requests and resource exhaustion (Denial of Service).
+**Root Cause:** The default timeout for the OpenAI Node.js client is 10 minutes, which is too long for a typical web application request, especially considering Vercel's function timeout limits.
+**Learning:** Always explicitly configure timeouts for external API calls and SDK clients to fail fast and prevent resource starvation.
+**Prevention:** Add `timeout: ms` configuration to all OpenAI client instantiations.
+**Code:**
+```typescript
+// Vulnerable
+const openai = new OpenAI({ apiKey });
+
+// Secure
+const openai = new OpenAI({ apiKey, timeout: 60000 });
+```
