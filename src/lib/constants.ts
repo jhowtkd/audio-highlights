@@ -104,7 +104,7 @@ export const DEFAULT_VOLUME = 1;
 // Error messages
 export const ERROR_MESSAGES = {
   FILE_TOO_LARGE: 'O arquivo excede o limite de 500MB. Comprima o áudio ou divida em partes menores.',
-  AUDIO_TOO_LONG: 'O áudio excede o limite de 4 horas. Divida o arquivo em partes menores.',
+  AUDIO_TOO_LONG: 'O áudio excede o limite de 4 horas. Divida o áudio em partes menores.',
   NO_FILE_PROVIDED: 'Nenhum arquivo enviado',
   TRANSCRIPTION_FAILED: 'Não foi possível transcrever o áudio. Verifique o arquivo e tente novamente.',
   HIGHLIGHTS_FAILED: 'Não foi possível gerar os highlights. Tente novamente em alguns instantes.',
