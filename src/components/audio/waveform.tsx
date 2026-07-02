@@ -38,9 +38,18 @@ export function Waveform({
 }: WaveformProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const rafRef = useRef<number | null>(null);
     const [waveformData, setWaveformData] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [hoveredHighlight, setHoveredHighlight] = useState<GeneratedHighlight | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (rafRef.current !== null) {
+                cancelAnimationFrame(rafRef.current);
+            }
+        };
+    }, []);
 
     // Generate waveform data from audio
     useEffect(() => {
@@ -228,39 +237,47 @@ export function Waveform({
 
     // Handle mouse move to show highlight tooltip
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-        if (!containerRef.current || duration === 0 || sortedHighlights.length === 0) {
-            setHoveredHighlight(null);
-            return;
+        if (rafRef.current !== null) {
+            cancelAnimationFrame(rafRef.current);
         }
 
-        const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const hoverTime = (x / rect.width) * duration;
+        const clientX = e.clientX;
 
-        // Binary search for the hovered highlight
-        let found: GeneratedHighlight | null = null;
-        let left = 0;
-        let right = sortedHighlights.length - 1;
-
-        while (left <= right) {
-            const mid = (left + right) >> 1;
-            const h = sortedHighlights[mid];
-
-            if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
-                found = h;
-                break;
+        rafRef.current = requestAnimationFrame(() => {
+            if (!containerRef.current || duration === 0 || sortedHighlights.length === 0) {
+                setHoveredHighlight(null);
+                return;
             }
 
-            if (hoverTime < h.startTime) {
-                right = mid - 1;
-            } else {
-                // If we are past the start time but not within the highlight,
-                // the target must be further to the right.
-                left = mid + 1;
-            }
-        }
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const hoverTime = (x / rect.width) * duration;
 
-        setHoveredHighlight(found);
+            // Binary search for the hovered highlight
+            let found: GeneratedHighlight | null = null;
+            let left = 0;
+            let right = sortedHighlights.length - 1;
+
+            while (left <= right) {
+                const mid = (left + right) >> 1;
+                const h = sortedHighlights[mid];
+
+                if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
+                    found = h;
+                    break;
+                }
+
+                if (hoverTime < h.startTime) {
+                    right = mid - 1;
+                } else {
+                    // If we are past the start time but not within the highlight,
+                    // the target must be further to the right.
+                    left = mid + 1;
+                }
+            }
+
+            setHoveredHighlight(found);
+        });
     }, [duration, sortedHighlights]);
 
     // Handle keyboard navigation
