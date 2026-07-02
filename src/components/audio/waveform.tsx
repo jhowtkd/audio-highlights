@@ -38,9 +38,18 @@ export function Waveform({
 }: WaveformProps) {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const requestRef = useRef<number | null>(null);
     const [waveformData, setWaveformData] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [hoveredHighlight, setHoveredHighlight] = useState<GeneratedHighlight | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (requestRef.current !== null) {
+                cancelAnimationFrame(requestRef.current);
+            }
+        };
+    }, []);
 
     // Generate waveform data from audio
     useEffect(() => {
@@ -233,34 +242,48 @@ export function Waveform({
             return;
         }
 
-        const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const hoverTime = (x / rect.width) * duration;
+        // Use clientX from the event, avoiding reading it inside the rAF callback
+        // which would require persisting the event.
+        const clientX = e.clientX;
 
-        // Binary search for the hovered highlight
-        let found: GeneratedHighlight | null = null;
-        let left = 0;
-        let right = sortedHighlights.length - 1;
-
-        while (left <= right) {
-            const mid = (left + right) >> 1;
-            const h = sortedHighlights[mid];
-
-            if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
-                found = h;
-                break;
-            }
-
-            if (hoverTime < h.startTime) {
-                right = mid - 1;
-            } else {
-                // If we are past the start time but not within the highlight,
-                // the target must be further to the right.
-                left = mid + 1;
-            }
+        if (requestRef.current !== null) {
+            cancelAnimationFrame(requestRef.current);
         }
 
-        setHoveredHighlight(found);
+        // Performance: Throttle high-frequency mousemove events using requestAnimationFrame
+        // to prevent layout thrashing and main-thread blocking when reading DOM geometry (getBoundingClientRect).
+        requestRef.current = requestAnimationFrame(() => {
+            if (!containerRef.current) return;
+
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const hoverTime = (x / rect.width) * duration;
+
+            // Binary search for the hovered highlight
+            let found: GeneratedHighlight | null = null;
+            let left = 0;
+            let right = sortedHighlights.length - 1;
+
+            while (left <= right) {
+                const mid = (left + right) >> 1;
+                const h = sortedHighlights[mid];
+
+                if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
+                    found = h;
+                    break;
+                }
+
+                if (hoverTime < h.startTime) {
+                    right = mid - 1;
+                } else {
+                    // If we are past the start time but not within the highlight,
+                    // the target must be further to the right.
+                    left = mid + 1;
+                }
+            }
+
+            setHoveredHighlight(found);
+        });
     }, [duration, sortedHighlights]);
 
     // Handle keyboard navigation
