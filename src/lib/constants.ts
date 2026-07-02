@@ -49,6 +49,10 @@ export const MAX_TOPIC_LENGTH = 50;
 export const MAX_TOPICS_COUNT = 10;
 export const MAX_NARRATIVE_CONTEXT_LENGTH = 1000;
 export const MAX_SEGMENTS_COUNT = 20000; // Limit to prevent DoS
+export const MAX_SEGMENT_ID_LENGTH = 100;
+export const MAX_SEGMENT_TEXT_LENGTH = 5000;
+export const MAX_WORD_LENGTH = 100;
+export const MAX_WORDS_PER_SEGMENT = 10000;
 
 export const DEFAULT_TARGET_DURATION = 60; // seconds
 export const CUT_PADDING_SECONDS = 0.5; // seconds (padding start/end to avoid clipping words)
