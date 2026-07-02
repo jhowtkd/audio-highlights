@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-07-02 - Gender Agreement Correction
+
+**Copy Type:** Button label / Status text
+**Original:** "Concluídas" / "Limpar concluídas"
+**Changed To:** "Concluídos" / "Limpar concluídos"
+**Learning:** After updating the primary noun from "Tarefas" (feminine) to "Projetos" (masculine) to remove internal jargon, some adjectives were left in the feminine form. Consistent gender agreement is essential for professional, native-sounding Portuguese copy.
+**Rule:** When changing a core noun (e.g., Tarefa -> Projeto, Arquivo -> Áudio), always audit the surrounding adjectives, verbs, and pronouns in the same view to ensure grammatical gender and number agreement.
