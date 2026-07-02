@@ -33,3 +33,9 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-07-02 - Throttling High-Frequency Mouse Events
+
+**Bottleneck:** High-frequency `mousemove` events on the waveform reading DOM geometry `getBoundingClientRect()` caused layout thrashing and main-thread blocking.
+**Learning:** When handling high-frequency UI events that read DOM geometry, explicitly throttle the execution using `requestAnimationFrame`.
+**Action:** Wrapped the geometry calculation and state update in `handleMouseMove` with `requestAnimationFrame`, cancelling the previous frame if still pending.
+**Code:** `requestRef.current = requestAnimationFrame(() => { /* logic */ })`
