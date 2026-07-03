@@ -16,6 +16,7 @@ import {
     Scissors,
 } from 'lucide-react';
 import { DecupagemView } from '@/components/decupagem/decupagem-view';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster, toast } from 'sonner';
 import { AudioPlayer } from '@/components/audio/player';
@@ -52,13 +53,15 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
+    const [showRetranscribeConfirm, setShowRetranscribeConfirm] = useState(false);
 
     const handleRetranscribe = () => {
         if (!task) return;
+        setShowRetranscribeConfirm(true);
+    };
 
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
+    const executeRetranscribe = () => {
+        if (!task) return;
 
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
@@ -506,6 +509,13 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                     </p>
                 </div>
             </footer>
+            <ConfirmDialog
+                open={showRetranscribeConfirm}
+                onOpenChange={setShowRetranscribeConfirm}
+                title="Retranscrever arquivo?"
+                message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                onConfirm={executeRetranscribe}
+            />
         </div>
     );
 }
