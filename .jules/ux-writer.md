@@ -32,3 +32,18 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-07-03 - Removed Robotic Error Prefix and Vague Language
+
+**Copy Type:** Error messages for missing transcriptions and processing retries.
+
+**Original:** "Erro: Transcrição não encontrada. Tente recarregar." / "Erro ao reiniciar processamento"
+
+**Changed To:** "Transcrição não encontrada. Por favor, recarregue a página." / "Não foi possível reiniciar. Verifique o arquivo e tente novamente."
+
+**Learning:** This app's users benefit from friendly, actionable error messages rather than technical or vague phrasing. Prefixing messages with 'Erro:' is robotic and unnecessarily alarming. Using specific actions like 'recarregue a página' or 'Verifique o arquivo' provides clear next steps.
+
+**Rule:** For this app, ALWAYS:
+1. Remove the word 'Erro:' from the beginning of error messages to soften the tone.
+2. Provide a specific, actionable next step rather than vague instructions like 'Tente recarregar'.
+3. Avoid generic messages like 'Erro ao [ação]'; instead, state what couldn't be done and suggest a fix.
