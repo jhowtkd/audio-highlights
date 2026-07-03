@@ -31,3 +31,28 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-07-03 - Missing Security HTTP Headers
+
+**Vulnerability:** The Next.js application was missing standard security HTTP headers (e.g., `X-Content-Type-Options`, `X-Frame-Options`), leaving it susceptible to attacks like Clickjacking, MIME-type sniffing, and cross-site scripting (XSS), as well as missing strict transport security (HSTS).
+**Root Cause:** Security headers were commented out in `next.config.ts`, possibly during initial development.
+**Learning:** Always enable HTTP security headers globally at the application level to provide defense in depth. Frameworks like Next.js make this trivial via `next.config.ts`.
+**Prevention:** Ensure `next.config.ts` configures `async headers()` to apply security headers to all routes `/(.*)`.
+**Code:**
+```typescript
+// Vulnerable:
+// async headers() { ... }
+
+// Secure:
+async headers() {
+  return [
+    {
+      source: '/(.*)',
+      headers: [
+        { key: 'X-Content-Type-Options', value: 'nosniff' },
+        // ... other security headers
+      ],
+    },
+  ];
+}
+```
