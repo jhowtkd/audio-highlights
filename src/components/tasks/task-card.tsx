@@ -18,6 +18,8 @@ import {
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
 import { formatFileSize, formatDuration } from '@/lib/format-utils';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
+import { useState } from 'react';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import type { Task } from '@/types/task-types';
 import { cn } from '@/lib/utils';
@@ -69,6 +71,7 @@ export function TaskCard({ task }: TaskCardProps) {
     const router = useRouter();
     const { removeTask, retryTask } = useTaskQueue();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [showRetranscribeConfirm, setShowRetranscribeConfirm] = useState(false);
 
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
@@ -79,10 +82,10 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
+        setShowRetranscribeConfirm(true);
+    };
 
+    const executeRetranscribe = () => {
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -225,6 +228,13 @@ export function TaskCard({ task }: TaskCardProps) {
                     </div>
                 </div>
             </div>
+            <ConfirmDialog
+                open={showRetranscribeConfirm}
+                onOpenChange={setShowRetranscribeConfirm}
+                title="Retranscrever arquivo?"
+                message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                onConfirm={executeRetranscribe}
+            />
         </div>
     );
 }

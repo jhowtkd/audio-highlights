@@ -8,10 +8,12 @@ import { Toaster } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { TaskList } from '@/components/tasks/task-list';
 import { UploadDialog } from '@/components/tasks/upload-dialog';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 
 export default function TasksPage() {
     const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+    const [showClearConfirm, setShowClearConfirm] = useState(false);
     const { tasks, pendingCount, completedCount, errorCount, isProcessing, clearCompleted } = useTaskQueue();
 
     const processingCount = tasks.filter(t =>
@@ -106,7 +108,7 @@ export default function TasksPage() {
 
                         {/* Actions */}
                         {completedCount > 0 && (
-                            <Button variant="outline" size="sm" onClick={clearCompleted}>
+                            <Button variant="outline" size="sm" onClick={() => setShowClearConfirm(true)}>
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Limpar concluídas
                             </Button>
@@ -141,6 +143,13 @@ export default function TasksPage() {
 
             {/* Upload Dialog */}
             <UploadDialog open={uploadDialogOpen} onOpenChange={setUploadDialogOpen} />
+            <ConfirmDialog
+                open={showClearConfirm}
+                onOpenChange={setShowClearConfirm}
+                title="Limpar projetos concluídos?"
+                message="Tem certeza que deseja remover todos os projetos concluídos da lista? Isso não apagará os arquivos originais."
+                onConfirm={clearCompleted}
+            />
         </div>
     );
 }
