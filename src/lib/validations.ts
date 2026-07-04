@@ -13,6 +13,10 @@ import {
   MAX_TOPICS_COUNT,
   MAX_NARRATIVE_CONTEXT_LENGTH,
   MAX_SEGMENTS_COUNT,
+  MAX_ID_LENGTH,
+  MAX_TEXT_LENGTH,
+  MAX_WORD_LENGTH,
+  MAX_WORDS_PER_SEGMENT,
 } from './constants';
 
 // Transcription API validation
@@ -54,17 +58,17 @@ export const highlightConfigSchema = z.object({
 
 // Shared segment schema
 export const transcriptionSegmentSchema = z.object({
-  id: z.string(),
+  id: z.string().max(MAX_ID_LENGTH, "ID exceeds maximum length"), // SECURITY: Apply max limits to prevent DoS via memory exhaustion
   start: z.number().nonnegative(),
   end: z.number().nonnegative(),
-  text: z.string(),
+  text: z.string().max(MAX_TEXT_LENGTH, "Text exceeds maximum length"), // SECURITY: Apply max limits to prevent DoS via memory exhaustion
   confidence: z.number().min(0).max(1).optional(),
   words: z.array(z.object({
-    word: z.string(),
+    word: z.string().max(MAX_WORD_LENGTH, "Word exceeds maximum length"), // SECURITY: Apply max limits to prevent DoS via memory exhaustion
     start: z.number().nonnegative(),
     end: z.number().nonnegative(),
     confidence: z.number().min(0).max(1).optional(),
-  })).optional(),
+  })).max(MAX_WORDS_PER_SEGMENT, "Too many words in segment").optional(), // SECURITY: Apply max limits to prevent DoS via memory exhaustion
 });
 
 // Highlights API request validation
