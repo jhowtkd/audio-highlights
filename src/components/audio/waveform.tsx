@@ -129,6 +129,7 @@ export function Waveform({
     }, [audioUrl, duration, segments]);
 
     const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+    const resizeFrameRef = useRef<number | null>(null);
 
     // Monitor container size changes
     useEffect(() => {
@@ -136,8 +137,14 @@ export function Waveform({
         if (!container) return;
 
         const observer = new ResizeObserver(() => {
-            const { width, height } = container.getBoundingClientRect();
-            setDimensions({ width, height });
+            if (resizeFrameRef.current !== null) {
+                cancelAnimationFrame(resizeFrameRef.current);
+            }
+            // Performance: Throttle resize events that read DOM geometry using requestAnimationFrame to prevent layout thrashing.
+            resizeFrameRef.current = requestAnimationFrame(() => {
+                const { width, height } = container.getBoundingClientRect();
+                setDimensions({ width, height });
+            });
         });
 
         observer.observe(container);
@@ -146,7 +153,12 @@ export function Waveform({
         const { width, height } = container.getBoundingClientRect();
         setDimensions({ width, height });
 
-        return () => observer.disconnect();
+        return () => {
+            observer.disconnect();
+            if (resizeFrameRef.current !== null) {
+                cancelAnimationFrame(resizeFrameRef.current);
+            }
+        };
     }, []);
 
     // Draw waveform on canvas
@@ -226,6 +238,16 @@ export function Waveform({
         return [...highlights].sort((a, b) => a.startTime - b.startTime);
     }, [highlights]);
 
+    const mouseMoveFrameRef = useRef<number | null>(null);
+
+    useEffect(() => {
+        return () => {
+            if (mouseMoveFrameRef.current !== null) {
+                cancelAnimationFrame(mouseMoveFrameRef.current);
+            }
+        };
+    }, []);
+
     // Handle mouse move to show highlight tooltip
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!containerRef.current || duration === 0 || sortedHighlights.length === 0) {
@@ -233,34 +255,47 @@ export function Waveform({
             return;
         }
 
-        const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const hoverTime = (x / rect.width) * duration;
+        // Performance: Extract event properties synchronously before requestAnimationFrame
+        // to avoid accessing stale event data due to React's event pooling.
+        const clientX = e.clientX;
 
-        // Binary search for the hovered highlight
-        let found: GeneratedHighlight | null = null;
-        let left = 0;
-        let right = sortedHighlights.length - 1;
-
-        while (left <= right) {
-            const mid = (left + right) >> 1;
-            const h = sortedHighlights[mid];
-
-            if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
-                found = h;
-                break;
-            }
-
-            if (hoverTime < h.startTime) {
-                right = mid - 1;
-            } else {
-                // If we are past the start time but not within the highlight,
-                // the target must be further to the right.
-                left = mid + 1;
-            }
+        if (mouseMoveFrameRef.current !== null) {
+            cancelAnimationFrame(mouseMoveFrameRef.current);
         }
 
-        setHoveredHighlight(found);
+        // Performance: Throttle high-frequency mousemove events that read DOM geometry
+        // (getBoundingClientRect) using requestAnimationFrame to prevent layout thrashing.
+        mouseMoveFrameRef.current = requestAnimationFrame(() => {
+            if (!containerRef.current) return;
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const hoverTime = (x / rect.width) * duration;
+
+            // Binary search for the hovered highlight
+            let found: GeneratedHighlight | null = null;
+            let left = 0;
+            let right = sortedHighlights.length - 1;
+
+            while (left <= right) {
+                const mid = (left + right) >> 1;
+                const h = sortedHighlights[mid];
+
+                if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
+                    found = h;
+                    break;
+                }
+
+                if (hoverTime < h.startTime) {
+                    right = mid - 1;
+                } else {
+                    // If we are past the start time but not within the highlight,
+                    // the target must be further to the right.
+                    left = mid + 1;
+                }
+            }
+
+            setHoveredHighlight(found);
+        });
     }, [duration, sortedHighlights]);
 
     // Handle keyboard navigation
