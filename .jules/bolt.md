@@ -33,3 +33,16 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-07-05 - Throttle High-Frequency React Event Handlers that read DOM
+
+**Bottleneck:** Un-throttled high-frequency UI events (`mousemove`) reading DOM geometry (`getBoundingClientRect`) causing layout thrashing and main-thread blocking.
+**Learning:** We need to explicitly throttle such events. When deferring React event handlers using `requestAnimationFrame`, always extract the required event properties (e.g., `e.clientX`) synchronously outside the callback to avoid accessing stale or nullified event data due to React's event pooling in older versions. We must also manage the `requestAnimationFrame` lifecycle using `useRef` and `cancelAnimationFrame` inside the hook and the component's unmount cleanup `useEffect`.
+**Action:** Throttle high-frequency UI events that do DOM reads/writes using `requestAnimationFrame`, synchronously capturing event fields first.
+**Code:**
+```typescript
+const clientX = e.clientX;
+if (requestRef.current) cancelAnimationFrame(requestRef.current);
+requestRef.current = requestAnimationFrame(() => {
+    // Read DOM geometry and update state
+});
+```
