@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useRef, ChangeEvent } from 'react';
+import { useRef, ChangeEvent, useState } from 'react';
 import {
     FileAudio,
     Trash2,
@@ -21,6 +21,7 @@ import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import type { Task } from '@/types/task-types';
 import { cn } from '@/lib/utils';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 
 interface TaskCardProps {
     task: Task;
@@ -69,6 +70,7 @@ export function TaskCard({ task }: TaskCardProps) {
     const router = useRouter();
     const { removeTask, retryTask } = useTaskQueue();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [actionToConfirm, setActionToConfirm] = useState<'retranscribe' | 'delete' | null>(null);
 
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
@@ -79,16 +81,23 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
+        setActionToConfirm('retranscribe');
+    };
 
-        // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
-        const success = retryTask(task.id);
-        if (!success) {
-            // Arquivo não está na memória, abrir seletor
-            fileInputRef.current?.click();
+    const handleDelete = () => {
+        setActionToConfirm('delete');
+    };
+
+    const confirmAction = () => {
+        if (actionToConfirm === 'retranscribe') {
+            const success = retryTask(task.id);
+            if (!success) {
+                fileInputRef.current?.click();
+            }
+        } else if (actionToConfirm === 'delete') {
+            removeTask(task.id);
         }
+        setActionToConfirm(null);
     };
 
     const handleFileSelect = (e: ChangeEvent<HTMLInputElement>) => {
@@ -206,13 +215,25 @@ export function TaskCard({ task }: TaskCardProps) {
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => removeTask(task.id)}
+                                onClick={handleDelete}
                                 className="text-slate-500 hover:text-red-600"
                                 title="Excluir projeto"
+                                aria-label="Excluir projeto"
                             >
                                 <Trash2 className="h-4 w-4" />
                             </Button>
                         )}
+
+                        <ConfirmDialog
+                            isOpen={actionToConfirm !== null}
+                            onOpenChange={(open) => { if (!open) setActionToConfirm(null) }}
+                            onConfirm={confirmAction}
+                            onCancel={() => setActionToConfirm(null)}
+                            title={actionToConfirm === 'delete' ? 'Excluir projeto?' : 'Retranscrever arquivo?'}
+                            message={actionToConfirm === 'delete'
+                                ? 'Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita.'
+                                : 'Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.'}
+                        />
 
                         {/* Hidden file input for restoration */}
                         <input

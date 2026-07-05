@@ -7,11 +7,13 @@ import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { TaskList } from '@/components/tasks/task-list';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { UploadDialog } from '@/components/tasks/upload-dialog';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 
 export default function TasksPage() {
     const [uploadDialogOpen, setUploadDialogOpen] = useState(false);
+    const [isClearDialogOpen, setIsClearDialogOpen] = useState(false);
     const { tasks, pendingCount, completedCount, errorCount, isProcessing, clearCompleted } = useTaskQueue();
 
     const processingCount = tasks.filter(t =>
@@ -21,6 +23,17 @@ export default function TasksPage() {
     return (
         <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
             <Toaster position="top-right" richColors />
+            <ConfirmDialog
+                isOpen={isClearDialogOpen}
+                onOpenChange={setIsClearDialogOpen}
+                onConfirm={() => {
+                    clearCompleted();
+                    setIsClearDialogOpen(false);
+                }}
+                onCancel={() => setIsClearDialogOpen(false)}
+                title="Limpar projetos concluídos?"
+                message="Tem certeza que deseja remover todos os projetos concluídos da lista? Esta ação não apagará os arquivos originais, mas removerá o histórico."
+            />
 
             {/* Header */}
             <header className="border-b border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
@@ -106,7 +119,7 @@ export default function TasksPage() {
 
                         {/* Actions */}
                         {completedCount > 0 && (
-                            <Button variant="outline" size="sm" onClick={clearCompleted}>
+                            <Button variant="outline" size="sm" onClick={() => setIsClearDialogOpen(true)}>
                                 <Trash2 className="h-4 w-4 mr-2" />
                                 Limpar concluídas
                             </Button>

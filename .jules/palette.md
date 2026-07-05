@@ -42,3 +42,10 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-01-24 - Blocking native dialogs for destructive actions
+
+**UX Problem:** The app was using `window.confirm()` and direct deletions without confirmation for destructive actions, causing jarring blocking behavior and accidental data loss.
+**Learning:** Native confirm dialogs stop all JavaScript execution and provide a poor, non-styled user experience.
+**Solution:** Implemented and used a custom, accessible `<ConfirmDialog>` based on Radix UI for all destructive actions.
+**Pattern:** For destructive actions (such as resetting projects, retranscribing files, or deleting tasks), never use blocking native browser dialogs. Rely on state-driven React modals by importing and rendering `<ConfirmDialog>`.
