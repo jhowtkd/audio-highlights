@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-07-06 - Client-Side Audio Normalization
+
+**Research Topic:** Normalizing playback volume of uneven recordings
+
+**Finding:** The native Web Audio API's `DynamicsCompressorNode` is perfectly suited for real-time dynamic range compression (volume leveling) without requiring any server-side FFmpeg processing.
+
+**Decision:** Proposed implementing a toggleable "Smart Volume" feature directly in the React `<AudioPlayer>` component.
+
+**Learning:** When integrating Web Audio API with React, `audioContext.createMediaElementSource()` MUST be called only once per `HTMLMediaElement` instance. React's Strict Mode and component remounting can easily trigger an `InvalidStateError`. Using a robust `useRef` architecture to track initialization is crucial.
+
+**Resources:**
+- https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode
