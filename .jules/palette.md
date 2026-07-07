@@ -42,3 +42,15 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-07-07 - Keyboard-Inaccessible Hover Tooltips
+
+**UX Problem:** Tooltips providing cost estimation details were built using `<div className="group relative">`, meaning they were completely inaccessible to keyboard users (no focus states, no way to trigger the tooltip) and lacked screen reader announcements.
+**Learning:** Relying purely on `:hover` for helper text excludes users who cannot use a mouse. Interactive elements providing information must be keyboard focusable.
+**Solution:** Replaced `div` wrappers with `<button type="button">`, added explicit `focus-visible:ring-2` focus indicators, added `group-focus:opacity-100` so tooltips appear on keyboard focus, and added descriptive `aria-label` on the button while hiding visual contents from screen readers with `aria-hidden="true"`.
+**Pattern:** For this design system, ALL inline info tooltips must:
+1. Be semantic `<button type="button">`, never `<div>`
+2. Have explicit `aria-label` on the button
+3. Hide internal icons and tooltip text from screen readers with `aria-hidden="true"`
+4. Show on BOTH hover (`group-hover:opacity-100`) AND focus (`group-focus:opacity-100`)
+5. Have clear focus rings (`focus-visible:ring-2`)
