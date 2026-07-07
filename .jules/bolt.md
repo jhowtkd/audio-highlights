@@ -33,3 +33,17 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-07-07 - Throttling High-Frequency React Event Handlers
+
+**Bottleneck:** `onMouseMove` in the `Waveform` component was synchronously calling `getBoundingClientRect()` on every mouse movement, causing layout thrashing and main-thread blocking.
+**Learning:** High-frequency DOM measurements inside React event handlers can cause severe jank. Wrapping them in `requestAnimationFrame` effectively throttles execution to the screen refresh rate.
+**Action:** Extract required event properties (like `e.clientX`) synchronously outside the RAF callback, maintain a reference to the frame ID for cleanup, and clear it on unmount or when the mouse leaves.
+**Code:**
+```typescript
+const clientX = e.clientX;
+if (animationFrameRef.current) cancelAnimationFrame(animationFrameRef.current);
+animationFrameRef.current = requestAnimationFrame(() => {
+  const rect = containerRef.current.getBoundingClientRect();
+  // ... DOM reading and state updates
+});
+```
