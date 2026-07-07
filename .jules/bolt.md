@@ -33,3 +33,21 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-05-30 - MouseMove DOM Reads Block Main Thread
+
+**Bottleneck:** High-frequency `mousemove` event calling `getBoundingClientRect()` synchronously, causing layout thrashing.
+**Learning:** When deferring React event handlers using `requestAnimationFrame`, extract required event properties (e.g., `e.clientX`) synchronously outside the callback to avoid accessing stale data due to React's event pooling.
+**Action:** Throttle DOM geometry reads in high-frequency events using `requestAnimationFrame` and `useRef` to track and cancel stale frames.
+**Code:**
+```typescript
+const rafRef = useRef(null);
+useEffect(() => () => rafRef.current && cancelAnimationFrame(rafRef.current), []);
+const onMouseMove = (e) => {
+  const clientX = e.clientX;
+  if (rafRef.current) cancelAnimationFrame(rafRef.current);
+  rafRef.current = requestAnimationFrame(() => {
+    // Perform DOM reads and state updates here using clientX
+  });
+};
+```
