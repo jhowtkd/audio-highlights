@@ -33,3 +33,9 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-07-08 - Throttling React Events with requestAnimationFrame
+
+**Bottleneck:** Synchronous `getBoundingClientRect()` calls inside high-frequency React events (like `onMouseMove`) causing layout thrashing and main-thread blocking.
+**Learning:** Using `requestAnimationFrame` effectively throttles DOM reads to screen refresh rate. When doing this in React, the `SyntheticEvent` properties (like `e.clientX`) must be extracted *synchronously* before the rAF callback to avoid accessing stale/nullified event data.
+**Action:** Always extract needed event properties outside the asynchronous/deferred callbacks. Remember to cancel pending frames on `useEffect` cleanup and `onMouseLeave`.
+**Code:** `const clientX = e.clientX; rafRef.current = requestAnimationFrame(() => { /* use clientX */ });`
