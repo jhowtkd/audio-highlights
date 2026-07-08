@@ -31,3 +31,26 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2025-07-07 - Rate Limiting API Endpoints
+
+**Vulnerability:** No rate limiting on public API endpoints (`/api/transcribe`, `/api/highlights`, `/api/search`, `/api/decupagem`).
+**Root Cause:** The Next.js API routes were created without middleware or endpoint-level rate limits.
+**Learning:** In a production Next.js application, especially one communicating with external LLM APIs (OpenAI, Groq), missing rate limiting is a severe risk for DoS and quota exhaustion.
+**Prevention:** Implement an in-memory (or Redis-backed) rate limiter (e.g., using `lru-cache`) for all routes. We introduced `src/lib/rate-limit.ts` to manage this per IP address.
+**Code:**
+```typescript
+import rateLimit from '@/lib/rate-limit';
+
+const limiter = rateLimit({
+    interval: 60 * 1000,
+    uniqueTokenPerInterval: 500,
+});
+
+// Inside route handler:
+const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown-ip';
+try {
+    await limiter.check(5, ip);
+} catch {
+    return NextResponse.json({ error: 'Rate limit exceeded.' }, { status: 429 });
+}
+```

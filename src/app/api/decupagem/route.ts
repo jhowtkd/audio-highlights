@@ -7,6 +7,12 @@ import { createErrorResponse, requireEnvVar, AppError } from '@/lib/errors';
 import { GPT_MODEL } from '@/lib/constants';
 import type { DecupageResult, DecupageSegment, DecupageProblemType } from '@/types/decupagem';
 import type { TranscriptionSegment } from '@/types';
+import rateLimit from '@/lib/rate-limit';
+
+const limiter = rateLimit({
+    interval: 60 * 1000,
+    uniqueTokenPerInterval: 500,
+});
 
 function buildAnalysisPrompt(segments: TranscriptionSegment[], context?: string): string {
     const transcriptText = segments
@@ -54,6 +60,16 @@ FORMATO DE RESPOSTA (JSON PURO):
 
 export async function POST(request: NextRequest) {
     try {
+        const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown-ip';
+        try {
+            await limiter.check(10, ip);
+        } catch {
+            return NextResponse.json(
+                { error: 'Rate limit exceeded. Please try again later.' },
+                { status: 429, headers: { 'Retry-After': '60' } }
+            );
+        }
+
         const apiKey = requireEnvVar('OPENAI_API_KEY');
 
         const body = await request.json();

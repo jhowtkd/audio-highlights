@@ -7,6 +7,12 @@ import { formatTime } from '@/lib/format-utils';
 import { GPT_MODEL, GPT_MAX_TOKENS } from '@/lib/constants';
 import { createErrorResponse, requireEnvVar, AppError } from '@/lib/errors';
 import { generateHighlightsRequestSchema } from '@/lib/validations';
+import rateLimit from '@/lib/rate-limit';
+
+const limiter = rateLimit({
+    interval: 60 * 1000,
+    uniqueTokenPerInterval: 500,
+});
 
 function buildPrompt(
   segments: TranscriptionSegment[],
@@ -388,6 +394,16 @@ function extractTranscriptForHighlight(
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown-ip';
+    try {
+        await limiter.check(10, ip);
+    } catch {
+        return NextResponse.json(
+            { error: 'Rate limit exceeded. Please try again later.' },
+            { status: 429, headers: { 'Retry-After': '60' } }
+        );
+    }
+
     // Validate environment variables
     const apiKey = requireEnvVar('OPENAI_API_KEY');
 

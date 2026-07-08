@@ -7,9 +7,24 @@ import { ERROR_MESSAGES, MAX_FILE_SIZE } from '@/lib/constants';
 import { createErrorResponse, AppError } from '@/lib/errors';
 import { needsConversion, convertToMp3 } from '@/lib/audio-converter';
 import { alignWordsToSegments } from '@/lib/transcription-utils';
+import rateLimit from '@/lib/rate-limit';
+
+const limiter = rateLimit({
+    interval: 60 * 1000,
+    uniqueTokenPerInterval: 500,
+});
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown-ip';
+    try {
+        await limiter.check(5, ip);
+    } catch {
+        return NextResponse.json(
+            { error: 'Rate limit exceeded. Please try again later.' },
+            { status: 429, headers: { 'Retry-After': '60' } }
+        );
+    }
     // Validate environment variables
     // const apiKey = requireEnvVar('OPENAI_API_KEY'); // Not needed for transcription via Groq
 
