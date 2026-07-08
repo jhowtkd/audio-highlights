@@ -31,3 +31,27 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2026-07-08 - DoS via Unbounded Inputs
+
+**Vulnerability:** The Zod validation schemas allowed arbitrarily large strings and arrays in the request payloads, potentially leading to Denial of Service via memory exhaustion and heavy parsing overhead.
+
+**Root Cause:** While Zod provides validation for types (`z.string()`, `z.array()`), default instances do not enforce maximum lengths or item counts unless explicitly specified with bounds like `.max()`.
+
+**Learning:** When validating incoming JSON payloads, it is critical to always enforce strict `.max()` boundaries for arrays and strings. Never assume input size is naturally constrained by external limitations.
+
+**Prevention:** Define length boundaries explicitly in `constants.ts` and apply them directly to schemas: `z.string().max(MAX_LENGTH)`, `z.array(...).max(MAX_ITEMS)`.
+
+**Code:**
+```typescript
+// Vulnerable
+export const transcriptionSegmentSchema = z.object({
+  text: z.string(),
+  words: z.array(...)
+});
+
+// Secure
+export const transcriptionSegmentSchema = z.object({
+  text: z.string().max(MAX_SEGMENT_TEXT_LENGTH),
+  words: z.array(...).max(MAX_WORDS_PER_SEGMENT)
+});
+```
