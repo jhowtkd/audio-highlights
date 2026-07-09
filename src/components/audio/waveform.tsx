@@ -226,6 +226,17 @@ export function Waveform({
         return [...highlights].sort((a, b) => a.startTime - b.startTime);
     }, [highlights]);
 
+    const rafRef = useRef<number | null>(null);
+
+    // Clean up raf on unmount
+    useEffect(() => {
+        return () => {
+            if (rafRef.current !== null) {
+                cancelAnimationFrame(rafRef.current);
+            }
+        };
+    }, []);
+
     // Handle mouse move to show highlight tooltip
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!containerRef.current || duration === 0 || sortedHighlights.length === 0) {
@@ -233,34 +244,46 @@ export function Waveform({
             return;
         }
 
-        const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const hoverTime = (x / rect.width) * duration;
+        // Extract required event properties synchronously to avoid accessing stale data
+        const clientX = e.clientX;
 
-        // Binary search for the hovered highlight
-        let found: GeneratedHighlight | null = null;
-        let left = 0;
-        let right = sortedHighlights.length - 1;
-
-        while (left <= right) {
-            const mid = (left + right) >> 1;
-            const h = sortedHighlights[mid];
-
-            if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
-                found = h;
-                break;
-            }
-
-            if (hoverTime < h.startTime) {
-                right = mid - 1;
-            } else {
-                // If we are past the start time but not within the highlight,
-                // the target must be further to the right.
-                left = mid + 1;
-            }
+        if (rafRef.current !== null) {
+            cancelAnimationFrame(rafRef.current);
         }
 
-        setHoveredHighlight(found);
+        rafRef.current = requestAnimationFrame(() => {
+            if (!containerRef.current) return;
+
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const hoverTime = (x / rect.width) * duration;
+
+            // Binary search for the hovered highlight
+            let found: GeneratedHighlight | null = null;
+            let left = 0;
+            let right = sortedHighlights.length - 1;
+
+            while (left <= right) {
+                const mid = (left + right) >> 1;
+                const h = sortedHighlights[mid];
+
+                if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
+                    found = h;
+                    break;
+                }
+
+                if (hoverTime < h.startTime) {
+                    right = mid - 1;
+                } else {
+                    // If we are past the start time but not within the highlight,
+                    // the target must be further to the right.
+                    left = mid + 1;
+                }
+            }
+
+            setHoveredHighlight(found);
+            rafRef.current = null;
+        });
     }, [duration, sortedHighlights]);
 
     // Handle keyboard navigation
