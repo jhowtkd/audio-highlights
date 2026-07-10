@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-07-11 - Removed robotic prefix from transcription error
+
+**Copy Type:** Error Message
+**Original:** "Erro: Transcrição não encontrada. Tente recarregar."
+**Changed To:** "Transcrição não encontrada. Por favor, recarregue a página."
+**Learning:** Prefixing error messages with the robotic and alarming "Erro:" creates a negative user experience. Writing friendly, actionable error messages that provide specific next steps is better for the user.
+**Rule:** For this app, NEVER prefix error messages with "Erro:". ALWAYS write friendly, actionable error messages that provide specific next steps for the user.
