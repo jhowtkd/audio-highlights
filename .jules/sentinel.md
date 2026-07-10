@@ -31,3 +31,10 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-01-25 - Missing String Bounds in Zod Schemas
+
+**Vulnerability:** Zod schemas using unbounded `z.string()` and `z.array()` structures could be exploited via massive client payloads, leading to memory exhaustion and Denial of Service (DoS).
+**Root Cause:** The schemas lacked explicit maximum length limits for string fields (e.g. `id`, `text`, `word`) and array fields (`words`), allowing arbitrarily large inputs.
+**Learning:** Always apply explicit `.max()` limits to all `z.string()` and `z.array()` validations, even for seemingly harmless fields.
+**Prevention:** Reference centralized maximum length constants from `src/lib/constants.ts` across all validation schemas to enforce strict bounds on incoming payloads.
