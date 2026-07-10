@@ -33,3 +33,17 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-07-10 - Throttling High-Frequency DOM Reads
+
+**Bottleneck:** Layout thrashing due to synchronous `getBoundingClientRect()` calls inside the `mousemove` event handler in the Waveform component.
+**Learning:** High-frequency events (like `mousemove` or `scroll`) reading DOM geometry synchronously block the main thread and cause layout thrashing. When delegating to `requestAnimationFrame` in React, we must extract event properties (like `e.clientX`) synchronously, as React event pooling might nullify them by the time the frame executes. We also must track the frame ID to cancel pending frames and avoid memory leaks.
+**Action:** Explicitly throttle DOM geometry reads using `requestAnimationFrame`, extract required event properties synchronously, and manage frame cancellation using a `useRef` and `useEffect` cleanup.
+**Code:**
+```tsx
+const clientX = e.clientX;
+if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+rafRef.current = requestAnimationFrame(() => {
+  // read bounding client rect here
+});
+```
