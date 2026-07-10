@@ -42,3 +42,10 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-07-10 - Native Confirm Dialog Replacement
+
+**UX Problem:** The application used native `window.confirm` and `confirm()` for destructive actions (like resetting projects, retranscribing, or deleting tasks), which are blocking, unstyled, and provide a jarring experience.
+**Learning:** Destructive actions needed a unified, accessible confirmation flow integrated with the app's visual language, rather than relying on browser-level alerts which break immersion.
+**Solution:** Created a state-driven `<ConfirmDialog>` component built with `@radix-ui/react-dialog` inside `src/components/ui/` and implemented it across the app for all destructive flows.
+**Pattern:** For destructive actions (such as resetting projects, retranscribing files, or deleting tasks), never use blocking native browser dialogs like `window.confirm()`. Instead, rely on state-driven React modals by importing and rendering the custom accessible `<ConfirmDialog>` component from `@/components/ui/confirm-dialog`.
