@@ -102,3 +102,13 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Real-Time Audio Volume Normalization Research
+
+**Research Topic:** Normalizing audio volume variations in user-uploaded podcasts without server processing.
+**Finding:** The native Web Audio API `DynamicsCompressorNode` can be attached to an `HTMLMediaElement` via `createMediaElementSource()` to perform real-time dynamic range compression directly in the browser with near-zero latency and no bundle size penalty.
+**Decision:** Propose implementing a client-side volume normalization toggle in the audio player using the native API instead of relying on expensive server-side FFmpeg processing.
+**Learning:** When using the Web Audio API in React components, `audioContext.createMediaElementSource()` must only be called once per `HTMLMediaElement`. Track the initialized source (e.g., using a `useRef`) to prevent `InvalidStateError` from repeated calls during `useEffect` re-executions or component re-renders.
+**Resources:**
+- https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode
+- research/proposals/2026-03-01-audio-volume-normalization.md
