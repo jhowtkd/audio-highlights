@@ -42,3 +42,9 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2026-07-11 - Replaced window.confirm with accessible ConfirmDialog
+
+**UX Problem:** The application used native `window.confirm` dialogs for destructive actions (reset, retranscribe, delete), which blocks the main thread, violates accessibility standards, and cannot be styled.
+**Learning:** Native browser dialogs provide poor user experience, can be disabled by users, and break the consistent visual language of the application.
+**Solution:** Created a state-driven `ConfirmDialog` using accessible `@/components/ui/dialog` and replaced all native confirm calls with it.
+**Pattern:** For destructive actions, always use state-driven React modals via `<ConfirmDialog>` instead of `window.confirm`.

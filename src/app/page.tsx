@@ -6,6 +6,7 @@ import { Mic, Sparkles, FileText, AlertCircle, Timer, Film, X, ListTodo, Scissor
 import { ThemeToggle } from '@/components/theme-toggle';
 import { Toaster, toast } from 'sonner';
 import { Dropzone } from '@/components/upload/dropzone';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { AudioPlayer } from '@/components/audio/player';
 import { TranscriptViewer } from '@/components/transcription/transcript-viewer';
 import { ConfigPanel } from '@/components/highlights/config-panel';
@@ -55,6 +56,8 @@ export default function Home() {
 
   // FFmpeg hook
   const { cutVideo, cutMixVideo, isProcessing: isFFmpegProcessing, progress: ffmpegProgress, message: ffmpegMessage } = useFFmpeg();
+
+  const [isResetDialogOpen, setIsResetDialogOpen] = useState(false);
 
   // Video state
   const [videoFile, setVideoFile] = useState<File | null>(null);
@@ -243,16 +246,6 @@ export default function Home() {
   }, []);
 
   const handleReset = useCallback(() => {
-    // Confirm before resetting if there's content
-    if (transcription || highlights.length > 0) {
-      const confirmed = window.confirm(
-        'Deseja realmente descartar este projeto? Todo o progresso será perdido.'
-      );
-      if (!confirmed) {
-        return;
-      }
-    }
-
     if (audioUrl) {
       URL.revokeObjectURL(audioUrl);
     }
@@ -268,7 +261,16 @@ export default function Home() {
     setTranscriptionProgress(0);
     setErrorMessage(null);
     setActiveTab('transcription');
-  }, [audioUrl, transcription, highlights]);
+    setVideoFile(null);
+  }, [audioUrl]);
+
+  const handleResetClick = useCallback(() => {
+    if (transcription || highlights.length > 0) {
+      setIsResetDialogOpen(true);
+    } else {
+      handleReset();
+    }
+  }, [transcription, highlights.length, handleReset]);
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -435,7 +437,7 @@ export default function Home() {
               <Button onClick={handleRetry} variant="default">
                 Tentar novamente
               </Button>
-              <Button onClick={handleReset} variant="outline">
+              <Button onClick={handleResetClick} variant="outline">
                 Começar novo projeto
               </Button>
             </div>
@@ -585,6 +587,17 @@ export default function Home() {
           </div>
         )}
       </main>
+
+      <ConfirmDialog
+        open={isResetDialogOpen}
+        onOpenChange={setIsResetDialogOpen}
+        title="Descartar projeto?"
+        message="Deseja realmente descartar este projeto? Todo o progresso será perdido."
+        confirmLabel="Descartar"
+        cancelLabel="Cancelar"
+        confirmVariant="destructive"
+        onConfirm={handleReset}
+      />
 
       {/* Footer */}
       <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mt-16">

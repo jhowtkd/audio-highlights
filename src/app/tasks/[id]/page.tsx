@@ -26,6 +26,7 @@ import { EpisodeSummary } from '@/components/highlights/episode-summary';
 import { Waveform } from '@/components/audio/waveform';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import { useTaskQueueContext } from '@/contexts/task-context';
 import { useFFmpeg } from '@/hooks/use-ffmpeg';
@@ -52,13 +53,10 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     const [task, setTask] = useState(() => getTask(id));
+    const [isRetranscribeDialogOpen, setIsRetranscribeDialogOpen] = useState(false);
 
     const handleRetranscribe = () => {
         if (!task) return;
-
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
 
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
@@ -277,7 +275,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                                 <Button
                                     variant="ghost"
                                     size="sm"
-                                    onClick={handleRetranscribe}
+                                    onClick={() => setIsRetranscribeDialogOpen(true)}
                                     className="text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-slate-100"
                                     title="Retranscrever arquivo"
                                 >
@@ -497,6 +495,17 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                     </div>
                 </div>
             </main>
+
+            <ConfirmDialog
+                open={isRetranscribeDialogOpen}
+                onOpenChange={setIsRetranscribeDialogOpen}
+                title="Retranscrever arquivo?"
+                message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                confirmLabel="Retranscrever"
+                cancelLabel="Cancelar"
+                confirmVariant="default"
+                onConfirm={handleRetranscribe}
+            />
 
             {/* Footer */}
             <footer className="border-t border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 mt-16">
