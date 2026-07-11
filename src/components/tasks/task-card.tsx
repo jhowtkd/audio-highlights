@@ -3,7 +3,7 @@
 import { useRouter } from 'next/navigation';
 import { formatDistanceToNow } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { useRef, ChangeEvent } from 'react';
+import { useRef, useState, ChangeEvent } from 'react';
 import {
     FileAudio,
     Trash2,
@@ -17,6 +17,7 @@ import {
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Progress } from '@/components/ui/progress';
+import { ConfirmDialog } from '@/components/ui/confirm-dialog';
 import { formatFileSize, formatDuration } from '@/lib/format-utils';
 import { useTaskQueue } from '@/hooks/use-task-queue';
 import type { Task } from '@/types/task-types';
@@ -69,6 +70,8 @@ export function TaskCard({ task }: TaskCardProps) {
     const router = useRouter();
     const { removeTask, retryTask } = useTaskQueue();
     const fileInputRef = useRef<HTMLInputElement>(null);
+    const [isRetranscribeDialogOpen, setIsRetranscribeDialogOpen] = useState(false);
+    const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
     const config = statusConfig[task.status];
     const StatusIcon = config.icon;
@@ -79,10 +82,6 @@ export function TaskCard({ task }: TaskCardProps) {
     };
 
     const handleRetranscribe = () => {
-        if (!confirm('Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente.')) {
-            return;
-        }
-
         // Tenta reprocessar. Se retornar false (arquivo não encontrado), pede o arquivo
         const success = retryTask(task.id);
         if (!success) {
@@ -194,7 +193,7 @@ export function TaskCard({ task }: TaskCardProps) {
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={handleRetranscribe}
+                                onClick={() => setIsRetranscribeDialogOpen(true)}
                                 className="text-slate-500 hover:text-blue-600"
                                 title="Retranscrever arquivo"
                             >
@@ -206,7 +205,7 @@ export function TaskCard({ task }: TaskCardProps) {
                             <Button
                                 size="sm"
                                 variant="ghost"
-                                onClick={() => removeTask(task.id)}
+                                onClick={() => setIsDeleteDialogOpen(true)}
                                 className="text-slate-500 hover:text-red-600"
                                 title="Excluir projeto"
                             >
@@ -225,6 +224,28 @@ export function TaskCard({ task }: TaskCardProps) {
                     </div>
                 </div>
             </div>
+
+            <ConfirmDialog
+                open={isRetranscribeDialogOpen}
+                onOpenChange={setIsRetranscribeDialogOpen}
+                title="Retranscrever arquivo?"
+                message="Tem certeza que deseja retranscrever este arquivo? Isso irá apagar os resultados atuais e gastar créditos novamente."
+                confirmLabel="Retranscrever"
+                cancelLabel="Cancelar"
+                confirmVariant="default"
+                onConfirm={handleRetranscribe}
+            />
+
+            <ConfirmDialog
+                open={isDeleteDialogOpen}
+                onOpenChange={setIsDeleteDialogOpen}
+                title="Excluir projeto?"
+                message="Tem certeza que deseja excluir este projeto? Esta ação não pode ser desfeita."
+                confirmLabel="Excluir"
+                cancelLabel="Cancelar"
+                confirmVariant="destructive"
+                onConfirm={() => removeTask(task.id)}
+            />
         </div>
     );
 }
