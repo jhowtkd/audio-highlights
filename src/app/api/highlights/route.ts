@@ -7,6 +7,7 @@ import { formatTime } from '@/lib/format-utils';
 import { GPT_MODEL, GPT_MAX_TOKENS } from '@/lib/constants';
 import { createErrorResponse, requireEnvVar, AppError } from '@/lib/errors';
 import { generateHighlightsRequestSchema } from '@/lib/validations';
+import { rateLimit } from '@/lib/rate-limit';
 
 function buildPrompt(
   segments: TranscriptionSegment[],
@@ -388,6 +389,12 @@ function extractTranscriptForHighlight(
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = (request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown').split(',')[0].trim();
+    const { success } = rateLimit(`highlights_${ip}`, { limit: 20, windowMs: 15 * 60 * 1000 });
+    if (!success) {
+      return NextResponse.json({ error: 'Muitas requisições. Tente novamente mais tarde.' }, { status: 429 });
+    }
+
     // Validate environment variables
     const apiKey = requireEnvVar('OPENAI_API_KEY');
 

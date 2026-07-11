@@ -5,6 +5,7 @@ import { createErrorResponse, requireEnvVar } from '@/lib/errors';
 import { groupSegmentsByTokenCount } from '@/lib/search-chunking';
 import type { SearchSegment } from '@/lib/search-chunking';
 import { searchRequestSchema } from '@/lib/validations';
+import { rateLimit } from '@/lib/rate-limit';
 
 interface SearchResult {
     segmentId: string;
@@ -101,6 +102,12 @@ REGRAS:
 
 export async function POST(request: NextRequest) {
     try {
+        const ip = (request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown').split(',')[0].trim();
+        const { success } = rateLimit(`search_${ip}`, { limit: 50, windowMs: 15 * 60 * 1000 });
+        if (!success) {
+            return NextResponse.json({ error: 'Muitas requisições. Tente novamente mais tarde.' }, { status: 429 });
+        }
+
         const apiKey = requireEnvVar('OPENAI_API_KEY');
 
         const body = await request.json();
