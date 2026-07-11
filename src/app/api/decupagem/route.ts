@@ -5,6 +5,7 @@ import { decupageRequestSchema } from '@/lib/validations';
 import { detectSilences } from '@/lib/silence-detector';
 import { createErrorResponse, requireEnvVar, AppError } from '@/lib/errors';
 import { GPT_MODEL } from '@/lib/constants';
+import { rateLimit } from '@/lib/rate-limit';
 import type { DecupageResult, DecupageSegment, DecupageProblemType } from '@/types/decupagem';
 import type { TranscriptionSegment } from '@/types';
 
@@ -54,6 +55,12 @@ FORMATO DE RESPOSTA (JSON PURO):
 
 export async function POST(request: NextRequest) {
     try {
+        const ip = (request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown').split(',')[0].trim();
+        const { success } = rateLimit(`decupagem_${ip}`, { limit: 20, windowMs: 15 * 60 * 1000 });
+        if (!success) {
+            return NextResponse.json({ error: 'Muitas requisições. Tente novamente mais tarde.' }, { status: 429 });
+        }
+
         const apiKey = requireEnvVar('OPENAI_API_KEY');
 
         const body = await request.json();

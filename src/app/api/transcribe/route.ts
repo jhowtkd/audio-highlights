@@ -7,9 +7,16 @@ import { ERROR_MESSAGES, MAX_FILE_SIZE } from '@/lib/constants';
 import { createErrorResponse, AppError } from '@/lib/errors';
 import { needsConversion, convertToMp3 } from '@/lib/audio-converter';
 import { alignWordsToSegments } from '@/lib/transcription-utils';
+import { rateLimit } from '@/lib/rate-limit';
 
 export async function POST(request: NextRequest) {
   try {
+    const ip = (request.headers.get('x-forwarded-for') ?? request.headers.get('x-real-ip') ?? 'unknown').split(',')[0].trim();
+    const { success } = rateLimit(`transcribe_${ip}`, { limit: 5, windowMs: 15 * 60 * 1000 });
+    if (!success) {
+      return NextResponse.json({ error: 'Muitas requisições. Tente novamente mais tarde.' }, { status: 429 });
+    }
+
     // Validate environment variables
     // const apiKey = requireEnvVar('OPENAI_API_KEY'); // Not needed for transcription via Groq
 
