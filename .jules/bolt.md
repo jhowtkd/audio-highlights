@@ -33,3 +33,22 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-07-12 - Waveform mousemove thrashing
+
+**Bottleneck:** High-frequency mousemove events triggering synchronous DOM geometry reads (`getBoundingClientRect()`) causing layout thrashing and main thread blocking on the Waveform canvas.
+**Learning:** Even though the function was wrapped in a `useCallback`, it was missing throttling. At higher mouse polling rates, this blocked the main thread.
+**Action:** When handling UI hover states that calculate dimensions or percentages based on cursor position over an element, always extract `e.clientX` and wrap the DOM read + state update in `requestAnimationFrame`. Cancel the frame on unmount and mouseleave.
+**Code:**
+```tsx
+const rafRef = useRef<number | null>(null);
+
+const handleMouseMove = useCallback((e) => {
+    const clientX = e.clientX;
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+        const rect = ref.current.getBoundingClientRect();
+        // ... updates
+    });
+}, []);
+```
