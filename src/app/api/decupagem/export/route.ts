@@ -1,20 +1,19 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { generateEDL } from '@/lib/edl-generator';
 import { createErrorResponse } from '@/lib/errors';
+import { decupageExportRequestSchema } from '@/lib/validations';
 import type { DecupageSegment, EDLFormat } from '@/types/decupagem';
 
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { segments, format, title } = body as {
-            segments: DecupageSegment[],
-            format: EDLFormat,
-            title?: string
-        };
 
-        if (!segments || !Array.isArray(segments)) {
-            return NextResponse.json({ error: 'Invalid segments data' }, { status: 400 });
-        }
+        // SECURITY: Validate unbounded user input to prevent type confusion and DoS
+        const validatedData = decupageExportRequestSchema.parse(body);
+
+        const segments = validatedData.segments as DecupageSegment[];
+        const format = validatedData.format as EDLFormat;
+        const title = validatedData.title;
 
         const content = generateEDL(segments, format, {
             title: title || 'Decupagem Export'

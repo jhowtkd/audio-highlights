@@ -118,3 +118,20 @@ export function validateEnv() {
     throw error;
   }
 }
+
+// Decupagem Export API request validation
+export const decupageExportRequestSchema = z.object({
+  segments: z.array(z.object({
+    id: z.string(),
+    startTime: z.number().nonnegative(),
+    endTime: z.number().nonnegative(),
+    text: z.string(),
+    problemType: z.string(),
+    severity: z.string().optional(),
+    suggestion: z.string(),
+    reason: z.string().optional(),
+    status: z.string().optional()
+  })).max(MAX_SEGMENTS_COUNT, `O número de segmentos excede o limite máximo de ${MAX_SEGMENTS_COUNT}`),
+  format: z.enum(['csv', 'fcpxml', 'cmx3600']),
+  title: z.string().max(MAX_EPISODE_TITLE_LENGTH).optional(),
+});
