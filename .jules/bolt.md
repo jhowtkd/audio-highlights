@@ -33,3 +33,10 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-07-13 - Waveform onMouseMove Performance
+
+**Bottleneck:** Moving mouse over the `Waveform` component triggered `getBoundingClientRect()` inside the `onMouseMove` handler on every mouse movement, leading to main thread blocking and layout thrashing.
+**Learning:** `mousemove` fires incredibly fast. We need to throttle synchronous geometry reads using `requestAnimationFrame`. React event pooling requires capturing properties (like `e.clientX`) synchronously outside the `rAF` callback to prevent stale references.
+**Action:** Use `requestAnimationFrame` for high-frequency events that calculate geometry. Extract required event fields first. Always clear pending frames on unmount or mouse leave.
+**Code:** `const clientX = e.clientX; hoverFrameRef.current = requestAnimationFrame(() => { ... })`
