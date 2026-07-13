@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+## 2026-07-13 - Real-time Audio Normalization
+
+**Research Topic:** Normalizing audio volume during playback for better UX.
+
+**Finding:** Web Audio API's `DynamicsCompressorNode` attached to a `MediaElementAudioSourceNode` can normalize varying volume levels (e.g., between different speakers in a podcast) in real-time with zero bundle size increase and negligible CPU overhead.
+
+**Decision:** Proposed adding an opt-in normalization toggle to the `AudioPlayer`.
+
+**Learning:** For real-time audio modifications during playback, native Web Audio API is far superior to server-side processing (FFmpeg) as it provides immediate feedback without download/upload cycles. Crucially, `createMediaElementSource()` must only be called once per `<audio>` element to avoid `InvalidStateError`.
+
+**Resources:**
+- https://developer.mozilla.org/en-US/docs/Web/API/DynamicsCompressorNode
+- research/proposals/2026-02-28-realtime-audio-normalization.md
