@@ -31,8 +31,8 @@ app.use(cors({
         if (allowedOrigins.includes(origin)) {
             return callback(null, true);
         }
-        // Also allow any *.vercel.app domain
-        if (origin.endsWith('.vercel.app')) {
+        // Also allow any audio-highlights*.vercel.app domain securely
+        if (/^https:\/\/audio-highlights(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin)) {
             return callback(null, true);
         }
         return callback(new Error('Not allowed by CORS'));
@@ -79,6 +79,7 @@ app.post('/cut-video', upload.single('video'), async (req: Request, res: Respons
     const endTime = parseFloat(end);
 
     if (isNaN(startTime) || isNaN(endTime) || startTime < 0 || endTime <= startTime) {
+        fs.unlink(file.path, () => {}); // SECURITY: Cleanup file on error
         res.status(400).json({ error: 'Invalid start/end times' });
         return;
     }
@@ -210,12 +211,14 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
             throw new Error('Invalid segments array');
         }
     } catch {
+        fs.unlink(file.path, () => {}); // SECURITY: Cleanup file on error
         res.status(400).json({ error: 'Invalid segments format. Expected JSON array of {start, end} objects.' });
         return;
     }
 
     const MAX_SEGMENTS = 100;
     if (parsedSegments.length > MAX_SEGMENTS) {
+        fs.unlink(file.path, () => {}); // SECURITY: Cleanup file on error
         res.status(400).json({ error: `Too many segments. Maximum allowed is ${MAX_SEGMENTS}.` });
         return;
     }
@@ -225,6 +228,7 @@ app.post('/concat-segments', upload.single('video'), async (req: Request, res: R
         if (!seg || typeof seg.start !== 'number' || typeof seg.end !== 'number' ||
             isNaN(seg.start) || isNaN(seg.end) ||
             seg.start < 0 || seg.end <= seg.start) {
+            fs.unlink(file.path, () => {}); // SECURITY: Cleanup file on error
             res.status(400).json({ error: 'Invalid segment values. Start must be >= 0 and End > Start.' });
             return;
         }
