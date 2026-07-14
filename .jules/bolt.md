@@ -33,3 +33,21 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-07-14 - Throttled High-Frequency Event without Dependencies
+
+**Bottleneck:** High-frequency `mousemove` events on the waveform triggered expensive DOM layout reads (`getBoundingClientRect()`) and React state updates (`setHoveredHighlight`), causing layout thrashing.
+**Learning:** Throttling high-frequency events using `requestAnimationFrame` instead of external debounce/throttle libraries effectively offloads execution from the main thread loop to frame rendering sync, preventing dropped frames. React's synthetic event pooling required synchronous extraction of `clientX` before async delegation.
+**Action:** Throttle geometry reads inside high-frequency event handlers using `requestAnimationFrame`, always tracking the frame ID in a ref and cleaning it up on unmount and `mouseleave` to prevent stuck UI.
+**Code:**
+```typescript
+// Extract synchronously
+const clientX = e.clientX;
+
+// Cancel pending
+if (rafRef.current !== null) cancelAnimationFrame(rafRef.current);
+
+// Request frame
+rafRef.current = requestAnimationFrame(() => {
+  // Process geometry
+});
+```
