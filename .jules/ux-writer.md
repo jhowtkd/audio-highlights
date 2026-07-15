@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-05-18 - Error Prefix Tone Decision
+
+**Copy Type:** Error messages in toasts and empty states
+**Original:** "Erro: Transcrição não encontrada. Tente recarregar."
+**Changed To:** "Transcrição não encontrada. Por favor, recarregue a página."
+**Learning:** Prefixing messages with the robotic and alarming 'Erro:' creates a negative tone and blames the user or system unnecessarily. Friendly, actionable error messages provide a better user experience.
+**Rule:** In this codebase's Portuguese user-facing copy, avoid prefixing error messages with 'Erro:'. Write friendly, actionable error messages that provide specific next steps for the user.
