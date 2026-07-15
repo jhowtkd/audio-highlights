@@ -31,3 +31,28 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-01-24 - Disk Space Exhaustion (DoS) via File Uploads
+
+**Vulnerability:** Uploaded files were not deleted when input validation failed, leading to disk space exhaustion.
+**Root Cause:** The `/cut-video` and `/concat-segments` routes in `ffmpeg-service/src/index.ts` used `multer` to handle file uploads, saving them to disk. However, validation errors triggered early returns without calling `fs.unlink()` on `req.file.path`.
+**Learning:** Always ensure `fs.unlink()` is explicitly called on `req.file.path` in all early return and validation error paths when accepting file uploads to prevent DoS vulnerabilities.
+**Prevention:** For all endpoints handling file uploads:
+- Track the uploaded file path early.
+- Call `fs.unlink(file.path, () => {})` in every `catch` or `if (error)` block before returning a response.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+if (isNaN(startTime)) {
+    res.status(400).json({ error: "Invalid start time" });
+    return; // file is never deleted
+}
+
+// Secure pattern to use:
+if (isNaN(startTime)) {
+    fs.unlink(file.path, () => {});
+    res.status(400).json({ error: "Invalid start time" });
+    return;
+}
+```
