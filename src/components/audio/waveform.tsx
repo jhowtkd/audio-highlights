@@ -226,42 +226,72 @@ export function Waveform({
         return [...highlights].sort((a, b) => a.startTime - b.startTime);
     }, [highlights]);
 
+    const requestRef = useRef<number>();
+
+    // Clean up animation frame on unmount
+    useEffect(() => {
+        return () => {
+            if (requestRef.current) {
+                cancelAnimationFrame(requestRef.current);
+            }
+        };
+    }, []);
+
     // Handle mouse move to show highlight tooltip
+    // Performance: Throttles high-frequency layout thrashing (getBoundingClientRect)
+    // and binary search to the display refresh rate (e.g. ~16ms).
+    // Reduces main thread blocking time.
     const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
         if (!containerRef.current || duration === 0 || sortedHighlights.length === 0) {
             setHoveredHighlight(null);
             return;
         }
 
-        const rect = containerRef.current.getBoundingClientRect();
-        const x = e.clientX - rect.left;
-        const hoverTime = (x / rect.width) * duration;
+        const clientX = e.clientX;
 
-        // Binary search for the hovered highlight
-        let found: GeneratedHighlight | null = null;
-        let left = 0;
-        let right = sortedHighlights.length - 1;
-
-        while (left <= right) {
-            const mid = (left + right) >> 1;
-            const h = sortedHighlights[mid];
-
-            if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
-                found = h;
-                break;
-            }
-
-            if (hoverTime < h.startTime) {
-                right = mid - 1;
-            } else {
-                // If we are past the start time but not within the highlight,
-                // the target must be further to the right.
-                left = mid + 1;
-            }
+        if (requestRef.current) {
+            cancelAnimationFrame(requestRef.current);
         }
 
-        setHoveredHighlight(found);
+        requestRef.current = requestAnimationFrame(() => {
+            if (!containerRef.current) return;
+            const rect = containerRef.current.getBoundingClientRect();
+            const x = clientX - rect.left;
+            const hoverTime = (x / rect.width) * duration;
+
+            // Binary search for the hovered highlight
+            let found: GeneratedHighlight | null = null;
+            let left = 0;
+            let right = sortedHighlights.length - 1;
+
+            while (left <= right) {
+                const mid = (left + right) >> 1;
+                const h = sortedHighlights[mid];
+
+                if (hoverTime >= h.startTime && hoverTime <= h.endTime) {
+                    found = h;
+                    break;
+                }
+
+                if (hoverTime < h.startTime) {
+                    right = mid - 1;
+                } else {
+                    // If we are past the start time but not within the highlight,
+                    // the target must be further to the right.
+                    left = mid + 1;
+                }
+            }
+
+            setHoveredHighlight(found);
+        });
     }, [duration, sortedHighlights]);
+
+    const handleMouseLeave = useCallback(() => {
+        if (requestRef.current) {
+            cancelAnimationFrame(requestRef.current);
+        }
+        setHoveredHighlight(null);
+    }, []);
 
     // Handle keyboard navigation
     const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
@@ -316,7 +346,7 @@ export function Waveform({
                 onClick={handleClick}
                 onKeyDown={handleKeyDown}
                 onMouseMove={handleMouseMove}
-                onMouseLeave={() => setHoveredHighlight(null)}
+                onMouseLeave={handleMouseLeave}
                 tabIndex={0}
                 role="slider"
                 aria-label="Audio waveform"

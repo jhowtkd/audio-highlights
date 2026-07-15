@@ -33,3 +33,9 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-07-15 - Throttled handleMouseMove with requestAnimationFrame
+
+**Bottleneck:** `handleMouseMove` in `waveform.tsx` fires very frequently on high refresh rate displays, causing excessive recalculations (including `getBoundingClientRect` and binary search) and potential React state updates on the main thread, leading to scroll/interaction jank.
+**Learning:** When using `requestAnimationFrame` in React components to throttle UI events, always extract the required event properties synchronously outside the callback to avoid accessing stale or nullified event data due to React's event pooling, and always cancel pending frames on mouseleave and unmount to prevent leaks.
+**Action:** Use `requestAnimationFrame` to throttle expensive DOM operations and state updates in high-frequency mouse handlers.
+**Code:** `requestRef.current = requestAnimationFrame(() => { ... })`
