@@ -226,7 +226,7 @@ export function Waveform({
         return [...highlights].sort((a, b) => a.startTime - b.startTime);
     }, [highlights]);
 
-    const requestRef = useRef<number>();
+    const requestRef = useRef<number>(undefined);
 
     // Clean up animation frame on unmount
     useEffect(() => {
