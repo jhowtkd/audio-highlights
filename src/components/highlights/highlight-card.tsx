@@ -180,6 +180,7 @@ export function HighlightCard({
                 onClick={() => setShowDetails(!showDetails)}
                 aria-expanded={showDetails}
                 aria-controls={`suggested-titles-${highlight.id}`}
+                aria-label={showDetails ? 'Ocultar opções de títulos alternativos' : 'Ver opções de títulos alternativos'}
                 className="flex items-center gap-1 text-xs text-blue-600 dark:text-blue-400 hover:underline"
               >
                 {showDetails ? <ChevronUp className="h-3 w-3" /> : <ChevronDown className="h-3 w-3" />}

@@ -159,9 +159,8 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
             onClick={handleRemoveFile}
             className="text-slate-500 hover:text-slate-700"
             aria-label="Remover arquivo"
-            title="Remover arquivo"
           >
-            <X className="h-5 w-5" />
+            <X className="h-5 w-5" aria-hidden="true" />
           </Button>
         </div>
 
