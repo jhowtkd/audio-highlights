@@ -102,3 +102,21 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-24 - Server-Side Subtitle Burn-In Research
+
+**Research Topic:** Hardcoding subtitles into exported video clips using FFmpeg
+
+**Finding:**
+It is possible to automatically "burn-in" subtitles to video exports using FFmpeg's `subtitles` filter (libass). This requires re-encoding the video stream (`-c:v libx264`), which is significantly slower than our current stream copy (`-c copy`) approach used for simple cuts.
+
+**Decision:**
+Propose adding a "Burn Subtitles" feature to the `ffmpeg-service` and frontend.
+While slower and more CPU intensive, it provides massive user value by eliminating the need for external editors (like CapCut) before posting to social media.
+
+**Learning:**
+When using the `subtitles` filter, you must escape the path to the SRT file (`replace(/\\/g, '/').replace(/:/g, '\\:')`). Additionally, `force_style` must be used to ensure the text looks modern (fonts, borders, shadows) as default FFmpeg subtitles are often unstyled and small.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/2026-02-24-subtitle-burn-in.md
