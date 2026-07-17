@@ -33,3 +33,9 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2025-02-18 - Throttle React Event Handlers with requestAnimationFrame
+
+**Bottleneck:** Unthrottled mousemove events in the Waveform component triggering rapid state updates (`setHoveredHighlight`) and expensive recalculations, causing main thread blocking and jank.
+**Learning:** `requestAnimationFrame` is highly effective for throttling UI events like `mousemove`. Crucially, when deferring React event handlers via `requestAnimationFrame`, required event properties (e.g., `e.clientX`) must be extracted synchronously outside the callback due to React's event pooling. Also, pending frames must be explicitly cancelled on unmount or `mouseleave` to avoid memory leaks and stale UI updates.
+**Action:** Implemented `requestAnimationFrame` for `handleMouseMove` in `Waveform`, extracting `e.clientX` synchronously, and added proper cancellation via `useRef` and a `handleMouseLeave` callback.
