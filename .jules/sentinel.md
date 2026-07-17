@@ -31,3 +31,25 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-02-13 - Uncleaned Uploaded Files in Validation Errors
+
+**Vulnerability:** Disk exhaustion DoS due to uncleaned multer uploads when API endpoints return early with validation errors.
+**Root Cause:** Multer saves files to disk (`/tmp/uploads/`) before the route handler is executed. When the route handler returned early due to input validation failures (e.g., `res.status(400)`), `fs.unlink()` was not called on `req.file.path`.
+**Learning:** Always explicitly delete uploaded files in all early return and validation error paths when using file upload middleware that writes to disk.
+**Prevention:** Add explicit `fs.unlink(file.path)` calls before sending `res.status(400)` responses for invalid input.
+**Code:**
+```typescript
+// Vulnerable:
+if (isNaN(startTime)) {
+    res.status(400).json({ error: 'Invalid' });
+    return;
+}
+
+// Secure:
+if (isNaN(startTime)) {
+    fs.unlink(file.path, () => {});
+    res.status(400).json({ error: 'Invalid' });
+    return;
+}
+```
