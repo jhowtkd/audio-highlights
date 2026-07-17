@@ -33,3 +33,14 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-01-24 - Throttled handleMouseMove with requestAnimationFrame
+
+**Bottleneck:** Synchronous execution of React event handlers on every mouse move dispatch.
+**Learning:** React synthetic events like `onMouseMove` fire at a very high frequency. Synchronously calculating DOM metrics (`getBoundingClientRect()`) and performing a binary search on every event caused main thread blocking and layout thrashing, resulting in UI jank. Throttling these expensive operations to the browser's render cycle (typically 60fps) using `requestAnimationFrame` significantly improves UI responsiveness.
+**Action:** Always throttle high-frequency UI events like `mousemove` or `scroll` if they involve layout reads or heavy computations. Remember to synchronously extract synthetic event properties (e.g., `e.clientX`) outside the async callback to avoid accessing stale data due to React's event pooling, and always cancel pending animation frames in a `mouseleave` handler and a component unmount `useEffect` to prevent memory leaks and stuck states.
+**Code:**
+```typescript
+hoverFrameRef.current = requestAnimationFrame(() => {
+    // Heavy computation here
+});
+```
