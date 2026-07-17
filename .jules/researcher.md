@@ -102,3 +102,22 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-07-17 - RSS Podcast Feed Import
+
+**Research Topic:** Eliminating manual file downloads by importing audio directly from podcast RSS feeds.
+
+**Finding:** Evaluated using `rss-parser` to parse standard podcast feeds.
+- Tested fetching a live Simplecast feed; instantly extracts episode titles and direct MP3 enclosures.
+- Server-to-server download bypasses the user's bandwidth entirely.
+
+**Decision:** Proposed implementing an "Import via URL" feature.
+- Users paste an RSS link.
+- App lists episodes.
+- App downloads the selected episode server-side for processing.
+
+**Learning:** Podcast RSS feeds are a highly standardized, stable data source compared to scraping platforms like YouTube. Utilizing them provides a massive UX win with very low technical risk.
+
+**Resources:**
+- https://github.com/rbren/rss-parser
+- research/proposals/2026-07-17-rss-podcast-import.md
