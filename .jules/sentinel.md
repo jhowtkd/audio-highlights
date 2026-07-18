@@ -31,3 +31,31 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-05-18 - Disk Space Exhaustion (DoS) via Unlinked File Uploads
+
+**Vulnerability:** Endpoints handling file uploads via `multer` can cause disk space exhaustion if they return early due to validation errors without explicitly deleting the uploaded file from the disk.
+
+**Root Cause:** The `multer` middleware automatically saves the uploaded file to disk *before* the route handler's logic executes. If the handler returns a 400 Bad Request due to invalid parameters (e.g., missing start/end times), the temporary file remains on disk indefinitely.
+
+**Learning:** Always explicitly `fs.unlink()` the uploaded file (`req.file.path`) in *every* error or early return path of the route handler. Do not rely solely on the main success/failure paths to handle cleanup.
+
+**Prevention:** For all endpoints using file upload middleware:
+- Ensure `fs.unlink(req.file.path)` is called immediately before returning an error response for validation failures.
+- Implement automated cleanup mechanisms (e.g., a cron job or background task) for abandoned files in the upload directory as a defense-in-depth measure.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+if (isNaN(startTime) || isNaN(endTime)) {
+    res.status(400).json({ error: 'Invalid start/end times' });
+    return;
+}
+
+// Secure pattern to use:
+if (isNaN(startTime) || isNaN(endTime)) {
+    fs.unlink(file.path, () => {});
+    res.status(400).json({ error: 'Invalid start/end times' });
+    return;
+}
+```
