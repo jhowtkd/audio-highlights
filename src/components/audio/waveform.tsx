@@ -41,7 +41,7 @@ export function Waveform({
     const [waveformData, setWaveformData] = useState<number[]>([]);
     const [isLoading, setIsLoading] = useState(true);
     const [hoveredHighlight, setHoveredHighlight] = useState<GeneratedHighlight | null>(null);
-    const animationFrameRef = useRef<number>();
+    const animationFrameRef = useRef<number | undefined>(undefined);
 
     // Clean up animation frame on unmount
     useEffect(() => {
