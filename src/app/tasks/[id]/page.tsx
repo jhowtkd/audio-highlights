@@ -133,7 +133,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
 
     const handleGenerateHighlights = useCallback(async (config: HighlightConfig) => {
         if (!task?.result?.transcription) {
-            toast.error('Transcrição não encontrada');
+            toast.error('A transcrição não foi encontrada. Atualize a página e tente novamente.');
             return;
         }
 

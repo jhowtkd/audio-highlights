@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-05 - Avoid "Erro:" prefix in user messages
+
+**Copy Type:** Error message (toast notification)
+**Original:** "Erro: Transcrição não encontrada. Tente recarregar." / "Transcrição não encontrada"
+**Changed To:** "A transcrição não foi encontrada. Atualize a página e tente novamente."
+**Learning:** Using technical prefixes like "Erro:" makes messages sound robotic and alarming. Dead-end error messages don't help the user recover.
+**Rule:** Do not prefix error messages with 'Erro:'. Instead, state the issue clearly and provide friendly, actionable next steps for the user without relying on technical or system-oriented prefixes.
