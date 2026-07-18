@@ -33,3 +33,9 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2024-07-18 - requestAnimationFrame for Layout Reads
+
+**Bottleneck:** High-frequency `mousemove` handler on Waveform component.
+**Learning:** Optimizing a `mousemove` handler with `requestAnimationFrame` is ineffective when the handler only performs layout reads (`getBoundingClientRect`) and pure React state updates. React already optimizes state updates (bailing out on reference equality), and layout reads do not cause layout thrashing unless paired with DOM writes. The optimization added complexity without measurable gain.
+**Action:** Before throttling DOM events, verify if they actually trigger layout recalculations or expensive DOM manipulations.
+**Code:** N/A (optimization was unnecessary).
