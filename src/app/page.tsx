@@ -189,7 +189,7 @@ export default function Home() {
 
     if (!transcription) {
       console.error('❌ Transcrição ausente ao tentar gerar highlights');
-      toast.error('Erro: Transcrição não encontrada. Tente recarregar.');
+      toast.error('Transcrição não encontrada. Por favor, recarregue a página.');
       return;
     }
 
@@ -328,7 +328,7 @@ export default function Home() {
                     Transforme seu podcast em highlights
                   </h1>
                   <p className="text-lg text-slate-600 dark:text-slate-400">
-                    Faça upload do seu áudio e deixe a IA identificar os melhores momentos
+                    Envie seu áudio e deixe a IA identificar os melhores momentos
                   </p>
                 </div>
 

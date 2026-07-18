@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-02 - Remove Robotic Error Prefix and Technical Jargon
+
+**Copy Type:** Error Message and Subtitle
+**Original:** "Erro: Transcrição não encontrada. Tente recarregar." and "Faça upload"
+**Changed To:** "Transcrição não encontrada. Por favor, recarregue a página." and "Envie"
+**Learning:** Prefixing error messages with "Erro:" is robotic and alarming to users. "Faça upload" is passive technical jargon. Using friendly, actionable error messages and active verbs like "Envie" improves clarity and user confidence.
+**Rule:** Do not prefix error messages with "Erro:". Prefer active verbs like "Envie" over technical jargon like "Faça upload".
