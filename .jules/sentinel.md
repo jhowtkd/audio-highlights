@@ -31,3 +31,29 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-07-19 - Disk Exhaustion (DoS) via Unhandled Multer Uploads
+
+**Vulnerability:** Uploaded files were not deleted when the API endpoints returned early due to validation errors. This allows an attacker to fill up the server's disk space by repeatedly sending invalid requests with large files.
+
+**Root Cause:** The early return paths in the route handlers for `/cut-video` and `/concat-segments` were returning an HTTP error without explicitly calling `fs.unlink()` to clean up the temporary file created by `multer`.
+
+**Learning:** Always ensure temporary files created by middleware (like `multer`) are cleaned up in *all* code paths, including validation failures and error handling.
+
+**Prevention:** Add `fs.unlink(req.file.path, () => {})` to all early return blocks and catch blocks in endpoints that handle file uploads.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+if (isNaN(startTime)) {
+    res.status(400).json({ error: 'Invalid start times' });
+    return;
+}
+
+// Secure pattern to use:
+if (isNaN(startTime)) {
+    fs.unlink(req.file.path, () => {});
+    res.status(400).json({ error: 'Invalid start times' });
+    return;
+}
+```
