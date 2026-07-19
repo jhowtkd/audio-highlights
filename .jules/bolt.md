@@ -33,3 +33,19 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-07-19 - Waveform Generation Loop
+
+**Bottleneck:** Rendering the waveform iterates over every single audio sample (`for` loop inside another `for` loop). For large files, this leads to millions of iterations and blocks the main thread.
+**Learning:** We only need to render visual approximations of the audio data. An exact average across every audio sample in a block is computationally wasteful when we only need ~100 samples per block for a good visual representation.
+**Action:** Subsample/stride through the audio buffer when extracting waveform points.
+**Code:**
+```typescript
+const stride = Math.max(1, Math.floor(blockSize / 100));
+let count = 0;
+for (let j = 0; j < blockSize; j += stride) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+filteredData.push(sum / count);
+```
