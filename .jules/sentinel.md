@@ -31,3 +31,9 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2024-05-18 - Disk Exhaustion DoS and CORS Misconfiguration in File Upload Microservice
+
+**Vulnerability:** File uploads in `/cut-video` and `/concat-segments` left temporary files on disk when validation errors occurred, leading to potential disk space exhaustion (DoS). Additionally, CORS was overly permissive with `endsWith('.vercel.app')`, potentially allowing unauthorized preview deployments to access the API.
+**Root Cause:** The express endpoints returned early on validation errors without explicitly unlinking `req.file.path`. The CORS configuration used a broad substring match instead of a strict regular expression.
+**Learning:** Always ensure `fs.unlink()` is called on all code paths for file uploads, including validation errors. Never use loose string matching like `endsWith` for CORS when wildcards are needed, use a strict regex.
+**Prevention:** For endpoints using multer, explicitly add `fs.unlink(file.path, () => {})` before returning an error response. Use regex for Vercel preview domains CORS: `/^https:\/\/audio-highlights(-[a-zA-Z0-9-]+)?\.vercel\.app$/`.
