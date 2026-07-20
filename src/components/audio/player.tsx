@@ -151,7 +151,7 @@ export const AudioPlayer = memo(function AudioPlayer({
             className="h-8 w-8"
             aria-label="Voltar 10 segundos"
           >
-            <SkipBack className="h-4 w-4" />
+          <SkipBack className="h-4 w-4" aria-hidden="true" />
           </Button>
 
           <Button
@@ -162,9 +162,9 @@ export const AudioPlayer = memo(function AudioPlayer({
             aria-label={isPlaying ? 'Pausar' : 'Reproduzir'}
           >
             {isPlaying ? (
-              <Pause className="h-5 w-5" />
+            <Pause className="h-5 w-5" aria-hidden="true" />
             ) : (
-              <Play className="h-5 w-5 ml-0.5" />
+            <Play className="h-5 w-5 ml-0.5" aria-hidden="true" />
             )}
           </Button>
 
@@ -175,7 +175,7 @@ export const AudioPlayer = memo(function AudioPlayer({
             className="h-8 w-8"
             aria-label="Avançar 10 segundos"
           >
-            <SkipForward className="h-4 w-4" />
+          <SkipForward className="h-4 w-4" aria-hidden="true" />
           </Button>
         </div>
 
@@ -189,9 +189,9 @@ export const AudioPlayer = memo(function AudioPlayer({
             aria-label={isMuted ? 'Ativar som' : 'Silenciar'}
           >
             {isMuted ? (
-              <VolumeX className="h-4 w-4" />
+            <VolumeX className="h-4 w-4" aria-hidden="true" />
             ) : (
-              <Volume2 className="h-4 w-4" />
+            <Volume2 className="h-4 w-4" aria-hidden="true" />
             )}
           </Button>
           <Slider
