@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-05 - Automated Chapter Generation Research
+
+**Research Topic:** Generating YouTube Chapters and Show Notes from transcripts
+
+**Finding:**
+Creators need full-episode metadata (chapters) just as much as micro-clips. Using a cheaper model like `gpt-4o-mini` for full-text segmentation and summarization provides excellent results at a fraction of the cost of standard highlight generation.
+
+**Decision:**
+Propose adding a `/api/chapters` endpoint utilizing `gpt-4o-mini` to generate YouTube-compliant chapters (minimum 3 chapters, starting at 00:00, >10s length) directly from the transcription segments.
+
+**Learning:**
+When building tools for content creators, supporting the "main" artifact (the full video/podcast) is just as critical as supporting the derivatives (shorts/reels).
+
+**Resources:**
+- https://support.google.com/youtube/answer/9884579?hl=en
