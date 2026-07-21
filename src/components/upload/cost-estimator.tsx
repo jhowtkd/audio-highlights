@@ -60,12 +60,13 @@ export function CostEstimator({ file, duration, onConfirm, onCancel }: CostEstim
                     <div className="flex justify-between items-center text-sm">
                         <span className="text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
                             <span>Transcrição (Whisper)</span>
-                            <div className="group relative cursor-help">
-                                <Info className="h-3.5 w-3.5 text-slate-400" />
-                                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
+                            <button type="button" aria-describedby="tooltip-whisper" className="group relative cursor-help rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                                <span className="sr-only">Informações sobre custo de transcrição</span>
+                                <Info className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                                <span id="tooltip-whisper" role="tooltip" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
                                     $0.006 / minuto
                                 </span>
-                            </div>
+                            </button>
                         </span>
                         <span className="font-mono text-slate-900 dark:text-slate-100">
                             {formatMoney(breakdown.whisper)}
@@ -75,12 +76,13 @@ export function CostEstimator({ file, duration, onConfirm, onCancel }: CostEstim
                     <div className="flex justify-between items-center text-sm">
                         <span className="text-slate-600 dark:text-slate-400 flex items-center gap-1.5">
                             <span>Análise AI (GPT-5 Nano)</span>
-                            <div className="group relative cursor-help">
-                                <Info className="h-3.5 w-3.5 text-slate-400" />
-                                <span className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
+                            <button type="button" aria-describedby="tooltip-gpt" className="group relative cursor-help rounded-full focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">
+                                <span className="sr-only">Informações sobre custo de análise AI</span>
+                                <Info className="h-3.5 w-3.5 text-slate-400" aria-hidden="true" />
+                                <span id="tooltip-gpt" role="tooltip" className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 px-2 py-1 bg-slate-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 group-focus:opacity-100 whitespace-nowrap pointer-events-none transition-opacity">
                                     Estimado base tokens
                                 </span>
-                            </div>
+                            </button>
                         </span>
                         <span className="font-mono text-slate-900 dark:text-slate-100">
                             {formatMoney(breakdown.gptMin)} - {formatMoney(breakdown.gptMax)}
