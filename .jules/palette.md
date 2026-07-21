@@ -42,3 +42,9 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+## 2024-07-21 - Accessible Tooltips for Inline Info
+
+**UX Problem:** Inline info tooltips were only accessible on hover (using div and group-hover), trapping keyboard users from reading pricing breakdown details.
+**Learning:** Users navigating by keyboard need focusable elements to trigger contextual tooltips.
+**Solution:** Replaced static divs with semantically correct `<button type="button">` and added a visually hidden `<span className="sr-only">` with the label text, removing `aria-hidden` from the actual tooltip content. Used `aria-describedby` pointing to the tooltip text container which has `role="tooltip"`. Added `group-focus:opacity-100` and `focus-visible:ring-2`.
+**Pattern:** All inline tooltips must use `<button type="button">`, have a `sr-only` span or `aria-label` identifying the button, use `aria-describedby` pointing to the tooltip content id which has `role="tooltip"`, hide inner decorative icons with `aria-hidden="true"`, and trigger via both hover and focus events (`group-hover:opacity-100 group-focus:opacity-100`).
