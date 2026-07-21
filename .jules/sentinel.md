@@ -31,3 +31,24 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2026-02-23 - DoS via Disk Exhaustion in Early Returns
+
+**Vulnerability:** Uploaded files were not deleted when the API request failed validation. Attackers could exhaust disk space by repeatedly sending invalid requests with large files attached.
+**Root Cause:** The `fs.unlink()` was omitted in early return paths in the `multer` endpoints.
+**Learning:** When using `multer` for file uploads, ensure that any validation failure or early return correctly cleans up the temporary files from the disk before exiting.
+**Prevention:** Always add a no-op `fs.unlink(req.file.path, () => {})` to early returns when a file has been uploaded but will not be processed further.
+**Code:**
+```typescript
+// Vulnerable pattern
+if (invalidParams) {
+    res.status(400).json({ error: 'Invalid params' });
+    return;
+}
+
+// Secure pattern
+if (invalidParams) {
+    fs.unlink(file.path, () => {});
+    res.status(400).json({ error: 'Invalid params' });
+    return;
+}
+```
