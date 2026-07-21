@@ -31,7 +31,7 @@ export const HighlightList = memo(function HighlightList({ highlights, segments,
       });
     } catch (error) {
       console.error('Erro ao copiar:', error);
-      toast.error('Erro ao copiar texto');
+      toast.error('Não foi possível copiar o texto. Tente novamente.');
     }
   };
 
