@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-03-05 - Removing 'Erro' prefixes and improving error actionability
+
+**Copy Type:** Error messages across the app
+**Original:** "Erro: Transcrição não encontrada. Tente recarregar." / "Erro ao gerar highlights"
+**Changed To:** "Transcrição não encontrada. Recarregue a página e tente novamente." / "Não foi possível gerar os highlights. Tente novamente."
+**Learning:** Users do not need technical, system-oriented prefixes like 'Erro:' to understand an issue. Describing what couldn't be done ("Não foi possível...") and providing a friendly, actionable next step ("Tente novamente.") provides a better user experience.
+**Rule:** Do not prefix error messages with 'Erro:'. State the issue clearly and provide friendly, actionable next steps for the user.
