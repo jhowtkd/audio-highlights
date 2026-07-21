@@ -33,3 +33,25 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-07-21 - Premature Memoization on High Frequency Props
+
+**Bottleneck:** Unnecessary component re-renders.
+**Learning:** Applying `React.memo` to a component driven by a high-frequency prop (like `currentTime` from an AudioPlayer updating at 60hz) without verifying the parent's rendering behavior pessimizes performance rather than optimizing it, because the shallow prop comparison will return false, causing the component to re-render anyway.
+**Action:** Do not use `React.memo` on components that receive continuously updating props.
+**Code:** N/A
+
+## 2026-07-21 - Waveform Striding Optimization
+
+**Bottleneck:** O(N) iteration over entire audio buffer (`getChannelData`) during waveform generation freezes main thread for long audio files (millions of samples).
+**Learning:** For visualizations with limited pixel width, iterating every sample is unnecessary. Downsampling (striding) limits the number of operations required per block.
+**Action:** Implemented striding using `step = Math.max(1, Math.floor(blockSize / MAX_SAMPLES_PER_BLOCK))` to ensure O(1) processing per block (max 100 samples per block) regardless of the audio file's duration.
+**Code:**
+```typescript
+const MAX_SAMPLES_PER_BLOCK = 100;
+const step = Math.max(1, Math.floor(blockSize / MAX_SAMPLES_PER_BLOCK));
+for (let j = 0; j < blockSize; j += step) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
