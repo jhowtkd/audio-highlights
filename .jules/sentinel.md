@@ -31,3 +31,29 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-07-22 - Disk Exhaustion DoS via Unhandled Uploads
+
+**Vulnerability:** Uploaded files via multer were not being deleted in early return paths (validation failures), allowing an attacker to quickly exhaust server disk space by repeatedly uploading large files with invalid parameters.
+
+**Root Cause:** Error handling and validation logic returned HTTP responses without cleaning up the temporary files created by multer in `req.file.path`.
+
+**Learning:** When using multer for file uploads, the file is saved to disk *before* the route handler's logic executes. Every early return or validation failure path must explicitly delete the uploaded file to prevent disk exhaustion (DoS).
+
+**Prevention:** Always ensure `fs.unlink()` is explicitly called on `req.file.path` in all early return and validation error paths. Use a no-op callback (e.g., `fs.unlink(file.path, () => {})`) to safely handle asynchronous deletion without crashing if the file is missing.
+
+**Code:**
+```typescript
+// Vulnerable pattern:
+if (invalid) {
+  res.status(400).json({ error: 'Invalid input' });
+  return;
+}
+
+// Secure pattern:
+if (invalid) {
+  fs.unlink(req.file.path, () => {});
+  res.status(400).json({ error: 'Invalid input' });
+  return;
+}
+```
