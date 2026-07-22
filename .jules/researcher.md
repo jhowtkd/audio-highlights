@@ -102,3 +102,12 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-25 - Burned-in Subtitles (FFmpeg)
+
+**Research Topic:** Adding hardcoded subtitles to video exports using FFmpeg.
+**Finding:** The `subtitles` filter in FFmpeg is perfect for this, but it requires re-encoding the video (losing the speed of `-c copy`). Also, absolute paths are strictly required for the filter, and they must be escaped (`.replace(/\\/g, '/').replace(/:/g, '\\:')`).
+**Decision:** Propose an optional "Burn Subtitles" feature. It adds immense value for social media clips, but the user must opt-in due to the slower processing time.
+**Learning:** When generating temporary SRT files for FFmpeg on Node.js, ensure robust error handling and `fs.unlink` in a finally block to prevent disk exhaustion, as this filter is prone to failure if the font or path isn't perfectly configured.
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
