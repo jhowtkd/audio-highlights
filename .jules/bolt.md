@@ -33,3 +33,21 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+## 2026-07-22 - Waveform Generation Blocking Main Thread
+
+**Bottleneck:** `Waveform` component iterates over every single audio sample (`O(N)`) to draw the visual waveform. For large files (e.g. 1 hour at 44.1kHz), this caused severe main thread blocking and jank.
+**Learning:** For rendering audio visualizations, absolute precision isn't required at a zoomed-out level. We can use downsampling/striding to drastically reduce the number of samples processed.
+**Action:** Implement striding by jumping through the buffer based on a maximum number of points we want to sample per block. This turns an `O(N)` operation into an `O(1)` per block operation.
+**Code:**
+```typescript
+const maxSamplesPerBlock = 100;
+const step = Math.max(1, Math.floor(blockSize / maxSamplesPerBlock));
+let samplesCount = 0;
+
+for (let j = 0; j < blockSize; j += step) {
+    sum += Math.abs(channelData[blockStart + j]);
+    samplesCount++;
+}
+
+filteredData.push(sum / samplesCount);
+```
