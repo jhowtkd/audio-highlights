@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-25 - FFmpeg Subtitle Burn-in Paths
+
+**Research Topic:** Hardcoding subtitles into video using FFmpeg `subtitles` filter via Node.js `spawn`.
+
+**Finding:**
+When passing an absolute path to the `-vf subtitles=<path>` filter, FFmpeg's filter graph parser can fail if the path contains unescaped backslashes (Windows) or colons (drive letters or part of paths).
+
+**Decision:**
+Always escape the absolute path string before passing it to the filter argument.
+
+**Learning:**
+The absolute path to the subtitle file must be escaped using `.replace(/\\/g, '/').replace(/:/g, '\\:')` to prevent path parsing errors in the `subtitles` filter.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#Notes-on-filtergraph-escaping
