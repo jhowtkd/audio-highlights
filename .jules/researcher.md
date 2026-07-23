@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-07-23 - Server-Side Burned-In Subtitles
+
+**Research Topic:** Adding hardsubs to exported video clips using FFmpeg
+
+**Finding:** Evaluated FFmpeg's `subtitles` filter for burning SRT subtitles directly into the video stream during the `/cut-video` or `/concat-segments` process.
+- Requires saving the SRT string to a temporary file.
+- Requires re-encoding the video (`-c:v libx264`) which is slower than stream copy but acceptable for the UX improvement.
+- Path escaping for the `subtitles` filter in Node.js spawn is strict and requires `.replace(/\\/g, '/').replace(/:/g, '\\:')`.
+
+**Decision:** Proposed adding an optional "Download with Subtitles" feature to the `ffmpeg-service` using the `subtitles` filter.
+
+**Learning:** When using FFmpeg's `subtitles` filter via `spawn` in Node.js, the absolute path to the subtitle file must be carefully escaped to prevent parsing errors, especially if running on Windows or dealing with complex paths. Re-encoding is a necessary trade-off for hardsubs compared to fast stream copying.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/server-side-burned-subtitles.md
