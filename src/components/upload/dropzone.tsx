@@ -195,7 +195,7 @@ export function Dropzone({ onFileAccepted, isUploading, uploadProgress = 0 }: Dr
       <div
         {...getRootProps({
           role: 'button',
-          'aria-label': 'Área de upload de arquivo. Arraste e solte ou clique para selecionar.',
+          'aria-label': 'Área de envio de arquivo. Arraste e solte ou clique para selecionar.',
         })}
         className={cn(
           'border-2 border-dashed rounded-xl p-12 text-center cursor-pointer transition-all duration-200 outline-none',
