@@ -85,7 +85,7 @@ export default function TasksPage() {
                                     <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
                                 </div>
                                 <div>
-                                    <p className="text-xs text-slate-500">Concluídas</p>
+                                    <p className="text-xs text-slate-500">Concluídos</p>
                                     <p className="text-lg font-semibold text-slate-900 dark:text-slate-100">{completedCount}</p>
                                 </div>
                             </div>
@@ -108,7 +108,7 @@ export default function TasksPage() {
                         {completedCount > 0 && (
                             <Button variant="outline" size="sm" onClick={clearCompleted}>
                                 <Trash2 className="h-4 w-4 mr-2" />
-                                Limpar concluídas
+                                Limpar projetos concluídos
                             </Button>
                         )}
                     </div>
