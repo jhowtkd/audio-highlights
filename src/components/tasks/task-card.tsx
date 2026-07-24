@@ -185,7 +185,7 @@ export function TaskCard({ task }: TaskCardProps) {
                         {task.status === 'completed' && (
                             <Button size="sm" onClick={handleViewResult}>
                                 <Play className="h-4 w-4 mr-1.5" />
-                                Ver Resultado
+                                Abrir projeto
                                 <ArrowRight className="h-4 w-4 ml-1.5" />
                             </Button>
                         )}

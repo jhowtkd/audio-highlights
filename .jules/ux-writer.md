@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-02-09 - Project Terminology Consistency
+
+**Copy Type:** Interface labels and buttons
+**Original:** "Concluídas", "Limpar concluídas", "Ver Resultado"
+**Changed To:** "Concluídos", "Limpar projetos concluídos", "Abrir projeto"
+**Learning:** The application mixes generic internal terms (like tasks/'tarefas' implicitly via feminine gender in 'concluídas') with user-facing terms like 'Projetos'. Aligning gender and context to 'Projetos' makes the UI more cohesive and understandable. 'Abrir projeto' is a clearer action than 'Ver Resultado'.
+**Rule:** Always use 'Projeto' (and masculine gender agreements) instead of internal jargon like 'Task'/'Tarefa'. Ensure button labels specify exactly what the user is opening.
