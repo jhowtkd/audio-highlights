@@ -102,11 +102,17 @@ export function Waveform({
                     const blockStart = blockSize * i;
                     let sum = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    // Optimization: use striding to sample at most 100 points per block
+                    // reducing operations from O(N) to O(1) per block.
+                    const step = Math.max(1, Math.floor(blockSize / 100));
+                    let count = 0;
+
+                    for (let j = 0; j < blockSize; j += step) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / count);
                 }
 
                 // Normalize the data

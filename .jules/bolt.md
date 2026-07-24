@@ -33,3 +33,19 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2025-02-14 - Optimized Waveform Generation
+
+**Bottleneck:** Rendering visual representations of large audio files (e.g., waveforms) iterated over every sample in the `AudioBuffer`, blocking the main thread and causing jank (O(N) operations per block).
+**Learning:** For rendering visualizations, pixel-perfect accuracy isn't necessary. Downsampling or striding significantly reduces CPU load.
+**Action:** Implemented striding/downsampling in the waveform generation loop (e.g., sampling a max of 100 points per block) reducing main thread operations from O(N) to O(1) per block.
+**Code:**
+```typescript
+const step = Math.max(1, Math.floor(blockSize / 100));
+let count = 0;
+for (let j = 0; j < blockSize; j += step) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+filteredData.push(sum / count);
+```
