@@ -31,3 +31,20 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2024-05-30 - Permissive CORS Wildcard & Upload DoS
+
+**Vulnerability:** Permissive CORS allowed any `*.vercel.app` domain, and early return paths in file upload handlers did not delete temporary `multer` files.
+**Root Cause:** Using `.endsWith('.vercel.app')` is dangerous because anyone can host a Vercel app. Also, forgetting to clean up `multer` files in early return validation errors leaves dangling files, leading to disk exhaustion.
+**Learning:** NEVER use wildcard suffix matching for CORS (like `.endsWith`). Always use a strict Regex to limit access to known preview/production domains. Always ensure `fs.unlink()` is explicitly called on `req.file.path` in ALL early return paths when handling file uploads.
+**Prevention:**
+- For CORS: Use regex `/^https:\/\/project-name(-[a-zA-Z0-9-]+)?\.vercel\.app$/`.
+- For file uploads: Use `fs.unlink(req.file.path, () => {})` before returning an error response.
+
+**Code:**
+```typescript
+// Vulnerable CORS pattern:
+if (origin.endsWith('.vercel.app')) return callback(null, true);
+
+// Secure CORS pattern:
+if (/^https:\/\/audio-highlights(-[a-zA-Z0-9-]+)?\.vercel\.app$/.test(origin)) return callback(null, true);
+```
