@@ -102,3 +102,21 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-24 - Server-Side Subtitle Burn-In
+
+**Research Topic:** Hardcoding subtitles into videos on the server using FFmpeg
+
+**Finding:**
+FFmpeg's `subtitles` filter allows burning subtitles directly into video streams. Tested a POC using `ffmpeg-static` in Node.js.
+When passing the absolute path of the SRT file to the `subtitles` filter, path parsing errors occur if backslashes or colons aren't properly escaped.
+
+**Decision:**
+Propose adding a `/burn-subtitles` endpoint to the `ffmpeg-service` microservice to offload rendering from the client and guarantee consistent output across devices.
+
+**Learning:**
+When using FFmpeg's `subtitles` filter via `spawn` in Node.js (e.g., in `ffmpeg-service`), the absolute path to the subtitle file must be escaped using `.replace(/\\/g, '/').replace(/:/g, '\\:')` to prevent path parsing errors.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/server-side-subtitle-burn-in.md
