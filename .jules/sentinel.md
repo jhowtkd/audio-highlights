@@ -31,3 +31,25 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2025-07-25 - Disk Exhaustion DoS in Multer Upload Handlers
+
+**Vulnerability:** Uploaded temporary files from `multer` were not being deleted when the request failed validation early, leading to disk space exhaustion and potential Denial of Service (DoS).
+**Root Cause:** The developer implemented input validation but only removed the uploaded `file.path` in the success and ffmpeg error paths, neglecting the early returns.
+**Learning:** In endpoints that accept file uploads via `multer`, the temporary file is created *before* the route handler runs. If validation fails and the handler returns early, it must explicitly delete the file to prevent DoS.
+**Prevention:** Always ensure `fs.unlink(file.path, () => {})` is explicitly called on `req.file.path` in all early return and validation error paths.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+if (isNaN(startTime)) {
+    res.status(400).json({ error: 'Invalid start time' });
+    return; // File leaks!
+}
+
+// Secure pattern to use:
+if (isNaN(startTime)) {
+    fs.unlink(file.path, () => {});
+    res.status(400).json({ error: 'Invalid start time' });
+    return;
+}
+```
