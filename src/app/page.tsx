@@ -189,7 +189,7 @@ export default function Home() {
 
     if (!transcription) {
       console.error('❌ Transcrição ausente ao tentar gerar highlights');
-      toast.error('Erro: Transcrição não encontrada. Tente recarregar.');
+      toast.error('A transcrição não foi encontrada. Recarregue a página e tente novamente.');
       return;
     }
 
