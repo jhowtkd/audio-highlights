@@ -32,3 +32,13 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2024-07-25 - Error Prefix Tone Decision
+
+**Copy Type:** Error messages
+
+**Original:** "Erro: Transcrição não encontrada. Tente recarregar." / "Erro: [motivo]"
+**Changed To:** "A transcrição não foi encontrada. Recarregue a página e tente novamente." / "Ocorreu um problema com este projeto: [motivo]"
+
+**Learning:** Em português, o prefixo "Erro:" soa muito técnico, passivo e culpabilizador. Remover o prefixo e explicar claramente o problema e o próximo passo deixa o tom mais amigável, acionável e conversacional.
+
+**Rule:** Em português, nunca use o prefixo "Erro:". Em vez disso, declare o problema claramente em linguagem natural e dê os próximos passos.
