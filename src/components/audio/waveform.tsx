@@ -98,15 +98,21 @@ export function Waveform({
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
 
+                // Optimization: Use striding to prevent main thread blocking for large files
+                // Max 100 samples per block reduces operations from O(N) to O(1) per block
+                const step = Math.max(1, Math.floor(blockSize / 100));
+
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    for (let j = 0; j < blockSize; j += step) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / count);
                 }
 
                 // Normalize the data
