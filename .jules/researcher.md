@@ -102,3 +102,19 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-25 - Burned Subtitles FFmpeg Path Escaping
+
+**Research Topic:** Burned Subtitles (Hardsubs)
+
+**Finding:**
+When applying the `subtitles` filter via FFmpeg in Node.js on Windows or certain environments, passing an absolute path to the `.srt` file causes the filter syntax to break (due to colons and backslashes).
+
+**Decision:**
+The absolute path must be escaped before passing it to the FFmpeg filter.
+
+**Learning:**
+Always use `.replace(/\\/g, '/').replace(/:/g, '\\:')` on absolute paths when using them in FFmpeg's `subtitles` video filter.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
