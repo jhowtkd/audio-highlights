@@ -33,3 +33,10 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-07-26 - Audio Waveform Processing Jank
+
+**Bottleneck:** Rendering the waveform visualization in `src/components/audio/waveform.tsx` was causing main thread blocking during the loop over `channelData`. Operations scaled at O(N).
+**Learning:** `channelData.length` for long audio files is extremely large (e.g., 26M samples for 10 minutes). Iterating and computing `Math.abs` for every single sample blocks the browser's UI thread and leads to severe jank.
+**Action:** When calculating sample averages for visualizations, implement striding to cap the number of operations per block (e.g., max 100 samples per block), reducing the complexity to O(1) without visibly sacrificing the rendering quality.
+**Code:** `for (let j = 0; j < blockSize; j += step) { sum += Math.abs(channelData[blockStart + j]); count++; }`
