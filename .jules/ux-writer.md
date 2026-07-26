@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2026-01-24 - Removing System "Erro:" Prefixes
+
+**Copy Type:** Error state display for failed projects and toasts
+**Original:** "Projeto não disponível" and "Erro: [error message]"
+**Changed To:** "Não foi possível carregar o projeto" and "[error message]"
+**Learning:** Prefixing messages with "Erro:" feels technical and robotic to users. Since the UI already uses an alert icon (red AlertCircle or error toast), the visual context of an issue is clear. Simply stating the issue directly (as returned in `task.error`) is much friendlier and respects the user's intelligence. Furthermore, changing "Projeto não disponível" to "Não foi possível carregar o projeto" uses a more active and natural phrasing.
+**Rule:** For this app, ALWAYS remove "Erro:" prefixes from user-facing copy. Let the UI context (red text, icons, toast colors) indicate it's an error, and use the text to state the issue directly.

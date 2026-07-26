@@ -305,12 +305,12 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                             <AlertCircle className="h-8 w-8 text-red-600 dark:text-red-400" />
                         </div>
                         <h2 className="text-xl font-semibold text-slate-900 dark:text-slate-100 mb-2">
-                            Projeto não disponível
+                            Não foi possível carregar o projeto
                         </h2>
                         <p className="text-slate-600 dark:text-slate-400 mb-6">
                             {task.status === 'error'
-                                ? `Erro: ${task.error}`
-                                : 'Este projeto ainda não foi processado ou não existe.'}
+                                ? task.error
+                                : 'Este projeto não foi encontrado ou ainda está sendo criado.'}
                         </p>
                         <Button onClick={() => router.push('/tasks')}>
                             <ArrowLeft className="h-4 w-4 mr-2" />
