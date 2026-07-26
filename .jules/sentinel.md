@@ -31,3 +31,21 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2024-07-26 - Unhandled Multer File Upload Disk Exhaustion
+
+**Vulnerability:** File uploads managed by multer were not being cleaned up (via `fs.unlink`) when input validation failed and the API returned early. This could lead to disk space exhaustion (DoS) over time as temporary files accumulate.
+
+**Root Cause:** The early return error paths in `ffmpeg-service/src/index.ts` lacked cleanup code for the uploaded file in `req.file.path`.
+
+**Learning:** Always explicitly delete uploaded files in all early return and validation error paths when using multer, not just on success or processing failure.
+
+**Prevention:** Ensure `fs.unlink(file.path, () => {})` is called in all validation error branches of endpoints accepting file uploads.
+
+**Code:**
+```typescript
+if (isNaN(startTime)) {
+    if (file?.path) fs.unlink(file.path, () => { });
+    res.status(400).json({ error: 'Invalid start time' });
+    return;
+}
+```
