@@ -102,3 +102,17 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-03-01 - Burned-in Subtitles Research
+
+**Research Topic:** Adding burned-in subtitles directly into exported video highlights using FFmpeg.
+
+**Finding:** FFmpeg's `subtitles` filter (libass) can successfully burn SRT subtitles into video, but it requires full re-encoding, abandoning the fast `stream copy` approach used for simple cuts. Absolute paths passed to the `subtitles` filter must be escaped properly otherwise FFmpeg fails to parse the file path.
+
+**Decision:** Propose adding hardsub capabilities as an optional feature in `ffmpeg-service`.
+
+**Learning:** When using FFmpeg's `subtitles` filter via `spawn` in Node.js, the absolute path to the subtitle file must be escaped using `.replace(/\\/g, '/').replace(/:/g, '\\:')` to prevent path parsing errors.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/burned-in-subtitles.md
