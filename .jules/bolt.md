@@ -33,3 +33,19 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-07-27 - Main Thread Blocked by Large Audio Waveform Generation
+
+**Bottleneck:** Iterating over `AudioBuffer` samples in a loop blocked the main thread. Loops `blockSize` times per sample block, which can be millions of operations for long audio.
+**Learning:** Downsampling the samples is necessary.
+**Action:** By downsampling to a maximum of 100 samples per block, the loop performs at most 100 operations, making it an O(1) complexity per block instead of O(N) operations per block. This is visually identical but significantly improves generation performance and removes UI jank.
+**Code:**
+```typescript
+const MAX_SAMPLES_PER_BLOCK = 100;
+const step = Math.max(1, Math.floor(blockSize / MAX_SAMPLES_PER_BLOCK));
+
+for (let j = 0; j < blockSize; j += step) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
