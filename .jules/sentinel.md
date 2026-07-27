@@ -31,3 +31,31 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-07-27 - Disk Exhaustion (DoS) via Unhandled File Uploads
+
+**Vulnerability:** When using `multer` to handle file uploads, uploaded files are temporarily saved to disk before route logic executes. If the request fails early validation (e.g., missing or invalid parameters) and returns without explicitly deleting the file (`fs.unlink`), the temporary files accumulate on disk. This can lead to disk space exhaustion and a Denial of Service (DoS).
+
+**Root Cause:** The early return statements for validation errors did not clean up the `req.file` object created by `multer`. `multer` assumes the route handler is responsible for deleting or moving the temporary file once uploaded.
+
+**Learning:** Always ensure that any code paths that exit early (due to validation failures, authorization errors, etc.) properly clean up temporary resources like uploaded files. In Express, using an empty callback `fs.unlink(file.path, () => {})` is a safe way to clean up without crashing if the file is absent.
+
+**Prevention:** For all API endpoints accepting file uploads:
+- Explicitly call `fs.unlink(req.file.path, () => {})` on every early return/error path.
+- Alternatively, use memory storage if files are small, or implement an automated cleanup job for the temp directory.
+
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+if (isNaN(startTime)) {
+    res.status(400).json({ error: 'Invalid start time' });
+    return; // File remains on disk!
+}
+
+// Secure pattern to use:
+if (isNaN(startTime)) {
+    fs.unlink(file.path, () => {});
+    res.status(400).json({ error: 'Invalid start time' });
+    return;
+}
+```
