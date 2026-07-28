@@ -31,3 +31,28 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+## 2026-01-24 - File Leak in File Upload Error Handling
+
+**Vulnerability:** Application exhausts disk space by not explicitly cleaning up temporary files managed by Multer when a request is rejected in early validation checks.
+
+**Root Cause:** Multer successfully saves the file to disk before the controller logic executes. If the controller throws an error or returns early during validation, the temporary file remains on disk forever.
+
+**Learning:** Any endpoint accepting file uploads must reliably clean up the temporary files, regardless of whether the request succeeds or fails early.
+
+**Prevention:** Always call `fs.unlink(req.file.path, () => {})` in all validation error branches and in global error handlers for requests containing a file.
+
+**Code:**
+```typescript
+// Vulnerable
+if (invalidData) {
+    res.status(400).json({ error: 'Invalid data' });
+    return;
+}
+
+// Secure
+if (invalidData) {
+    fs.unlink(req.file.path, () => {});
+    res.status(400).json({ error: 'Invalid data' });
+    return;
+}
+```
