@@ -33,3 +33,21 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-07-28 - Optimizing Waveform Generation via Downsampling
+**Bottleneck:** The `<Waveform>` component processed every audio sample to render visual blocks. For long audio files at high sample rates (e.g., 48kHz), this meant iterating through millions of elements (e.g., 28.8M samples for a 10-minute file), causing the main UI thread to block for over 100ms and freezing interactions.
+**Learning:** For rendering dense visual representations like waveforms, precision beyond screen resolution is wasted work. Limiting the sample read count per pixel/block yields a visually identical graph while dropping computational complexity from $O(N)$ (where $N$ is block size) to $O(1)$.
+**Action:** Implemented a striding/downsampling loop with a maximum sample limit (`MAX_SAMPLES_PER_BLOCK = 100`) to guarantee fast, constant-time execution per visual block regardless of the underlying audio length or sample density.
+**Code:**
+```typescript
+const MAX_SAMPLES_PER_BLOCK = 100;
+const stride = Math.max(1, Math.floor(blockSize / MAX_SAMPLES_PER_BLOCK));
+
+let sum = 0;
+let count = 0;
+for (let j = 0; j < blockSize; j += stride) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+filteredData.push(sum / count);
+```
