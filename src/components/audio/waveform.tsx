@@ -98,15 +98,21 @@ export function Waveform({
                 const blockSize = Math.floor(channelData.length / samples);
                 const filteredData: number[] = [];
 
+                // Performance: Reduces loop iterations by sampling instead of processing every point. O(N) -> O(1) per block.
+                const MAX_SAMPLES_PER_BLOCK = 100;
+                const stride = Math.max(1, Math.floor(blockSize / MAX_SAMPLES_PER_BLOCK));
+
                 for (let i = 0; i < samples; i++) {
                     const blockStart = blockSize * i;
                     let sum = 0;
+                    let count = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    for (let j = 0; j < blockSize; j += stride) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / count);
                 }
 
                 // Normalize the data
