@@ -179,7 +179,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
             toast.success(`${data.highlights.length} highlights gerados!`);
         } catch (error) {
             console.error('Erro:', error);
-            toast.error(error instanceof Error ? error.message : 'Erro ao gerar highlights');
+            toast.error(error instanceof Error ? error.message : 'Não foi possível gerar os cortes. Por favor, tente novamente.');
         } finally {
             setIsGenerating(false);
         }
@@ -309,7 +309,7 @@ export default function TaskDetailPage({ params }: { params: Promise<TaskPagePar
                         </h2>
                         <p className="text-slate-600 dark:text-slate-400 mb-6">
                             {task.status === 'error'
-                                ? `Erro: ${task.error}`
+                                ? `Não foi possível concluir: ${task.error}`
                                 : 'Este projeto ainda não foi processado ou não existe.'}
                         </p>
                         <Button onClick={() => router.push('/tasks')}>

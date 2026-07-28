@@ -32,3 +32,10 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2024-05-30 - Fix Copy: Remove "Erro:" prefixes and Fix Gender Agreement
+
+**Copy Type:** Error messages & Interface text
+**Original:** "Erro: Transcrição não encontrada. Tente recarregar.", "Concluídas"
+**Changed To:** "Transcrição não encontrada. Por favor, recarregue a página e tente novamente.", "Concluídos"
+**Learning:** Technical prefixes like "Erro:" make messages feel robotic and alarming. Providing clear next steps in a friendly tone improves the experience. Adjectives must agree with the implied masculine noun 'Projeto' instead of the internal jargon 'Tarefa'.
+**Rule:** Never prefix errors with "Erro:". Always include a polite, actionable next step ("Por favor, tente novamente"). Use masculine agreements when referring to items in the task list (Projetos).

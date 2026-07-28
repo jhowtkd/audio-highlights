@@ -158,7 +158,7 @@ export function useTaskQueue() {
             console.error('Erro no processamento:', error);
             const errorMessage = error instanceof Error ? error.message : 'Erro desconhecido';
             failTask(taskId, errorMessage);
-            toast.error(`Erro ao processar "${task.filename}": ${errorMessage}`);
+            toast.error(`Não foi possível processar "${task.filename}": ${errorMessage}`);
         }
     }, [getTask, getTaskFile, startProcessing, updateProgress, completeTask, failTask, convertToMp3, splitAudio]);
 
@@ -216,7 +216,7 @@ export function useTaskQueue() {
             return true;
         } catch (error) {
             console.error('Error retrying task:', error);
-            toast.error('Erro ao reiniciar processamento');
+            toast.error('Não foi possível reiniciar o processamento. Por favor, tente novamente.');
             return false;
         }
     }, [state.tasks, getTaskFile, context, resetTask, processQueue]);
