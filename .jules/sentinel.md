@@ -31,3 +31,25 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2026-07-29 - Disk Exhaustion DoS via Unhandled Uploads
+
+**Vulnerability:** File uploads (via multer) that failed early validation (e.g., invalid start/end times, invalid segment format) were not deleted from the filesystem, leading to potential disk exhaustion (DoS).
+**Root Cause:** Early return statements for validation errors did not include `fs.unlink()` cleanup for the uploaded `req.file`.
+**Learning:** Always ensure temporary uploaded files are explicitly deleted on ALL return paths, especially early validation failures, to prevent disk space exhaustion (DoS) vulnerabilities.
+**Prevention:** Explicitly call `fs.unlink(file.path, () => {})` before returning a validation error if `file` exists.
+**Code:**
+```typescript
+// Vulnerable:
+if (isNaN(startTime) || isNaN(endTime)) {
+    res.status(400).json({ error: 'Invalid start/end times' });
+    return;
+}
+
+// Secure:
+if (isNaN(startTime) || isNaN(endTime)) {
+    if (file) fs.unlink(file.path, () => {});
+    res.status(400).json({ error: 'Invalid start/end times' });
+    return;
+}
+```
