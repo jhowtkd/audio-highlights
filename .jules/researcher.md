@@ -102,3 +102,16 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-24 - Server-Side Subtitle Burning (Hardsubs)
+
+**Research Topic:** Adding burned-in subtitles (hardsubs) to video exports
+
+**Finding:** Evaluated using FFmpeg's `subtitles` filter vs Client-side FFmpeg.wasm. The server-side approach using the existing `ffmpeg-service` microservice is vastly superior in speed and reliability, despite the need to re-encode the video.
+
+**Decision:** Propose implementing subtitle burning in the `ffmpeg-service`. We must drop `-c copy` (stream copy) and use `-c:v libx264` when subtitles are requested, which will increase processing time but provide immense value to creators.
+
+**Learning:** When passing absolute paths to FFmpeg's `subtitles` filter in Node.js, the path must be meticulously escaped (e.g., replacing `\` with `/` and `:` with `\:`). Failing to do so causes FFmpeg to fail parsing the filter graph with a "No such file or directory" error, even if the file exists.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
