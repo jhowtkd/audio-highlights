@@ -33,3 +33,10 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-05-24 - Waveform Generation Blocked Main Thread
+
+**Bottleneck:** High CPU usage and main thread blocking when rendering waveforms for large audio files.
+**Learning:** Iterating over every single audio sample in the AudioBuffer (O(N) per block) is too slow for large files and blocks the UI.
+**Action:** Implemented downsampling/striding (sampling max 100 points per block) instead of iterating over every sample in the AudioBuffer to prevent main thread blocking (reducing operations from O(N) to O(1) per block).
+**Code:** `for (let j = 0; j < blockSize; j += stride) { ... }`
