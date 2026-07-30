@@ -102,11 +102,17 @@ export function Waveform({
                     const blockStart = blockSize * i;
                     let sum = 0;
 
-                    for (let j = 0; j < blockSize; j++) {
+                    // Downsample: examine at most 100 points per block to prevent main thread blocking
+                    const pointsToSample = Math.min(blockSize, 100);
+                    const step = Math.max(1, Math.floor(blockSize / pointsToSample));
+
+                    let count = 0;
+                    for (let j = 0; j < blockSize; j += step) {
                         sum += Math.abs(channelData[blockStart + j]);
+                        count++;
                     }
 
-                    filteredData.push(sum / blockSize);
+                    filteredData.push(sum / count);
                 }
 
                 // Normalize the data

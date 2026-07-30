@@ -33,3 +33,19 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2024-07-30 - AudioBuffer Iteration Blocks Main Thread
+
+**Bottleneck:** Rendering waveforms for large audio files blocked the main thread, causing severe UI jank due to O(N) iteration over every sample in the `AudioBuffer`.
+**Learning:** Iterating millions of audio samples synchronously is too slow. A visual representation doesn't need every sample.
+**Action:** Always use downsampling or striding (e.g., examining a maximum of 100 points per block) when calculating visual approximations of audio buffers to reduce operations to O(1) per block.
+**Code:**
+```typescript
+const pointsToSample = Math.min(blockSize, 100);
+const step = Math.max(1, Math.floor(blockSize / pointsToSample));
+let count = 0;
+for (let j = 0; j < blockSize; j += step) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
