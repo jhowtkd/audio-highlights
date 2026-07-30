@@ -42,3 +42,10 @@
 **Learning:** Screen readers require these attributes to understand the state and the relationships between these elements.
 **Solution:** Added `aria-expanded` and `aria-controls` to the suggested titles toggle in `HighlightCard`, and `aria-haspopup="menu"`, `aria-expanded`, and `aria-controls` to the export dropdown in `TranscriptViewer`. Additionally, added `role="menu"` to the dropdown container and `role="menuitem"` to its items.
 **Pattern:** For this design system, interactive dropdowns and toggles that reveal additional content must always include the `aria-expanded` and `aria-controls` attributes linking the button to the hidden container. Dropdown menus should implement the full WAI-ARIA menu structure.
+
+## 2026-07-30 - Icon-only Buttons Missing ARIA Labels
+
+**UX Problem:** The "Retranscrever arquivo" and "Excluir projeto" icon-only buttons in the Task Card (`task-card.tsx`) lacked `aria-label` attributes and the inner SVGs lacked `aria-hidden="true"`, making them inaccessible to screen readers (relying only on `title` attributes).
+**Learning:** In this Next.js/Radix UI stack, we frequently use `lucide-react` icons inside buttons. Without explicit labels and hiding the SVG, assistive tech announces redundant or confusing elements.
+**Solution:** Added `aria-label` to the `<Button>` and `aria-hidden="true"` to the inner `<Icon>` elements.
+**Pattern:** For all icon-only buttons using `lucide-react`, strictly ensure: 1. The `<Button>` has an `aria-label` attribute, and 2. The inner icon `<Icon>` has `aria-hidden="true"`.
