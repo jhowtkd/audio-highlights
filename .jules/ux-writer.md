@@ -32,3 +32,12 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2026-03-05 - Tone and Word Choice Improvements
+
+**Copy Type:** Error message and Home page description
+**Original:** "Erro: Transcrição não encontrada. Tente recarregar." / "Faça upload do seu áudio e deixe a IA identificar os melhores momentos"
+**Changed To:** "Transcrição não encontrada. Recarregue a página e tente novamente." / "Envie seu áudio e deixe a IA identificar os melhores momentos"
+**Learning:** Avoid prefixing error messages with "Erro:" and use clear, actionable next steps. Prefer active verbs like "Envie" over passive technical jargon like "Faça upload".
+**Rule:**
+1. Do not prefix error messages with "Erro:". State the issue clearly and provide friendly, actionable next steps for the user.
+2. Prefer active verbs (e.g., "Envie") over passive technical jargon or anglicisms (e.g., "Faça upload").
