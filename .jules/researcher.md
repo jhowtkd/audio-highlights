@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-07-30 - Burned Subtitles Research
+
+**Research Topic:** Hardcoding (burning) subtitles into exported video clips using FFmpeg.
+
+**Finding:**
+FFmpeg's `subtitles` filter can successfully burn standard SRT files into the video stream. The `ffmpeg-static` binary includes the required `libass` dependency for this filter. However, this process requires re-encoding the video (`-c:v libx264`), which is significantly slower than our current stream-copy (`-c copy`) approach and will increase server load on `ffmpeg-service`.
+
+**Decision:**
+Proposed adding a "Burn Subtitles" feature to the export workflow. Despite the performance hit of re-encoding, the UX benefit of providing ready-to-publish videos for social media outweighs the cost.
+
+**Learning:**
+While stream-copy is ideal for performance, some high-value user features (like hardsubs) fundamentally require re-encoding. We must design backend architecture to handle these longer, CPU-intensive tasks gracefully.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/2026-07-30-burned-subtitles.md
