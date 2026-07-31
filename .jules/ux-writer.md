@@ -32,3 +32,18 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+## 2024-08-01 - User-Facing Terminology (Tasks vs Projects)
+
+**Copy Type:** Interface terminology / State labels
+**Original:** "Concluídas" (referring to "tarefas" / tasks)
+**Changed To:** "Concluídos" (referring to "projetos")
+**Learning:** The application uses "tasks" internally, but "Projetos" in the UI (e.g., "Meus Projetos"). Because "Projeto" is masculine in Portuguese, related adjectives like "Concluídos" must agree in gender.
+**Rule:** Avoid the internal jargon 'task' (or 'tarefa') and instead use content-first terms like 'Áudio', 'Vídeo', or 'Projeto'. Ensure all adjectives and related words use masculine gender agreements (e.g., 'Concluídos', not 'Concluídas') to match 'Projeto'.
+
+## 2024-08-01 - Active Verbs vs Anglicisms
+
+**Copy Type:** Call to Action (Hero subtitle)
+**Original:** "Faça upload do seu áudio..."
+**Changed To:** "Envie seu áudio..."
+**Learning:** "Faça upload" is a passive anglicism that feels technical. "Envie" is an active, conversational Portuguese verb that feels more approachable for non-technical users.
+**Rule:** Prefer active verbs (e.g., 'Envie') over passive technical jargon or anglicisms (e.g., 'Faça upload') to create a more conversational and approachable tone in user-facing Portuguese copy.
