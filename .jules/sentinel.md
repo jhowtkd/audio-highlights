@@ -31,3 +31,18 @@ return fileName.substring(lastDot);
 // Secure:
 if (!/^\.[a-zA-Z0-9]+$/.test(ext)) return '';
 ```
+
+## 2024-05-30 - Overly Permissive CORS Configuration
+
+**Vulnerability:** The CORS configuration allowed any origin ending in `.vercel.app` to access the service, which combined with `credentials: true` could allow any attacker-controlled Vercel deployment to interact with the API.
+**Root Cause:** A convenience wildcard was used for Vercel preview environments without restricting it to the specific project's namespace.
+**Learning:** Never use broad domain suffix matching (like `.endsWith('.vercel.app')`) for CORS, especially when credentials are allowed, as these platforms host untrusted third-party code.
+**Prevention:** Use exact origin matching or strict regular expressions that bind to the specific project name (e.g., `/^https:\/\/project-name-[a-zA-Z0-9-]+\.vercel\.app$/`).
+**Code:**
+```typescript
+// Vulnerable pattern found in this codebase:
+if (origin.endsWith('.vercel.app')) { return callback(null, true); }
+
+// Secure pattern to use:
+if (/^https:\/\/audio-highlights-[a-zA-Z0-9-]+\.vercel\.app$/.test(origin)) { return callback(null, true); }
+```
