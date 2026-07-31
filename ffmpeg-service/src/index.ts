@@ -31,8 +31,8 @@ app.use(cors({
         if (allowedOrigins.includes(origin)) {
             return callback(null, true);
         }
-        // Also allow any *.vercel.app domain
-        if (origin.endsWith('.vercel.app')) {
+        // Also allow preview deployments for this specific project
+        if (/^https:\/\/audio-highlights-[a-zA-Z0-9-]+\.vercel\.app$/.test(origin)) {
             return callback(null, true);
         }
         return callback(new Error('Not allowed by CORS'));
