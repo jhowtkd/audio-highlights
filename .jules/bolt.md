@@ -33,3 +33,19 @@ const activeSegmentIndex = useMemo(() => {
   itemContent={(index, segment) => <TranscriptSegment ... />}
 />
 ```
+
+## 2026-02-09 - Waveform Generation Downsampling
+
+**Bottleneck:** `Waveform` fallback logic iterates over every single sample in the `AudioBuffer` to calculate block averages. For large files (e.g., 5 min at 48kHz = 14.4 million samples), this blocks the main UI thread during generation (O(N) operation per block).
+**Learning:** For visualizing audio waveforms, evaluating every sample is visually indistinguishable from evaluating a small representative subset, but it is vastly more expensive computationally.
+**Action:** Implemented a striding (downsampling) approach in the loop. By calculating a `stride` based on `MAX_POINTS_PER_BLOCK = 100`, the loop reduces operations from O(N) to O(1) per block without sacrificing visual fidelity.
+**Code:**
+```typescript
+const MAX_POINTS_PER_BLOCK = 100;
+const stride = Math.max(1, Math.floor(blockSize / MAX_POINTS_PER_BLOCK));
+
+for (let j = 0; j < blockSize; j += stride) {
+    sum += Math.abs(channelData[blockStart + j]);
+    count++;
+}
+```
