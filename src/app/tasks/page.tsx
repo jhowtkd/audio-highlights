@@ -106,8 +106,16 @@ export default function TasksPage() {
 
                         {/* Actions */}
                         {completedCount > 0 && (
-                            <Button variant="outline" size="sm" onClick={clearCompleted}>
-                                <Trash2 className="h-4 w-4 mr-2" />
+                            <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                    if (window.confirm('Tem certeza que deseja limpar todos os projetos concluídos?')) {
+                                        clearCompleted();
+                                    }
+                                }}
+                            >
+                                <Trash2 className="h-4 w-4 mr-2" aria-hidden="true" />
                                 Limpar concluídas
                             </Button>
                         )}
