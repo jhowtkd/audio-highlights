@@ -102,3 +102,23 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-25 - Server-Side Audiogram Generation
+
+**Research Topic:** Converting audio clips into shareable videos (audiograms) using FFmpeg.
+
+**Finding:**
+Evaluated creating audiograms for audio-only highlights so users can share them on video-first platforms like TikTok/Reels. Using FFmpeg's `showwaves` filter is very fast and efficient compared to client-side Canvas drawing and recording.
+
+**Decision:**
+Proposed adding a `/generate-audiogram` endpoint to the `ffmpeg-service`.
+-   Leverages existing backend infrastructure.
+-   Outputs standard MP4 videos compatible with all social networks.
+-   A basic POC proved it takes ~1.5s for a 3s clip on CPU.
+
+**Learning:**
+Simple visual elements like waveforms can be generated natively in FFmpeg much faster than relying on headless browsers or complex client-side video encoding.
+
+**Resources:**
+-   https://ffmpeg.org/ffmpeg-filters.html#showwaves
+-   research/proposals/2026-02-25-audiogram-generation.md
