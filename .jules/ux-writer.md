@@ -32,3 +32,11 @@
 **Changed To:** "A IA precisa de mais contexto para encontrar os melhores momentos. Recomendamos arquivos com pelo menos 1 minuto."
 **Learning:** Simply stating a recommendation ("Recomendamos...") can feel arbitrary. Explaining the *technical reason* in simple terms ("A IA precisa de mais contexto") educates the user and justifies the constraint, likely increasing compliance.
 **Rule:** When warning about AI limitations, briefly explain the technical "why" (e.g., context, audio clarity) to build trust and understanding.
+
+## 2024-08-02 - Terminology and Gender Agreement
+
+**Copy Type:** Interface Text (Counters and Dialogs)
+**Original:** "Concluídas", "Limpar concluídas", "Adicionar novo áudio"
+**Changed To:** "Concluídos", "Limpar concluídos", "Novo projeto"
+**Learning:** In Portuguese user-facing copy, the application uses the masculine term "Projeto" (Project) instead of the internal jargon "Tarefa" (Task). Therefore, all adjectives and related words must use masculine gender agreements (e.g., 'Concluídos', not 'Concluídas') to match 'Projeto'. Additionally, since the application accepts both audio and video, "Adicionar novo áudio" is not inclusive of all formats and breaks the established "Projeto" mental model.
+**Rule:** For this app, ALWAYS use content-first terms like 'Projeto', 'Áudio', or 'Vídeo' instead of 'Tarefa', and ensure gender agreements match the corresponding noun. Use "Projeto" as the primary mental model for user uploads.
