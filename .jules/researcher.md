@@ -102,3 +102,20 @@ Parsing FFmpeg's `stderr` for `silencedetect` is straightforward and more reliab
 **Resources:**
 - https://ffmpeg.org/ffmpeg-filters.html#silencedetect
 - research/proposals/2026-02-24-smart-silence-removal.md
+
+## 2026-02-25 - Server-Side Burned-In Subtitles
+
+**Research Topic:** Adding hardcoded (burned-in) subtitles to video exports for social media readiness.
+
+**Finding:**
+Client-side subtitle burning via FFmpeg WASM is too slow and resource-intensive, often causing browser crashes for clips longer than a few minutes. Server-side burning using `ffmpeg-static` with the `-vf subtitles=file.srt` filter is robust and reliable.
+
+**Decision:**
+Propose offloading subtitle burning to the `ffmpeg-service` microservice. While it incurs server CPU costs, it is the only viable path for high-quality, reliable mobile/web exports.
+
+**Learning:**
+When using `ffmpeg-static` in Node.js, the `subtitles` filter correctly utilizes the system's `libass` and `fontconfig` to render text. However, dynamically applying styles requires converting SRT to ASS format first, as SRT offers limited styling. Start with SRT for MVP and consider ASS for future customization.
+
+**Resources:**
+- https://ffmpeg.org/ffmpeg-filters.html#subtitles-1
+- research/proposals/2026-02-25-burned-in-subtitles.md
